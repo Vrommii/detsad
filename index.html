@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Ладушки - Детский сад | Чат</title>
+<title>Ладушки - Детский сад</title>
 
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
@@ -45,14 +45,15 @@ input:focus { border-color: #f7bc6c; }
 .profile-card { display: flex; gap: 15px; align-items: center; background: #fef1df; border-radius: 50px; padding: 15px; }
 .badge { background: #d9e0b5; border-radius: 20px; padding: 5px 12px; font-size: 12px; }
 .badge.teacher { background: #fbc490; }
+.loading { text-align: center; padding: 20px; color: #846b48; }
 </style>
 </head>
 <body>
 <div class="app">
   <div class="header">🧸 Ладушки</div>
-  <div id="screen"></div>
+  <div id="screen"><div class="loading">Загрузка...</div></div>
   <div class="tabbar">
-    <div class="tab active" onclick="navigate('home', this)">🏠</div>
+    <div class="tab" onclick="navigate('home', this)">🏠</div>
     <div class="tab" onclick="navigate('schedule', this)">📅</div>
     <div class="tab" onclick="navigate('chat', this)">💬</div>
     <div class="tab" onclick="navigate('profile', this)">👤</div>
@@ -89,6 +90,18 @@ async function isTeacher(user) {
     const doc = await db.collection("users").doc(user.uid).get();
     return doc.exists && doc.data()?.role === "teacher";
   } catch(e) { return false; }
+}
+
+// Проверка существования email в Firebase Auth (перед регистрацией)
+async function checkEmailExists(email) {
+  try {
+    // Метод fetchSignInMethodsForEmail проверяет, существует ли email в системе
+    const methods = await auth.fetchSignInMethodsForEmail(email);
+    return methods.length > 0;
+  } catch(e) {
+    console.warn("Ошибка проверки email:", e);
+    return false;
+  }
 }
 
 // Загрузка расписания
@@ -161,14 +174,18 @@ async function doLogin() {
   if (!email || !pass) { errorDiv.style.display = "block"; errorDiv.innerText = "Заполните поля"; return; }
   try {
     await auth.signInWithEmailAndPassword(email, pass);
+    // После входа сессия сохранится автоматически
     navigate('home', document.querySelector(".tab"));
   } catch(e) {
     errorDiv.style.display = "block";
-    errorDiv.innerText = e.code === 'auth/user-not-found' ? "Пользователь не найден" : "Ошибка входа";
+    if (e.code === 'auth/user-not-found') errorDiv.innerText = "Пользователь не найден";
+    else if (e.code === 'auth/wrong-password') errorDiv.innerText = "Неверный пароль";
+    else if (e.code === 'auth/invalid-email') errorDiv.innerText = "Неверный формат email";
+    else errorDiv.innerText = "Ошибка: " + e.message;
   }
 }
 
-// ========= РЕГИСТРАЦИЯ =========
+// ========= РЕГИСТРАЦИЯ С ПРОВЕРКОЙ EMAIL =========
 function showRegister() {
   document.getElementById("screen").innerHTML = `
     <div class="card">
@@ -190,20 +207,72 @@ async function doRegister() {
   const pass = document.getElementById("regPass")?.value;
   const errorDiv = document.getElementById("regError");
   const successDiv = document.getElementById("regSuccess");
+  
   errorDiv.style.display = "none";
   successDiv.style.display = "none";
-  if (!name || !email || !pass) { errorDiv.style.display = "block"; errorDiv.innerText = "Заполните все поля"; return; }
-  if (pass.length < 6) { errorDiv.style.display = "block"; errorDiv.innerText = "Пароль минимум 6 символов"; return; }
+  
+  // Проверка заполнения
+  if (!name || !email || !pass) {
+    errorDiv.style.display = "block";
+    errorDiv.innerText = "Заполните все поля";
+    return;
+  }
+  
+  // Проверка длины пароля
+  if (pass.length < 6) {
+    errorDiv.style.display = "block";
+    errorDiv.innerText = "Пароль должен быть не менее 6 символов";
+    return;
+  }
+  
+  // Проверка валидности email
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    errorDiv.style.display = "block";
+    errorDiv.innerText = "Введите корректный email";
+    return;
+  }
+  
+  // ⭐ ПРОВЕРКА: существует ли уже такой email в Firebase Auth
+  errorDiv.style.display = "block";
+  errorDiv.innerText = "Проверка email...";
+  
   try {
+    const emailExists = await checkEmailExists(email);
+    if (emailExists) {
+      errorDiv.style.display = "block";
+      errorDiv.innerText = "❌ Этот email уже зарегистрирован. Войдите в аккаунт.";
+      return;
+    }
+    
+    errorDiv.style.display = "none";
+    
+    // Регистрация
     const cred = await auth.createUserWithEmailAndPassword(email, pass);
     await cred.user.updateProfile({ displayName: name });
-    await db.collection("users").doc(cred.user.uid).set({ name, email, role: "parent" });
+    await db.collection("users").doc(cred.user.uid).set({ 
+      name, 
+      email, 
+      role: "parent",
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    
     successDiv.style.display = "block";
-    successDiv.innerText = "Регистрация успешна!";
+    successDiv.innerText = "✅ Регистрация успешна! Перенаправление...";
+    
     setTimeout(() => navigate('home', document.querySelector(".tab")), 1500);
+    
   } catch(e) {
     errorDiv.style.display = "block";
-    errorDiv.innerText = e.code === 'auth/email-already-in-use' ? "Email уже используется" : "Ошибка: " + e.message;
+    if (e.code === 'auth/email-already-in-use') {
+      errorDiv.innerText = "❌ Этот email уже используется";
+    } else if (e.code === 'auth/invalid-email') {
+      errorDiv.innerText = "❌ Неверный формат email";
+    } else if (e.code === 'auth/weak-password') {
+      errorDiv.innerText = "❌ Слишком слабый пароль";
+    } else {
+      errorDiv.innerText = "Ошибка: " + e.message;
+    }
   }
 }
 
@@ -225,7 +294,7 @@ async function renderSchedule() {
   return `
     <div class="card">
       <h3>📋 Расписание дня</h3>
-      <div id="scheduleList">${listHtml}</div>
+      <div id="scheduleList">${listHtml || '<div class="small">Нет событий</div>'}</div>
       ${isTeacherFlag ? `
         <div style="margin-top:15px;">
           <input id="newItem" placeholder="Новое событие...">
@@ -281,7 +350,7 @@ async function refreshSchedule() {
   }
 }
 
-// ========= ЧАТ (ГАРАНТИРОВАННО РАБОТАЕТ) =========
+// ========= ЧАТ =========
 async function renderChat() {
   const user = auth.currentUser;
   if (!user) {
@@ -300,7 +369,6 @@ async function renderChat() {
   `;
 }
 
-// Отправка сообщения
 async function sendMessage() {
   const input = document.getElementById("messageInput");
   if (!input) return;
@@ -325,7 +393,6 @@ async function sendMessage() {
       createdAt: firebase.firestore.FieldValue.serverTimestamp()
     });
     input.value = "";
-    // Прокрутка вниз
     const box = document.getElementById("chatBox");
     if (box) box.scrollTop = box.scrollHeight;
   } catch(e) {
@@ -334,18 +401,15 @@ async function sendMessage() {
   }
 }
 
-// Загрузка сообщений
 function loadMessages() {
   const chatBox = document.getElementById("chatBox");
   if (!chatBox) return;
   
-  // Отписываемся от старого
   if (unsubscribeMessages) {
     unsubscribeMessages();
     unsubscribeMessages = null;
   }
   
-  // Подписываемся на новые сообщения
   unsubscribeMessages = db.collection("messages")
     .orderBy("createdAt", "asc")
     .limitToLast(100)
@@ -356,7 +420,7 @@ function loadMessages() {
       snapshot.forEach(doc => messages.push({ id: doc.id, ...doc.data() }));
       
       if (messages.length === 0) {
-        chatBox.innerHTML = '<div style="text-align:center;padding:40px;color:#aa936e;">💬 Пока нет сообщений</div>';
+        chatBox.innerHTML = '<div class="empty-chat">💬 Пока нет сообщений</div>';
         return;
       }
       
@@ -364,9 +428,7 @@ function loadMessages() {
       messages.forEach(msg => {
         const div = document.createElement("div");
         div.className = `message ${msg.isTeacher ? 'message-teacher' : ''}`;
-        
         const time = msg.createdAt?.toDate ? msg.createdAt.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "";
-        
         div.innerHTML = `
           <img src="${msg.photoURL || 'https://via.placeholder.com/45'}" class="avatar" onerror="this.src='https://via.placeholder.com/45'">
           <div class="message-content">
@@ -383,7 +445,7 @@ function loadMessages() {
       chatBox.scrollTop = chatBox.scrollHeight;
     }, (error) => {
       console.error("Ошибка чата:", error);
-      chatBox.innerHTML = '<div style="text-align:center;padding:40px;color:red;">⚠️ Ошибка загрузки чата</div>';
+      chatBox.innerHTML = '<div class="empty-chat">⚠️ Ошибка загрузки чата</div>';
     });
 }
 
@@ -433,7 +495,6 @@ async function updateAvatar() {
   input.click();
 }
 
-// ========= ВЫХОД =========
 async function logout() {
   if (unsubscribeMessages) {
     unsubscribeMessages();
@@ -467,6 +528,7 @@ async function navigate(screen, tabEl) {
   }
   
   const root = document.getElementById("screen");
+  if (!root) return;
   root.style.opacity = "0";
   
   setTimeout(async () => {
@@ -478,7 +540,6 @@ async function navigate(screen, tabEl) {
     
     root.innerHTML = html;
     
-    // Если мы на странице чата и пользователь авторизован - загружаем сообщения
     if (screen === "chat" && auth.currentUser) {
       loadMessages();
     } else if (unsubscribeMessages) {
@@ -496,8 +557,13 @@ function escapeHtml(str) {
 }
 
 // ========= ЗАПУСК =========
+// Сохраняем сессию — Firebase Auth автоматически сохраняет состояние в localStorage
+// При перезагрузке страницы пользователь останется в системе
+
 createTeacher().then(() => {
-  auth.onAuthStateChanged(() => {
+  // Подписываемся на изменения состояния авторизации
+  // Firebase Auth автоматически восстанавливает сессию при загрузке
+  auth.onAuthStateChanged((user) => {
     const active = document.querySelector(".tab.active");
     if (active) {
       const idx = Array.from(document.querySelectorAll('.tab')).indexOf(active);

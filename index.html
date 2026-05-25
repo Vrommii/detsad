@@ -2,341 +2,57 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=yes">
-<title>Ладушки - Детский сад | Чат и расписание</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Ладушки - Детский сад | Чат</title>
 
-<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
 
 <style>
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-body {
-  background: #c8d5b9;
-  font-family: 'Segoe UI', 'Quicksand', 'Nunito', system-ui, -apple-system, sans-serif;
-  padding: 20px 16px 90px 16px;
-  min-height: 100vh;
-}
-
-.app {
-  max-width: 1200px;
-  margin: 0 auto;
-  background: #fffcf5;
-  border-radius: 48px;
-  box-shadow: 0 30px 50px -20px rgba(0,0,0,0.3);
-  overflow: hidden;
-}
-
-@media (min-width: 700px) {
-  body { padding: 32px 40px 90px 40px; }
-  .app { border-radius: 56px; }
-  .card { margin: 20px 28px !important; }
-  .tabbar { max-width: 500px !important; gap: 35px !important; }
-  .chat-box { height: 450px !important; }
-}
-
-@media (max-width: 699px) {
-  .card { margin: 16px 14px !important; }
-  .tabbar { width: 90%; max-width: 360px; }
-  .chat-box { height: 350px !important; }
-}
-
-.header {
-  background: #fdebb3;
-  padding: 20px 24px;
-  text-align: center;
-  font-size: 28px;
-  font-weight: 800;
-  color: #a5673f;
-  border-bottom: 4px solid #f7d98c;
-}
-.header span {
-  background: white;
-  padding: 0 16px;
-  border-radius: 60px;
-  font-size: 18px;
-  margin-left: 10px;
-  display: inline-block;
-}
-
-.card {
-  background: rgba(255, 250, 240, 0.95);
-  padding: 24px 22px;
-  border-radius: 36px;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.05);
-  border: 1px solid #faeec9;
-}
-
-h3 {
-  font-size: 24px;
-  font-weight: 700;
-  color: #846b48;
-  margin-bottom: 18px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  border-left: 6px solid #fbc490;
-  padding-left: 16px;
-}
-
-button {
-  background: #ffd89a;
-  border: none;
-  border-radius: 60px;
-  font-weight: 600;
-  font-size: 16px;
-  padding: 12px 18px;
-  margin-top: 12px;
-  cursor: pointer;
-  color: #684f2e;
-  font-family: inherit;
-  width: 100%;
-  transition: 0.2s;
-}
-button:hover { background: #f7ca7a; transform: scale(0.98); }
-
-input, textarea {
-  width: 100%;
-  padding: 12px 18px;
-  margin-top: 12px;
-  border-radius: 50px;
-  border: 1px solid #eeddbb;
-  background: #fffef7;
-  font-family: inherit;
-  font-size: 15px;
-  outline: none;
-}
-input:focus {
-  border-color: #f7bc6c;
-  box-shadow: 0 0 0 3px rgba(247,188,108,0.2);
-}
-
-.schedule-item {
-  background: #f7efdb;
-  border-radius: 60px;
-  padding: 12px 20px;
-  margin-bottom: 12px;
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  word-break: break-word;
-}
-.schedule-item:before { content: "⭐"; font-size: 20px; }
-
-.chat-box {
-  height: 350px;
-  overflow-y: auto;
-  background: #fef7e9;
-  border-radius: 32px;
-  padding: 16px;
-  margin: 12px 0 10px;
-  border: 1px solid #f7e5ca;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.message {
-  background: white;
-  border-radius: 20px;
-  padding: 12px 16px;
-  display: flex;
-  gap: 12px;
-  align-items: flex-start;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-  animation: messageAppear 0.2s ease;
-}
-
-@keyframes messageAppear {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.message-teacher {
-  background: #fdebb3;
-  border-left: 4px solid #f7bc6c;
-}
-
-.message-parent {
-  background: white;
-}
-
-.avatar {
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 2px solid #ffda9e;
-  flex-shrink: 0;
-}
-
-.message-content {
-  flex: 1;
-}
-
-.message-name {
-  font-weight: bold;
-  font-size: 14px;
-  margin-bottom: 4px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.message-text {
-  font-size: 15px;
-  line-height: 1.4;
-  word-break: break-word;
-}
-
-.message-time {
-  font-size: 10px;
-  color: #aa936e;
-  margin-left: 8px;
-  font-weight: normal;
-}
-
-.teacher-badge {
-  background: #fbc490;
-  color: #6b3f1c;
-  padding: 2px 8px;
-  border-radius: 20px;
-  font-size: 10px;
-  font-weight: bold;
-}
-
-.small {
-  font-size: 11px;
-  color: #aa936e;
-  margin-top: 6px;
-}
-
-.tabbar {
-  position: fixed;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: #fef3e2;
-  display: flex;
-  padding: 12px 24px;
-  border-radius: 80px;
-  backdrop-filter: blur(12px);
-  background: rgba(254, 243, 226, 0.96);
-  box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-  gap: 28px;
-  z-index: 20;
-}
-.tab {
-  font-size: 30px;
-  cursor: pointer;
-  opacity: 0.55;
-  padding: 4px;
-  border-radius: 60px;
-}
-.tab.active {
-  opacity: 1;
-  transform: scale(1.2);
-  background: #ffefcf;
-}
-
-.profile-card {
-  display: flex;
-  gap: 18px;
-  align-items: center;
-  background: #fef1df;
-  border-radius: 48px;
-  padding: 16px;
-}
-
-.badge {
-  background: #d9e0b5;
-  border-radius: 40px;
-  padding: 6px 14px;
-  font-size: 12px;
-  font-weight: bold;
-  color: #5f6d3e;
-}
-
-.badge.teacher {
-  background: #fbc490;
-  color: #6b3f1c;
-}
-
-.locked-message {
-  text-align: center;
-  padding: 30px 20px;
-  background: #fef3e6;
-  border-radius: 32px;
-}
-
-.fade-in {
-  animation: fadeSlide 0.3s ease-out;
-}
-@keyframes fadeSlide {
-  0% { opacity: 0; transform: translateY(10px); }
-  100% { opacity: 1; transform: translateY(0); }
-}
-
-.error-msg {
-  background: #ffe0e0;
-  color: #c23d3d;
-  padding: 10px 15px;
-  border-radius: 30px;
-  font-size: 13px;
-  margin-top: 12px;
-  text-align: center;
-}
-
-.success-msg {
-  background: #e0ffe0;
-  color: #2d6a2d;
-  padding: 10px 15px;
-  border-radius: 30px;
-  font-size: 13px;
-  margin-top: 12px;
-  text-align: center;
-}
-
-.chat-input-area {
-  display: flex;
-  gap: 10px;
-  margin-top: 12px;
-}
-
-.chat-input-area input {
-  flex: 1;
-  margin-top: 0;
-}
-
-.chat-input-area button {
-  width: auto;
-  padding: 12px 24px;
-  margin-top: 0;
-}
-
-.empty-chat {
-  text-align: center;
-  padding: 40px;
-  color: #aa936e;
-}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #c8d5b9; font-family: 'Segoe UI', Arial, sans-serif; padding: 20px 16px 90px 16px; }
+.app { max-width: 600px; margin: 0 auto; background: #fffcf5; border-radius: 30px; overflow: hidden; }
+.header { background: #fdebb3; padding: 20px; text-align: center; font-size: 24px; font-weight: bold; color: #a5673f; }
+.card { background: white; margin: 16px; padding: 20px; border-radius: 24px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+h3 { color: #846b48; margin-bottom: 16px; }
+button { background: #ffd89a; border: none; border-radius: 30px; padding: 12px; margin-top: 10px; cursor: pointer; width: 100%; font-size: 16px; font-weight: bold; }
+button:hover { background: #f7ca7a; }
+input { width: 100%; padding: 12px; margin-top: 10px; border-radius: 30px; border: 1px solid #eeddbb; outline: none; }
+input:focus { border-color: #f7bc6c; }
+.chat-box { height: 400px; overflow-y: auto; background: #fef7e9; border-radius: 20px; padding: 15px; margin: 10px 0; border: 1px solid #f7e5ca; }
+.message { background: white; border-radius: 15px; padding: 12px; margin-bottom: 12px; display: flex; gap: 12px; align-items: flex-start; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+.message-teacher { background: #fdebb3; border-left: 4px solid #f7bc6c; }
+.avatar { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; background: #ffd89a; }
+.message-content { flex: 1; }
+.message-name { font-weight: bold; font-size: 13px; color: #684f2e; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.message-text { font-size: 14px; margin-top: 5px; word-break: break-word; }
+.message-time { font-size: 10px; color: #aa936e; font-weight: normal; }
+.teacher-badge { background: #fbc490; color: #6b3f1c; padding: 2px 8px; border-radius: 20px; font-size: 10px; font-weight: bold; }
+.tabbar { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #fef3e2; display: flex; padding: 10px 25px; border-radius: 50px; gap: 30px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 100; }
+.tab { font-size: 28px; cursor: pointer; opacity: 0.55; transition: 0.2s; padding: 5px; border-radius: 40px; }
+.tab.active { opacity: 1; transform: scale(1.15); background: #ffefcf; }
+.schedule-item { background: #f7efdb; padding: 12px 16px; border-radius: 30px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+.small { font-size: 11px; color: #aa936e; margin-top: 12px; text-align: center; }
+.locked-message { text-align: center; padding: 40px 20px; background: #fef3e6; border-radius: 24px; }
+.error-msg { background: #ffe0e0; color: #c23d3d; padding: 10px; border-radius: 20px; margin-top: 10px; text-align: center; display: none; }
+.success-msg { background: #e0ffe0; color: #2d6a2d; padding: 10px; border-radius: 20px; margin-top: 10px; text-align: center; display: none; }
+.input-area { display: flex; gap: 10px; margin-top: 12px; }
+.input-area input { flex: 1; margin-top: 0; }
+.input-area button { width: auto; padding: 12px 24px; margin-top: 0; }
+.empty-chat { text-align: center; padding: 40px; color: #aa936e; }
+.profile-card { display: flex; gap: 15px; align-items: center; background: #fef1df; border-radius: 50px; padding: 15px; }
+.badge { background: #d9e0b5; border-radius: 20px; padding: 5px 12px; font-size: 12px; }
+.badge.teacher { background: #fbc490; }
 </style>
 </head>
 <body>
 <div class="app">
-  <div class="header">
-    🧸 Ладушки <span>сад-онлайн</span>
-  </div>
-  <div id="screen" class="fade-in"></div>
+  <div class="header">🧸 Ладушки</div>
+  <div id="screen"></div>
   <div class="tabbar">
-    <div class="tab active" onclick="navigate('home', this)">🏡</div>
+    <div class="tab active" onclick="navigate('home', this)">🏠</div>
     <div class="tab" onclick="navigate('schedule', this)">📅</div>
     <div class="tab" onclick="navigate('chat', this)">💬</div>
     <div class="tab" onclick="navigate('profile', this)">👤</div>
@@ -349,10 +65,7 @@ const firebaseConfig = {
   apiKey: "AIzaSyAuZgI5XVWNSfHKWhAp26SWdD_Ye-3gBzs",
   authDomain: "detsad-7ca3d.firebaseapp.com",
   projectId: "detsad-7ca3d",
-  storageBucket: "detsad-7ca3d.firebasestorage.app",
-  messagingSenderId: "267900723144",
-  appId: "1:267900723144:web:d84022962650acc02faafd",
-  measurementId: "G-0QE2TLXT0C"
+  storageBucket: "detsad-7ca3d.firebasestorage.app"
 };
 
 // Инициализация
@@ -361,48 +74,35 @@ const auth = firebase.auth();
 const db = firebase.firestore();
 const storage = firebase.storage();
 
-// Глобальные переменные
-let currentUnsubMessages = null;
-let scheduleCache = [];
+// Данные
+let unsubscribeMessages = null;
+let scheduleItems = [];
 
-// Учётная запись воспитателя
 const TEACHER_EMAIL = "teacher@ladushki.ru";
 const TEACHER_PASSWORD = "Ladushki2025";
 
-// Проверка прав воспитателя
-async function isTeacher(user = auth.currentUser) {
+// Проверка воспитателя
+async function isTeacher(user) {
   if (!user) return false;
   if (user.email === TEACHER_EMAIL) return true;
   try {
     const doc = await db.collection("users").doc(user.uid).get();
-    return doc.exists && doc.data().role === "teacher";
+    return doc.exists && doc.data()?.role === "teacher";
   } catch(e) { return false; }
 }
 
 // Загрузка расписания
-async function loadScheduleFromFirestore() {
+async function loadSchedule() {
   try {
-    const snapshot = await db.collection("settings").doc("dailySchedule").get();
-    if (snapshot.exists && snapshot.data().items) {
-      scheduleCache = snapshot.data().items;
+    const doc = await db.collection("settings").doc("dailySchedule").get();
+    if (doc.exists && doc.data().items) {
+      scheduleItems = doc.data().items;
     } else {
-      scheduleCache = [
-        "🍳 08:30 — Завтрак (каша с ягодами)",
-        "🎨 10:00 — Творчество / лепка",
-        "🚶 11:30 — Прогулка на свежем воздухе",
-        "🍲 12:30 — Обед (суп, компот)",
-        "😴 13:30 — Тихий час (сказка)",
-        "🍎 15:30 — Полдник + игры"
-      ];
-      await db.collection("settings").doc("dailySchedule").set({ items: scheduleCache });
+      scheduleItems = ["🍳 08:30 — Завтрак", "🎨 10:00 — Творчество", "🚶 11:30 — Прогулка", "🍲 12:30 — Обед", "😴 13:30 — Тихий час", "🍎 15:30 — Полдник"];
+      await db.collection("settings").doc("dailySchedule").set({ items: scheduleItems });
     }
-  } catch(e) { console.warn("Ошибка загрузки расписания", e); }
-  return scheduleCache;
-}
-
-async function saveScheduleToFirestore(newItems) {
-  await db.collection("settings").doc("dailySchedule").set({ items: newItems });
-  scheduleCache = newItems;
+  } catch(e) { console.warn(e); }
+  return scheduleItems;
 }
 
 // ========= ГЛАВНАЯ =========
@@ -412,297 +112,204 @@ async function renderHome() {
     const isTeacherFlag = await isTeacher(user);
     return `
       <div class="card">
-        <h3>🌞 Добро пожаловать, ${escapeHtml(user.displayName || user.email)}!</h3>
-        <div style="display:flex; align-items:center; gap:14px; margin-bottom:16px;">
-          <img src="${user.photoURL || 'https://via.placeholder.com/70?text=👪'}" class="avatar" style="width:60px;height:60px;" onerror="this.src='https://via.placeholder.com/70?text=👪'">
+        <h3>🌞 Добро пожаловать</h3>
+        <div style="display:flex; align-items:center; gap:15px; margin-bottom:15px;">
+          <img src="${user.photoURL || 'https://via.placeholder.com/60'}" class="avatar" style="width:60px;height:60px;" onerror="this.src='https://via.placeholder.com/60'">
           <div>
-            <strong style="font-size:1.3rem;">${escapeHtml(user.displayName || user.email)}</strong>
-            ${isTeacherFlag ? '<div class="badge teacher">👩‍🏫 Воспитатель</div>' : '<div class="badge">👪 Родитель</div>'}
+            <strong style="font-size:18px;">${escapeHtml(user.displayName || user.email)}</strong>
+            ${isTeacherFlag ? '<div class="badge teacher" style="margin-top:5px;">👩‍🏫 Воспитатель</div>' : '<div class="badge" style="margin-top:5px;">👪 Родитель</div>'}
           </div>
         </div>
-        <button onclick="navigate('schedule', document.querySelectorAll('.tab')[1])">📋 Расписание дня</button>
-        <button onclick="navigate('chat', document.querySelectorAll('.tab')[2])">💬 Общий чат</button>
+        <button onclick="navigate('schedule', document.querySelectorAll('.tab')[1])">📋 Расписание</button>
+        <button onclick="navigate('chat', document.querySelectorAll('.tab')[2])">💬 Чат</button>
         <button onclick="logout()">🚪 Выйти</button>
       </div>
     `;
   } else {
     return `
       <div class="card">
-        <h3>🍎 Добро пожаловать в сад "Ладушки"</h3>
+        <h3>🍎 Добро пожаловать</h3>
         <div class="locked-message">
-          <p>🔒 <strong>Расписание и чат доступны только после регистрации</strong></p>
-          <p class="small" style="margin-top:10px;">Создайте аккаунт или войдите, чтобы продолжить</p>
+          <p>🔒 Чат и расписание доступны после регистрации</p>
+          <button onclick="showLogin()">🍎 Войти</button>
+          <button onclick="showRegister()">🐣 Регистрация</button>
         </div>
-        <button onclick="showLoginForm()">🍎 Войти в аккаунт</button>
-        <button onclick="showRegisterForm()">🐣 Зарегистрироваться</button>
-        <div class="small" style="margin-top:16px; text-align:center;">👩‍🏫 Воспитатель: teacher@ladushki.ru</div>
+        <div class="small">👩‍🏫 Воспитатель: teacher@ladushki.ru</div>
       </div>
     `;
   }
 }
 
-// ========= ФОРМА ВХОДА =========
-function showLoginForm() {
+// ========= ВХОД =========
+function showLogin() {
   document.getElementById("screen").innerHTML = `
     <div class="card">
-      <h3>🍎 Вход в аккаунт</h3>
+      <h3>🍎 Вход</h3>
       <input id="loginEmail" placeholder="Email" type="email">
       <input id="loginPass" type="password" placeholder="Пароль">
-      <div id="loginError" class="error-msg" style="display:none;"></div>
-      <button onclick="loginAction()">Войти</button>
-      <div class="small">Нет аккаунта? <span style="cursor:pointer;color:#a5673f;" onclick="showRegisterForm()">Зарегистрироваться</span></div>
-      <div class="small">👩‍🏫 Воспитатель: teacher@ladushki.ru</div>
+      <div id="loginError" class="error-msg"></div>
+      <button onclick="doLogin()">Войти</button>
+      <div class="small">Нет аккаунта? <span style="cursor:pointer;color:#a5673f;" onclick="showRegister()">Регистрация</span></div>
     </div>
   `;
 }
 
-async function loginAction() {
+async function doLogin() {
   const email = document.getElementById("loginEmail")?.value.trim();
   const pass = document.getElementById("loginPass")?.value;
   const errorDiv = document.getElementById("loginError");
-  
-  if (!email || !pass) {
-    errorDiv.style.display = "block";
-    errorDiv.innerText = "Заполните email и пароль";
-    return;
-  }
-  
+  if (!email || !pass) { errorDiv.style.display = "block"; errorDiv.innerText = "Заполните поля"; return; }
   try {
     await auth.signInWithEmailAndPassword(email, pass);
     navigate('home', document.querySelector(".tab"));
   } catch(e) {
     errorDiv.style.display = "block";
-    if (e.code === 'auth/user-not-found') errorDiv.innerText = "Пользователь не найден";
-    else if (e.code === 'auth/wrong-password') errorDiv.innerText = "Неверный пароль";
-    else if (e.code === 'auth/invalid-email') errorDiv.innerText = "Неверный формат email";
-    else errorDiv.innerText = "Ошибка: " + e.message;
+    errorDiv.innerText = e.code === 'auth/user-not-found' ? "Пользователь не найден" : "Ошибка входа";
   }
 }
 
-// ========= ФОРМА РЕГИСТРАЦИИ =========
-function showRegisterForm() {
+// ========= РЕГИСТРАЦИЯ =========
+function showRegister() {
   document.getElementById("screen").innerHTML = `
     <div class="card">
       <h3>🐣 Регистрация</h3>
-      <input id="regName" placeholder="Ваше имя" autocomplete="off">
-      <input id="regEmail" placeholder="Email" type="email" autocomplete="off">
-      <input id="regPass" type="password" placeholder="Пароль (минимум 6 символов)">
-      <input id="regAvatarFile" type="file" accept="image/*">
-      <div id="regError" class="error-msg" style="display:none;"></div>
-      <div id="regSuccess" class="success-msg" style="display:none;"></div>
-      <button onclick="registerAction()">⭐ Создать аккаунт</button>
-      <div class="small">Уже есть аккаунт? <span style="cursor:pointer;color:#a5673f;" onclick="showLoginForm()">Войти</span></div>
+      <input id="regName" placeholder="Ваше имя">
+      <input id="regEmail" placeholder="Email" type="email">
+      <input id="regPass" type="password" placeholder="Пароль (мин 6 символов)">
+      <div id="regError" class="error-msg"></div>
+      <div id="regSuccess" class="success-msg"></div>
+      <button onclick="doRegister()">Зарегистрироваться</button>
+      <div class="small">Уже есть аккаунт? <span style="cursor:pointer;color:#a5673f;" onclick="showLogin()">Войти</span></div>
     </div>
   `;
 }
 
-async function registerAction() {
+async function doRegister() {
   const name = document.getElementById("regName")?.value.trim();
   const email = document.getElementById("regEmail")?.value.trim();
   const pass = document.getElementById("regPass")?.value;
-  const file = document.getElementById("regAvatarFile")?.files[0];
   const errorDiv = document.getElementById("regError");
   const successDiv = document.getElementById("regSuccess");
-  
   errorDiv.style.display = "none";
   successDiv.style.display = "none";
-  
-  if (!name || !email || !pass) {
-    errorDiv.style.display = "block";
-    errorDiv.innerText = "Заполните все поля: имя, email, пароль";
-    return;
-  }
-  
-  if (pass.length < 6) {
-    errorDiv.style.display = "block";
-    errorDiv.innerText = "Пароль должен быть не менее 6 символов";
-    return;
-  }
-  
+  if (!name || !email || !pass) { errorDiv.style.display = "block"; errorDiv.innerText = "Заполните все поля"; return; }
+  if (pass.length < 6) { errorDiv.style.display = "block"; errorDiv.innerText = "Пароль минимум 6 символов"; return; }
   try {
-    const userCredential = await auth.createUserWithEmailAndPassword(email, pass);
-    const user = userCredential.user;
-    
-    let photoURL = null;
-    if (file) {
-      try {
-        const ext = file.name.split('.').pop();
-        const storageRef = storage.ref().child(`avatars/${user.uid}.${ext}`);
-        await storageRef.put(file);
-        photoURL = await storageRef.getDownloadURL();
-      } catch(e) { console.warn("Ошибка загрузки аватара", e); }
-    }
-    
-    await user.updateProfile({ displayName: name, photoURL: photoURL });
-    
-    await db.collection("users").doc(user.uid).set({
-      name: name,
-      email: email,
-      photoURL: photoURL,
-      role: "parent",
-      createdAt: firebase.firestore.FieldValue.serverTimestamp()
-    });
-    
+    const cred = await auth.createUserWithEmailAndPassword(email, pass);
+    await cred.user.updateProfile({ displayName: name });
+    await db.collection("users").doc(cred.user.uid).set({ name, email, role: "parent" });
     successDiv.style.display = "block";
-    successDiv.innerText = "🎉 Регистрация успешна! Перенаправление...";
-    
-    setTimeout(() => {
-      navigate('home', document.querySelector(".tab"));
-    }, 1500);
-    
+    successDiv.innerText = "Регистрация успешна!";
+    setTimeout(() => navigate('home', document.querySelector(".tab")), 1500);
   } catch(e) {
     errorDiv.style.display = "block";
-    if (e.code === 'auth/email-already-in-use') {
-      errorDiv.innerText = "Этот email уже зарегистрирован. Войдите в аккаунт.";
-    } else if (e.code === 'auth/invalid-email') {
-      errorDiv.innerText = "Неверный формат email";
-    } else if (e.code === 'auth/weak-password') {
-      errorDiv.innerText = "Слишком слабый пароль. Используйте минимум 6 символов";
-    } else {
-      errorDiv.innerText = "Ошибка: " + e.message;
-    }
-    console.error("Registration error:", e);
+    errorDiv.innerText = e.code === 'auth/email-already-in-use' ? "Email уже используется" : "Ошибка: " + e.message;
   }
 }
 
 // ========= РАСПИСАНИЕ =========
-async function renderSchedulePage() {
+async function renderSchedule() {
   const user = auth.currentUser;
   if (!user) {
-    return `
-      <div class="card">
-        <h3>🔒 Доступ закрыт</h3>
-        <div class="locked-message">
-          <p>📅 Расписание доступно только после входа</p>
-          <button onclick="showLoginForm()">Войти</button>
-          <button onclick="showRegisterForm()">Зарегистрироваться</button>
-        </div>
-      </div>
-    `;
+    return `<div class="card"><div class="locked-message"><p>📅 Расписание доступно после входа</p><button onclick="showLogin()">Войти</button></div></div>`;
   }
-  
-  const isTeacherUser = await isTeacher(user);
-  await loadScheduleFromFirestore();
-  
-  const scheduleHtml = scheduleCache.map((item, idx) => `
+  const isTeacherFlag = await isTeacher(user);
+  await loadSchedule();
+  const listHtml = scheduleItems.map((item, idx) => `
     <div class="schedule-item">
-      <span style="flex:1;">${escapeHtml(item)}</span>
-      ${isTeacherUser ? `
-        <button onclick="editScheduleItem(${idx})" style="width:auto; margin:0; padding:6px 12px;">✏️</button>
-        <button onclick="deleteScheduleItem(${idx})" style="width:auto; margin:0; padding:6px 12px;">🗑️</button>
-      ` : ''}
+      <span>${escapeHtml(item)}</span>
+      ${isTeacherFlag ? `<div><button onclick="editItem(${idx})" style="width:auto; padding:5px 12px; margin:0;">✏️</button>
+                         <button onclick="deleteItem(${idx})" style="width:auto; padding:5px 12px; margin:0;">🗑️</button></div>` : ''}
     </div>
   `).join('');
-  
   return `
     <div class="card">
       <h3>📋 Расписание дня</h3>
-      <div id="scheduleListContainer">${scheduleHtml}</div>
-      ${isTeacherUser ? `
-        <div style="margin-top:16px;">
-          <input id="newScheduleText" placeholder="Новое событие...">
-          <button onclick="addScheduleItem()">➕ Добавить</button>
+      <div id="scheduleList">${listHtml}</div>
+      ${isTeacherFlag ? `
+        <div style="margin-top:15px;">
+          <input id="newItem" placeholder="Новое событие...">
+          <button onclick="addItem()">➕ Добавить</button>
         </div>
       ` : ''}
     </div>
   `;
 }
 
-window.editScheduleItem = async function(idx) {
+window.editItem = async function(idx) {
   const user = auth.currentUser;
-  if (!user || !(await isTeacher(user))) return alert("Нет прав");
-  const newVal = prompt("Редактировать:", scheduleCache[idx]);
+  if (!user || !(await isTeacher(user))) return;
+  const newVal = prompt("Редактировать:", scheduleItems[idx]);
   if (newVal?.trim()) {
-    scheduleCache[idx] = newVal.trim();
-    await saveScheduleToFirestore(scheduleCache);
-    refreshScheduleUI();
+    scheduleItems[idx] = newVal.trim();
+    await db.collection("settings").doc("dailySchedule").set({ items: scheduleItems });
+    refreshSchedule();
   }
 };
-
-window.deleteScheduleItem = async function(idx) {
+window.deleteItem = async function(idx) {
   const user = auth.currentUser;
   if (!user || !(await isTeacher(user))) return;
   if (confirm("Удалить?")) {
-    scheduleCache.splice(idx, 1);
-    await saveScheduleToFirestore(scheduleCache);
-    refreshScheduleUI();
+    scheduleItems.splice(idx, 1);
+    await db.collection("settings").doc("dailySchedule").set({ items: scheduleItems });
+    refreshSchedule();
   }
 };
-
-window.addScheduleItem = async function() {
+window.addItem = async function() {
   const user = auth.currentUser;
   if (!user || !(await isTeacher(user))) return;
-  const input = document.getElementById("newScheduleText");
+  const input = document.getElementById("newItem");
   if (input?.value.trim()) {
-    scheduleCache.push(input.value.trim());
-    await saveScheduleToFirestore(scheduleCache);
+    scheduleItems.push(input.value.trim());
+    await db.collection("settings").doc("dailySchedule").set({ items: scheduleItems });
     input.value = "";
-    refreshScheduleUI();
+    refreshSchedule();
   }
 };
-
-async function refreshScheduleUI() {
-  const container = document.getElementById("scheduleListContainer");
+async function refreshSchedule() {
+  const container = document.getElementById("scheduleList");
   if (container) {
     const user = auth.currentUser;
-    const isTeacherUser = user ? await isTeacher(user) : false;
-    container.innerHTML = scheduleCache.map((item, idx) => `
+    const isTeacherFlag = user ? await isTeacher(user) : false;
+    container.innerHTML = scheduleItems.map((item, idx) => `
       <div class="schedule-item">
-        <span style="flex:1;">${escapeHtml(item)}</span>
-        ${isTeacherUser ? `
-          <button onclick="editScheduleItem(${idx})" style="width:auto; margin:0; padding:6px 12px;">✏️</button>
-          <button onclick="deleteScheduleItem(${idx})" style="width:auto; margin:0; padding:6px 12px;">🗑️</button>
-        ` : ''}
+        <span>${escapeHtml(item)}</span>
+        ${isTeacherFlag ? `<div><button onclick="editItem(${idx})" style="width:auto; padding:5px 12px; margin:0;">✏️</button>
+                           <button onclick="deleteItem(${idx})" style="width:auto; padding:5px 12px; margin:0;">🗑️</button></div>` : ''}
       </div>
     `).join('');
   }
 }
 
-// ========= ЧАТ (РАБОТАЕТ) =========
-async function renderChatPage() {
+// ========= ЧАТ (ГАРАНТИРОВАННО РАБОТАЕТ) =========
+async function renderChat() {
   const user = auth.currentUser;
   if (!user) {
-    return `
-      <div class="card">
-        <h3>🔒 Доступ закрыт</h3>
-        <div class="locked-message">
-          <p>💬 Чат доступен только после входа</p>
-          <button onclick="showLoginForm()">Войти</button>
-          <button onclick="showRegisterForm()">Зарегистрироваться</button>
-        </div>
-      </div>
-    `;
+    return `<div class="card"><div class="locked-message"><p>💬 Чат доступен после входа</p><button onclick="showLogin()">Войти</button></div></div>`;
   }
   return `
     <div class="card">
-      <h3>💬 Общий чат (родители + воспитатель)</h3>
-      <div id="chatBox" class="chat-box">
-        <div class="empty-chat">Загрузка сообщений...</div>
+      <h3>💬 Общий чат</h3>
+      <div id="chatBox" class="chat-box">Загрузка...</div>
+      <div class="input-area">
+        <input id="messageInput" type="text" placeholder="Напишите сообщение..." maxlength="500">
+        <button onclick="sendMessage()">📤</button>
       </div>
-      <div class="chat-input-area">
-        <input id="msgInput" type="text" placeholder="Напишите сообщение..." maxlength="500">
-        <button onclick="sendChatMessage()">📤 Отправить</button>
-      </div>
-      <div class="small">✨ Все участники видят сообщения друг друга</div>
+      <div class="small">✨ Все видят сообщения друг друга</div>
     </div>
   `;
 }
 
 // Отправка сообщения
-async function sendChatMessage() {
-  const input = document.getElementById("msgInput");
+async function sendMessage() {
+  const input = document.getElementById("messageInput");
   if (!input) return;
-  
   const text = input.value.trim();
-  if (!text) {
-    alert("Напишите сообщение");
-    return;
-  }
+  if (!text) return;
   
   const user = auth.currentUser;
   if (!user) {
     alert("Войдите в аккаунт");
-    showLoginForm();
     return;
   }
   
@@ -712,112 +319,90 @@ async function sendChatMessage() {
     await db.collection("messages").add({
       text: text,
       uid: user.uid,
-      displayName: user.displayName || user.email || "Родитель",
+      name: user.displayName || user.email || "Родитель",
       photoURL: user.photoURL || null,
       isTeacher: isTeacherUser,
       createdAt: firebase.firestore.FieldValue.serverTimestamp()
     });
-    
     input.value = "";
-    
-    const chatBox = document.getElementById("chatBox");
-    if (chatBox) {
-      setTimeout(() => {
-        chatBox.scrollTop = chatBox.scrollHeight;
-      }, 100);
-    }
-  } catch(error) {
-    console.error("Ошибка:", error);
-    alert("Ошибка отправки: " + error.message);
+    // Прокрутка вниз
+    const box = document.getElementById("chatBox");
+    if (box) box.scrollTop = box.scrollHeight;
+  } catch(e) {
+    console.error("Ошибка:", e);
+    alert("Ошибка отправки: " + e.message);
   }
 }
 
 // Загрузка сообщений
-function loadChatMessages() {
+function loadMessages() {
   const chatBox = document.getElementById("chatBox");
   if (!chatBox) return;
   
-  if (currentUnsubMessages) {
-    currentUnsubMessages();
-    currentUnsubMessages = null;
+  // Отписываемся от старого
+  if (unsubscribeMessages) {
+    unsubscribeMessages();
+    unsubscribeMessages = null;
   }
   
-  currentUnsubMessages = db.collection("messages")
+  // Подписываемся на новые сообщения
+  unsubscribeMessages = db.collection("messages")
     .orderBy("createdAt", "asc")
     .limitToLast(100)
-    .onSnapshot(
-      (snapshot) => {
-        if (!chatBox) return;
-        
-        const messages = [];
-        snapshot.forEach((doc) => {
-          messages.push({
-            id: doc.id,
-            ...doc.data()
-          });
-        });
-        
-        if (messages.length === 0) {
-          chatBox.innerHTML = '<div class="empty-chat">💬 Пока нет сообщений. Напишите первое!</div>';
-          return;
-        }
-        
-        chatBox.innerHTML = "";
-        messages.forEach((msg) => {
-          const messageDiv = document.createElement("div");
-          messageDiv.className = `message ${msg.isTeacher ? 'message-teacher' : 'message-parent'}`;
-          
-          const time = msg.createdAt?.toDate 
-            ? msg.createdAt.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-            : "";
-          
-          messageDiv.innerHTML = `
-            <img src="${msg.photoURL || 'https://via.placeholder.com/44?text=👤'}" class="avatar" onerror="this.src='https://via.placeholder.com/44?text=👤'">
-            <div class="message-content">
-              <div class="message-name">
-                ${escapeHtml(msg.displayName || "Пользователь")}
-                ${msg.isTeacher ? '<span class="teacher-badge">👩‍🏫 Воспитатель</span>' : ''}
-                <span class="message-time">${time}</span>
-              </div>
-              <div class="message-text">${escapeHtml(msg.text || "")}</div>
-            </div>
-          `;
-          chatBox.appendChild(messageDiv);
-        });
-        
-        chatBox.scrollTop = chatBox.scrollHeight;
-      },
-      (error) => {
-        console.error("Ошибка чата:", error);
-        if (chatBox) {
-          chatBox.innerHTML = '<div class="empty-chat">⚠️ Ошибка загрузки чата. Проверьте подключение.</div>';
-        }
+    .onSnapshot((snapshot) => {
+      if (!chatBox) return;
+      
+      const messages = [];
+      snapshot.forEach(doc => messages.push({ id: doc.id, ...doc.data() }));
+      
+      if (messages.length === 0) {
+        chatBox.innerHTML = '<div style="text-align:center;padding:40px;color:#aa936e;">💬 Пока нет сообщений</div>';
+        return;
       }
-    );
+      
+      chatBox.innerHTML = "";
+      messages.forEach(msg => {
+        const div = document.createElement("div");
+        div.className = `message ${msg.isTeacher ? 'message-teacher' : ''}`;
+        
+        const time = msg.createdAt?.toDate ? msg.createdAt.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "";
+        
+        div.innerHTML = `
+          <img src="${msg.photoURL || 'https://via.placeholder.com/45'}" class="avatar" onerror="this.src='https://via.placeholder.com/45'">
+          <div class="message-content">
+            <div class="message-name">
+              ${escapeHtml(msg.name || "Пользователь")}
+              ${msg.isTeacher ? '<span class="teacher-badge">👩‍🏫 Воспитатель</span>' : ''}
+              <span class="message-time">${time}</span>
+            </div>
+            <div class="message-text">${escapeHtml(msg.text || "")}</div>
+          </div>
+        `;
+        chatBox.appendChild(div);
+      });
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }, (error) => {
+      console.error("Ошибка чата:", error);
+      chatBox.innerHTML = '<div style="text-align:center;padding:40px;color:red;">⚠️ Ошибка загрузки чата</div>';
+    });
 }
 
 // ========= ПРОФИЛЬ =========
 async function renderProfile() {
   const user = auth.currentUser;
   if (!user) {
-    return `
-      <div class="card">
-        <h3>👤 Гость</h3>
-        <button onclick="showLoginForm()">Войти</button>
-        <button onclick="showRegisterForm()">Регистрация</button>
-      </div>
-    `;
+    return `<div class="card"><button onclick="showLogin()">Войти</button><button onclick="showRegister()">Регистрация</button></div>`;
   }
-  const isTeacherUser = await isTeacher(user);
+  const isTeacherFlag = await isTeacher(user);
   return `
     <div class="card">
-      <h3>👤 Мой профиль</h3>
+      <h3>👤 Профиль</h3>
       <div class="profile-card">
-        <img src="${user.photoURL || 'https://via.placeholder.com/80'}" class="avatar" style="width:70px;height:70px;" onerror="this.src='https://via.placeholder.com/80'">
+        <img src="${user.photoURL || 'https://via.placeholder.com/70'}" class="avatar" style="width:70px;height:70px;" onerror="this.src='https://via.placeholder.com/70'">
         <div>
           <strong>${escapeHtml(user.displayName || user.email)}</strong><br>
-          <span class="small">${escapeHtml(user.email)}</span>
-          ${isTeacherUser ? '<div class="badge teacher" style="margin-top:8px;">👩‍🏫 Воспитатель</div>' : '<div class="badge" style="margin-top:8px;">👪 Родитель</div>'}
+          <small>${escapeHtml(user.email)}</small>
+          ${isTeacherFlag ? '<div class="badge teacher" style="margin-top:8px;">👩‍🏫 Воспитатель</div>' : '<div class="badge" style="margin-top:8px;">👪 Родитель</div>'}
         </div>
       </div>
       <button onclick="updateAvatar()">🖼️ Сменить аватар</button>
@@ -836,112 +421,88 @@ async function updateAvatar() {
     const user = auth.currentUser;
     if (!user) return;
     try {
-      const ext = file.name.split('.').pop();
-      const ref = storage.ref().child(`avatars/${user.uid}_${Date.now()}.${ext}`);
+      const ref = storage.ref().child(`avatars/${user.uid}_${Date.now()}`);
       await ref.put(file);
       const url = await ref.getDownloadURL();
       await user.updateProfile({ photoURL: url });
       await db.collection("users").doc(user.uid).set({ photoURL: url }, { merge: true });
-      alert("Аватар обновлён!");
+      alert("Аватар обновлён");
       navigate('profile');
     } catch(e) { alert("Ошибка: " + e.message); }
   };
   input.click();
 }
 
+// ========= ВЫХОД =========
 async function logout() {
-  try {
-    if (currentUnsubMessages) {
-      currentUnsubMessages();
-      currentUnsubMessages = null;
-    }
-    await auth.signOut();
-    alert("👋 Вы вышли из профиля");
-    navigate('home', document.querySelector(".tab"));
-  } catch(e) {
-    console.error("Ошибка выхода:", e);
-    alert("Ошибка при выходе: " + e.message);
+  if (unsubscribeMessages) {
+    unsubscribeMessages();
+    unsubscribeMessages = null;
   }
+  await auth.signOut();
+  alert("Вы вышли");
+  navigate('home', document.querySelector(".tab"));
 }
 
-// Создание аккаунта воспитателя
-async function createTeacherAccountIfNotExists() {
+// ========= СОЗДАНИЕ ВОСПИТАТЕЛЯ =========
+async function createTeacher() {
   try {
-    const signInResult = await auth.signInWithEmailAndPassword(TEACHER_EMAIL, TEACHER_PASSWORD).catch(() => null);
-    
-    if (signInResult) {
+    const existing = await auth.signInWithEmailAndPassword(TEACHER_EMAIL, TEACHER_PASSWORD).catch(() => null);
+    if (existing) {
       await auth.signOut();
-      console.log("Аккаунт воспитателя уже существует");
       return;
     }
-    
     const newUser = await auth.createUserWithEmailAndPassword(TEACHER_EMAIL, TEACHER_PASSWORD);
     await newUser.user.updateProfile({ displayName: "Воспитатель Анна" });
-    await db.collection("users").doc(newUser.user.uid).set({ 
-      role: "teacher", 
-      email: TEACHER_EMAIL,
-      name: "Воспитатель Анна"
-    });
-    
+    await db.collection("users").doc(newUser.user.uid).set({ role: "teacher", email: TEACHER_EMAIL });
     await auth.signOut();
-    console.log("Аккаунт воспитателя создан");
-    
-  } catch(e) { 
-    console.warn("Teacher account error:", e);
-  }
+  } catch(e) { console.warn(e); }
 }
 
 // ========= НАВИГАЦИЯ =========
-async function navigate(screen, el) {
-  if (el) {
+async function navigate(screen, tabEl) {
+  if (tabEl) {
     document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
-    el.classList.add("active");
+    tabEl.classList.add("active");
   }
   
   const root = document.getElementById("screen");
-  if (!root) return;
-  
   root.style.opacity = "0";
   
   setTimeout(async () => {
     let html = "";
     if (screen === "home") html = await renderHome();
-    else if (screen === "schedule") html = await renderSchedulePage();
-    else if (screen === "chat") html = await renderChatPage();
+    else if (screen === "schedule") html = await renderSchedule();
+    else if (screen === "chat") html = await renderChat();
     else if (screen === "profile") html = await renderProfile();
     
     root.innerHTML = html;
     
+    // Если мы на странице чата и пользователь авторизован - загружаем сообщения
     if (screen === "chat" && auth.currentUser) {
-      loadChatMessages();
-    } else if (currentUnsubMessages) { 
-      currentUnsubMessages(); 
-      currentUnsubMessages = null; 
+      loadMessages();
+    } else if (unsubscribeMessages) {
+      unsubscribeMessages();
+      unsubscribeMessages = null;
     }
     
     root.style.opacity = "1";
   }, 50);
 }
 
-// Экранирование HTML
 function escapeHtml(str) {
   if (!str) return "";
-  return str
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
+  return str.replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[m]));
 }
 
-// ЗАПУСК
-createTeacherAccountIfNotExists().then(() => {
-  auth.onAuthStateChanged((user) => {
-    const activeTab = document.querySelector(".tab.active");
-    if (activeTab) {
-      const idx = Array.from(document.querySelectorAll('.tab')).indexOf(activeTab);
+// ========= ЗАПУСК =========
+createTeacher().then(() => {
+  auth.onAuthStateChanged(() => {
+    const active = document.querySelector(".tab.active");
+    if (active) {
+      const idx = Array.from(document.querySelectorAll('.tab')).indexOf(active);
       const screens = ['home', 'schedule', 'chat', 'profile'];
-      navigate(screens[idx], activeTab);
+      navigate(screens[idx], active);
     } else {
       navigate('home', document.querySelector(".tab"));
     }

@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=yes">
+<title>Ладушки - Детский сад</title>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
+
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background: #c8d5b9;
+  font-family: 'Segoe UI', 'Quicksand', 'Nunito', system-ui, -apple-system, sans-serif;
+  padding: 20px 16px 90px 16px;
+  min-height: 100vh;
+}
+
+.app {
+  max-width: 1200px;
+  margin: 0 auto;
+  background: #fffcf5;
+  border-radius: 48px;
+  box-shadow: 0 30px 50px -20px rgba(0,0,0,0.3);
+  overflow: hidden;
+}
+
+@media (min-width: 700px) {
+  body { padding: 32px 40px 90px 40px; }
+  .app { border-radius: 56px; }
+  .card { margin: 20px 28px !important; }
+  .tabbar { max-width: 500px !important; gap: 35px !important; }
+  .chat-box { height: 400px; }
+}
+
+@media (max-width: 699px) {
+  .card { margin: 16px 14px !important; }
+  .tabbar { width: 90%; max-width: 360px; }
+}
+
+.header {
+  background: #fdebb3;
+  padding: 20px 24px;
+  text-align: center;
+  font-size: 28px;
+  font-weight: 800;
+  color: #a5673f;
+  border-bottom: 4px solid #f7d98c;
+}
+.header span {
+  background: white;
+  padding: 0 16px;
+  border-radius: 60px;
+  font-size: 18px;
+  margin-left: 10px;
+  display: inline-block;
+}
+
+.card {
+  background: rgba(255, 250, 240, 0.95);
+  padding: 24px 22px;
+  border-radius: 36px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+  border: 1px solid #faeec9;
+}
+
+h3 {
+  font-size: 24px;
+  font-weight: 700;
+  color: #846b48;
+  margin-bottom: 18px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-left: 6px solid #fbc490;
+  padding-left: 16px;
+}
+
+button {
+  background: #ffd89a;
+  border: none;
+  border-radius: 60px;
+  font-weight: 600;
+  font-size: 16px;
+  padding: 12px 18px;
+  margin-top: 12px;
+  cursor: pointer;
+  color: #684f2e;
+  font-family: inherit;
+  width: 100%;
+  transition: 0.2s;
+}
+button:hover { background: #f7ca7a; transform: scale(0.98); }
+
+input, textarea {
+  width: 100%;
+  padding: 12px 18px;
+  margin-top: 12px;
+  border-radius: 50px;
+  border: 1px solid #eeddbb;
+  background: #fffef7;
+  font-family: inherit;
+  font-size: 15px;
+  outline: none;
+}
+input:focus {
+  border-color: #f7bc6c;
+  box-shadow: 0 0 0 3px rgba(247,188,108,0.2);
+}
+
+.schedule-item {
+  background: #f7efdb;
+  border-radius: 60px;
+  padding: 12px 20px;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  word-break: break-word;
+}
+.schedule-item:before { content: "⭐"; font-size: 20px; }
+
+.chat-box {
+  height: 280px;
+  overflow-y: auto;
+  background: #fef7e9;
+  border-radius: 32px;
+  padding: 14px;
+  margin: 12px 0 10px;
+  border: 1px solid #f7e5ca;
+}
+
+.message {
+  background: white;
+  border-radius: 24px;
+  padding: 10px 14px;
+  margin-bottom: 14px;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #ffda9e;
+}
+
+.small {
+  font-size: 11px;
+  color: #aa936e;
+  margin-top: 6px;
+}
+
+.tabbar {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #fef3e2;
+  display: flex;
+  padding: 12px 24px;
+  border-radius: 80px;
+  backdrop-filter: blur(12px);
+  background: rgba(254, 243, 226, 0.96);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+  gap: 28px;
+  z-index: 20;
+}
+.tab {
+  font-size: 30px;
+  cursor: pointer;
+  opacity: 0.55;
+  padding: 4px;
+  border-radius: 60px;
+}
+.tab.active {
+  opacity: 1;
+  transform: scale(1.2);
+  background: #ffefcf;
+}
+
+.profile-card {
+  display: flex;
+  gap: 18px;
+  align-items: center;
+  background: #fef1df;
+  border-radius: 48px;
+  padding: 16px;
+}
+
+.badge {
+  background: #d9e0b5;
+  border-radius: 40px;
+  padding: 6px 14px;
+  font-size: 12px;
+  font-weight: bold;
+  color: #5f6d3e;
+}
+
+.badge.teacher {
+  background: #fbc490;
+  color: #6b3f1c;
+}
+
+.locked-message {
+  text-align: center;
+  padding: 30px 20px;
+  background: #fef3e6;
+  border-radius: 32px;
+}
+
+.fade-in {
+  animation: fadeSlide 0.3s ease-out;
+}
+@keyframes fadeSlide {
+  0% { opacity: 0; transform: translateY(10px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+.error-msg {
+  background: #ffe0e0;
+  color: #c23d3d;
+  padding: 10px 15px;
+  border-radius: 30px;
+  font-size: 13px;
+  margin-top: 12px;
+  text-align: center;
+}
+
+.success-msg {
+  background: #e0ffe0;
+  color: #2d6a2d;
+  padding: 10px 15px;
+  border-radius: 30px;
+  font-size: 13px;
+  margin-top: 12px;
+  text-align: center;
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    🧸 Ладушки <span>сад-онлайн</span>
+  </div>
+  <div id="screen" class="fade-in"></div>
+  <div class="tabbar">
+    <div class="tab active" onclick="navigate('home', this)">🏡</div>
+    <div class="tab" onclick="navigate('schedule', this)">📅</div>
+    <div class="tab" onclick="navigate('chat', this)">💬</div>
+    <div class="tab" onclick="navigate('profile', this)">👤</div>
+  </div>
+</div>
+
+<script>
+// ========= ВАШИ РЕАЛЬНЫЕ КЛЮЧИ FIREBASE =========
+const firebaseConfig = {
+  apiKey: "AIzaSyAuZgI5XVWNSfHKWhAp26SWdD_Ye-3gBzs",
+  authDomain: "detsad-7ca3d.firebaseapp.com",
+  projectId: "detsad-7ca3d",
+  storageBucket: "detsad-7ca3d.firebasestorage.app",
+  messagingSenderId: "267900723144",
+  appId: "1:267900723144:web:d84022962650acc02faafd",
+  measurementId: "G-0QE2TLXT0C"
+};
+
+// Инициализация Firebase
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+const storage = firebase.storage();
+
+// Глобальные переменные
+let currentUnsubMessages = null;
+let scheduleCache = [];
+
+// Учётная запись воспитателя
+const TEACHER_EMAIL = "teacher@ladushki.ru";
+const TEACHER_PASSWORD = "Ladushki2025";
+
+// Проверка прав воспитателя
+async function isTeacher(user = auth.currentUser) {
+  if (!user) return false;
+  if (user.email === TEACHER_EMAIL) return true;
+  try {
+    const doc = await db.collection("users").doc(user.uid).get();
+    return doc.exists && doc.data().role === "teacher";
+  } catch(e) { return false; }
+}
+
+// Загрузка расписания
+async function loadScheduleFromFirestore() {
+  try {
+    const snapshot = await db.collection("settings").doc("dailySchedule").get();
+    if (snapshot.exists && snapshot.data().items) {
+      scheduleCache = snapshot.data().items;
+    } else {
+      scheduleCache = [
+        "🍳 08:30 — Завтрак (каша с ягодами)",
+        "🎨 10:00 — Творчество / лепка",
+        "🚶 11:30 — Прогулка на свежем воздухе",
+        "🍲 12:30 — Обед (суп, компот)",
+        "😴 13:30 — Тихий час (сказка)",
+        "🍎 15:30 — Полдник + игры"
+      ];
+      await db.collection("settings").doc("dailySchedule").set({ items: scheduleCache });
+    }
+  } catch(e) { console.warn("Ошибка загрузки расписания", e); }
+  return scheduleCache;
+}
+
+async function saveScheduleToFirestore(newItems) {
+  await db.collection("settings").doc("dailySchedule").set({ items: newItems });
+  scheduleCache = newItems;
+}
+
+// ========= ГЛАВНАЯ (только кнопки входа/регистрации для неавторизованных) =========
+async function renderHome() {
+  const user = auth.currentUser;
+  if (user) {
+    const isTeacherFlag = await isTeacher(user);
+    return `
+      <div class="card">
+        <h3>🌞 Добро пожаловать, ${escapeHtml(user.displayName || user.email)}!</h3>
+        <div style="display:flex; align-items:center; gap:14px; margin-bottom:16px;">
+          <img src="${user.photoURL || 'https://via.placeholder.com/70?text=👪'}" class="avatar" style="width:60px;height:60px;" onerror="this.src='https://via.placeholder.com/70?text=👪'">
+          <div>
+            <strong style="font-size:1.3rem;">${escapeHtml(user.displayName || user.email)}</strong>
+            ${isTeacherFlag ? '<div class="badge teacher">👩‍🏫 Воспитатель</div>' : '<div class="badge">👪 Родитель</div>'}
+          </div>
+        </div>
+        <button onclick="navigate('schedule', document.querySelectorAll('.tab')[1])">📋 Расписание дня</button>
+        <button onclick="navigate('chat', document.querySelectorAll('.tab')[2])">💬 Общий чат</button>
+        <button onclick="logout()">🚪 Выйти</button>
+      </div>
+    `;
+  } else {
+    // Только кнопки входа и регистрации!
+    return `
+      <div class="card">
+        <h3>🍎 Добро пожаловать в сад "Ладушки"</h3>
+        <div class="locked-message">
+          <p>🔒 <strong>Расписание и чат доступны только после регистрации</strong></p>
+          <p class="small" style="margin-top:10px;">Создайте аккаунт или войдите, чтобы продолжить</p>
+        </div>
+        <button onclick="showLoginForm()">🍎 Войти в аккаунт</button>
+        <button onclick="showRegisterForm()">🐣 Зарегистрироваться</button>
+        <div class="small" style="margin-top:16px; text-align:center;">👩‍🏫 Воспитатель: teacher@ladushki.ru</div>
+      </div>
+    `;
+  }
+}
+
+// ========= ФОРМА ВХОДА =========
+function showLoginForm() {
+  document.getElementById("screen").innerHTML = `
+    <div class="card">
+      <h3>🍎 Вход в аккаунт</h3>
+      <input id="loginEmail" placeholder="Email" type="email">
+      <input id="loginPass" type="password" placeholder="Пароль">
+      <div id="loginError" class="error-msg" style="display:none;"></div>
+      <button onclick="loginAction()">Войти</button>
+      <div class="small">Нет аккаунта? <span style="cursor:pointer;color:#a5673f;" onclick="showRegisterForm()">Зарегистрироваться</span></div>
+      <div class="small">👩‍🏫 Воспитатель: teacher@ladushki.ru</div>
+    </div>
+  `;
+}
+
+async function loginAction() {
+  const email = document.getElementById("loginEmail")?.value.trim();
+  const pass = document.getElementById("loginPass")?.value;
+  const errorDiv = document.getElementById("loginError");
+  
+  if (!email || !pass) {
+    errorDiv.style.display = "block";
+    errorDiv.innerText = "Заполните email и пароль";
+    return;
+  }
+  
+  try {
+    await auth.signInWithEmailAndPassword(email, pass);
+    navigate('home', document.querySelector(".tab"));
+  } catch(e) {
+    errorDiv.style.display = "block";
+    if (e.code === 'auth/user-not-found') errorDiv.innerText = "Пользователь не найден";
+    else if (e.code === 'auth/wrong-password') errorDiv.innerText = "Неверный пароль";
+    else if (e.code === 'auth/invalid-email') errorDiv.innerText = "Неверный формат email";
+    else errorDiv.innerText = "Ошибка: " + e.message;
+  }
+}
+
+// ========= ФОРМА РЕГИСТРАЦИИ =========
+function showRegisterForm() {
+  document.getElementById("screen").innerHTML = `
+    <div class="card">
+      <h3>🐣 Регистрация</h3>
+      <input id="regName" placeholder="Ваше имя" autocomplete="off">
+      <input id="regEmail" placeholder="Email" type="email" autocomplete="off">
+      <input id="regPass" type="password" placeholder="Пароль (минимум 6 символов)">
+      <input id="regAvatarFile" type="file" accept="image/*">
+      <div id="regError" class="error-msg" style="display:none;"></div>
+      <div id="regSuccess" class="success-msg" style="display:none;"></div>
+      <button onclick="registerAction()">⭐ Создать аккаунт</button>
+      <div class="small">Уже есть аккаунт? <span style="cursor:pointer;color:#a5673f;" onclick="showLoginForm()">Войти</span></div>
+    </div>
+  `;
+}
+
+async function registerAction() {
+  const name = document.getElementById("regName")?.value.trim();
+  const email = document.getElementById("regEmail")?.value.trim();
+  const pass = document.getElementById("regPass")?.value;
+  const file = document.getElementById("regAvatarFile")?.files[0];
+  const errorDiv = document.getElementById("regError");
+  const successDiv = document.getElementById("regSuccess");
+  
+  errorDiv.style.display = "none";
+  successDiv.style.display = "none";
+  
+  if (!name || !email || !pass) {
+    errorDiv.style.display = "block";
+    errorDiv.innerText = "Заполните все поля: имя, email, пароль";
+    return;
+  }
+  
+  if (pass.length < 6) {
+    errorDiv.style.display = "block";
+    errorDiv.innerText = "Пароль должен быть не менее 6 символов";
+    return;
+  }
+  
+  try {
+    const userCredential = await auth.createUserWithEmailAndPassword(email, pass);
+    const user = userCredential.user;
+    
+    let photoURL = null;
+    if (file) {
+      try {
+        const ext = file.name.split('.').pop();
+        const storageRef = storage.ref().child(`avatars/${user.uid}.${ext}`);
+        await storageRef.put(file);
+        photoURL = await storageRef.getDownloadURL();
+      } catch(e) { console.warn("Ошибка загрузки аватара", e); }
+    }
+    
+    await user.updateProfile({ displayName: name, photoURL: photoURL });
+    
+    await db.collection("users").doc(user.uid).set({
+      name: name,
+      email: email,
+      photoURL: photoURL,
+      role: "parent",
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    
+    successDiv.style.display = "block";
+    successDiv.innerText = "🎉 Регистрация успешна! Перенаправление...";
+    
+    setTimeout(() => {
+      navigate('home', document.querySelector(".tab"));
+    }, 1500);
+    
+  } catch(e) {
+    errorDiv.style.display = "block";
+    if (e.code === 'auth/email-already-in-use') {
+      errorDiv.innerText = "Этот email уже зарегистрирован. Войдите в аккаунт.";
+    } else if (e.code === 'auth/invalid-email') {
+      errorDiv.innerText = "Неверный формат email";
+    } else if (e.code === 'auth/weak-password') {
+      errorDiv.innerText = "Слишком слабый пароль. Используйте минимум 6 символов";
+    } else {
+      errorDiv.innerText = "Ошибка: " + e.message;
+    }
+    console.error("Registration error:", e);
+  }
+}
+
+// ========= РАСПИСАНИЕ (только для авторизованных) =========
+async function renderSchedulePage() {
+  const user = auth.currentUser;
+  if (!user) {
+    return `
+      <div class="card">
+        <h3>🔒 Доступ закрыт</h3>
+        <div class="locked-message">
+          <p>📅 Расписание доступно только после входа</p>
+          <button onclick="showLoginForm()">Войти</button>
+          <button onclick="showRegisterForm()">Зарегистрироваться</button>
+        </div>
+      </div>
+    `;
+  }
+  
+  const isTeacherUser = await isTeacher(user);
+  await loadScheduleFromFirestore();
+  
+  const scheduleHtml = scheduleCache.map((item, idx) => `
+    <div class="schedule-item">
+      <span style="flex:1;">${escapeHtml(item)}</span>
+      ${isTeacherUser ? `
+        <button onclick="editScheduleItem(${idx})" style="width:auto; margin:0; padding:6px 12px;">✏️</button>
+        <button onclick="deleteScheduleItem(${idx})" style="width:auto; margin:0; padding:6px 12px;">🗑️</button>
+      ` : ''}
+    </div>
+  `).join('');
+  
+  return `
+    <div class="card">
+      <h3>📋 Расписание дня</h3>
+      <div id="scheduleListContainer">${scheduleHtml}</div>
+      ${isTeacherUser ? `
+        <div style="margin-top:16px;">
+          <input id="newScheduleText" placeholder="Новое событие...">
+          <button onclick="addScheduleItem()">➕ Добавить</button>
+        </div>
+      ` : ''}
+    </div>
+  `;
+}
+
+// Редактирование расписания
+window.editScheduleItem = async function(idx) {
+  const user = auth.currentUser;
+  if (!user || !(await isTeacher(user))) return alert("Нет прав");
+  const newVal = prompt("Редактировать:", scheduleCache[idx]);
+  if (newVal?.trim()) {
+    scheduleCache[idx] = newVal.trim();
+    await saveScheduleToFirestore(scheduleCache);
+    refreshScheduleUI();
+  }
+};
+
+window.deleteScheduleItem = async function(idx) {
+  const user = auth.currentUser;
+  if (!user || !(await isTeacher(user))) return;
+  if (confirm("Удалить?")) {
+    scheduleCache.splice(idx, 1);
+    await saveScheduleToFirestore(scheduleCache);
+    refreshScheduleUI();
+  }
+};
+
+window.addScheduleItem = async function() {
+  const user = auth.currentUser;
+  if (!user || !(await isTeacher(user))) return;
+  const input = document.getElementById("newScheduleText");
+  if (input?.value.trim()) {
+    scheduleCache.push(input.value.trim());
+    await saveScheduleToFirestore(scheduleCache);
+    input.value = "";
+    refreshScheduleUI();
+  }
+};
+
+async function refreshScheduleUI() {
+  const container = document.getElementById("scheduleListContainer");
+  if (container) {
+    const user = auth.currentUser;
+    const isTeacherUser = user ? await isTeacher(user) : false;
+    container.innerHTML = scheduleCache.map((item, idx) => `
+      <div class="schedule-item">
+        <span style="flex:1;">${escapeHtml(item)}</span>
+        ${isTeacherUser ? `
+          <button onclick="editScheduleItem(${idx})" style="width:auto; margin:0; padding:6px 12px;">✏️</button>
+          <button onclick="deleteScheduleItem(${idx})" style="width:auto; margin:0; padding:6px 12px;">🗑️</button>
+        ` : ''}
+      </div>
+    `).join('');
+  }
+}
+
+// ========= ЧАТ (только для авторизованных) =========
+async function renderChatPage() {
+  const user = auth.currentUser;
+  if (!user) {
+    return `
+      <div class="card">
+        <h3>🔒 Доступ закрыт</h3>
+        <div class="locked-message">
+          <p>💬 Чат доступен только после входа</p>
+          <button onclick="showLoginForm()">Войти</button>
+          <button onclick="showRegisterForm()">Зарегистрироваться</button>
+        </div>
+      </div>
+    `;
+  }
+  return `
+    <div class="card">
+      <h3>💬 Родительский чат</h3>
+      <div id="chatBox" class="chat-box"></div>
+      <div style="display:flex; gap:8px;">
+        <input id="msgInput" placeholder="Напишите сообщение...">
+        <button onclick="sendChatMessage()" style="width:auto; padding:0 24px;">➤</button>
+      </div>
+    </div>
+  `;
+}
+
+async function sendChatMessage() {
+  const input = document.getElementById("msgInput");
+  if (!input?.value.trim()) return;
+  const user = auth.currentUser;
+  if (!user) { alert("Войдите в аккаунт"); return; }
+  
+  try {
+    await db.collection("messages").add({
+      text: input.value.trim(),
+      uid: user.uid,
+      displayName: user.displayName || user.email,
+      photoURL: user.photoURL,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    input.value = "";
+  } catch(e) { alert("Ошибка: " + e.message); }
+}
+
+function loadChatMessages() {
+  const chatBox = document.getElementById("chatBox");
+  if (!chatBox) return;
+  if (currentUnsubMessages) currentUnsubMessages();
+  
+  currentUnsubMessages = db.collection("messages")
+    .orderBy("createdAt", "asc")
+    .limitToLast(100)
+    .onSnapshot(snapshot => {
+      chatBox.innerHTML = "";
+      const items = [];
+      snapshot.forEach(doc => items.push(doc.data()));
+      items.reverse().forEach(d => {
+        const msgDiv = document.createElement("div");
+        msgDiv.className = "message";
+        msgDiv.innerHTML = `
+          <img src="${d.photoURL || 'https://via.placeholder.com/44'}" class="avatar" onerror="this.src='https://via.placeholder.com/44'">
+          <div><strong>${escapeHtml(d.displayName || "Родитель")}</strong><br>${escapeHtml(d.text)}</div>
+        `;
+        chatBox.appendChild(msgDiv);
+      });
+      chatBox.scrollTop = chatBox.scrollHeight;
+    });
+}
+
+// ========= ПРОФИЛЬ =========
+async function renderProfile() {
+  const user = auth.currentUser;
+  if (!user) {
+    return `
+      <div class="card">
+        <h3>👤 Гость</h3>
+        <button onclick="showLoginForm()">Войти</button>
+        <button onclick="showRegisterForm()">Регистрация</button>
+      </div>
+    `;
+  }
+  return `
+    <div class="card">
+      <h3>👤 Мой профиль</h3>
+      <div class="profile-card">
+        <img src="${user.photoURL || 'https://via.placeholder.com/80'}" class="avatar" style="width:70px;height:70px;" onerror="this.src='https://via.placeholder.com/80'">
+        <div>
+          <strong>${escapeHtml(user.displayName || user.email)}</strong><br>
+          <span class="small">${escapeHtml(user.email)}</span>
+        </div>
+      </div>
+      <button onclick="updateAvatar()">🖼️ Сменить аватар</button>
+      <button onclick="logout()">🚪 Выйти</button>
+    </div>
+  `;
+}
+
+async function updateAvatar() {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'image/*';
+  input.onchange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const user = auth.currentUser;
+    if (!user) return;
+    try {
+      const ext = file.name.split('.').pop();
+      const ref = storage.ref().child(`avatars/${user.uid}_${Date.now()}.${ext}`);
+      await ref.put(file);
+      const url = await ref.getDownloadURL();
+      await user.updateProfile({ photoURL: url });
+      await db.collection("users").doc(user.uid).set({ photoURL: url }, { merge: true });
+      alert("Аватар обновлён!");
+      navigate('profile');
+    } catch(e) { alert("Ошибка: " + e.message); }
+  };
+  input.click();
+}
+
+// Функция выхода
+async function logout() {
+  try {
+    await auth.signOut();
+    if (currentUnsubMessages) { 
+      currentUnsubMessages(); 
+      currentUnsubMessages = null; 
+    }
+    alert("👋 Вы вышли из профиля");
+    navigate('home', document.querySelector(".tab"));
+  } catch(e) {
+    console.error("Ошибка выхода:", e);
+    alert("Ошибка при выходе: " + e.message);
+  }
+}
+
+// СОЗДАНИЕ АККАУНТА ВОСПИТАТЕЛЯ (БЕЗ АВТОМАТИЧЕСКОГО ВХОДА!)
+async function createTeacherAccountIfNotExists() {
+  try {
+    // Пытаемся найти пользователя через signIn (не сохраняя сессию)
+    const signInResult = await auth.signInWithEmailAndPassword(TEACHER_EMAIL, TEACHER_PASSWORD).catch(() => null);
+    
+    if (signInResult) {
+      // Аккаунт существует - сразу выходим
+      await auth.signOut();
+      console.log("Аккаунт воспитателя уже существует");
+      return;
+    }
+    
+    // Аккаунта нет - создаём
+    const newUser = await auth.createUserWithEmailAndPassword(TEACHER_EMAIL, TEACHER_PASSWORD);
+    await newUser.user.updateProfile({ displayName: "Воспитатель Анна" });
+    await db.collection("users").doc(newUser.user.uid).set({ 
+      role: "teacher", 
+      email: TEACHER_EMAIL,
+      name: "Воспитатель Анна"
+    });
+    
+    // СРАЗУ ВЫХОДИМ, чтобы не оставаться в аккаунте воспитателя
+    await auth.signOut();
+    console.log("Аккаунт воспитателя создан и выход выполнен");
+    
+  } catch(e) { 
+    console.warn("Teacher account creation error:", e);
+  }
+}
+
+// ========= НАВИГАЦИЯ =========
+async function navigate(screen, el) {
+  if (el) {
+    document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+    el.classList.add("active");
+  }
+  
+  const root = document.getElementById("screen");
+  root.style.opacity = "0";
+  
+  setTimeout(async () => {
+    let html = "";
+    if (screen === "home") html = await renderHome();
+    else if (screen === "schedule") html = await renderSchedulePage();
+    else if (screen === "chat") html = await renderChatPage();
+    else if (screen === "profile") html = await renderProfile();
+    
+    root.innerHTML = html;
+    
+    if (screen === "chat" && auth.currentUser) {
+      loadChatMessages();
+    } else if (currentUnsubMessages) { 
+      currentUnsubMessages(); 
+      currentUnsubMessages = null; 
+    }
+    
+    root.style.opacity = "1";
+  }, 50);
+}
+
+// ЗАПУСК ПРИЛОЖЕНИЯ
+// Сначала создаём аккаунт воспитателя (если нужно) и выходим из него
+// Затем подписываемся на изменения авторизации
+createTeacherAccountIfNotExists().then(() => {
+  // Подписываемся на изменения состояния входа
+  auth.onAuthStateChanged((user) => {
+    // Просто обновляем текущий экран
+    // Если пользователь не авторизован - показываем кнопки входа/регистрации
+    // Если авторизован - показываем его профиль
+    const activeTab = document.querySelector(".tab.active");
+    if (activeTab) {
+      const idx = Array.from(document.querySelectorAll('.tab')).indexOf(activeTab);
+      const screens = ['home', 'schedule', 'chat', 'profile'];
+      navigate(screens[idx], activeTab);
+    } else {
+      navigate('home', document.querySelector(".tab"));
+    }
+  });
+});
+
+function escapeHtml(str) {
+  if (!str) return "";
+  return str.replace(/[&<>]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[m]));
+}
+</script>
+</body>
+</html>

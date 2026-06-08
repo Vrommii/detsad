@@ -79,6 +79,8 @@ const db = firebase.firestore();
 let unsubscribeMessages = null;
 let currentGroupId = null;
 let currentChildId = null;
+let selectedParentIdForGroup = null; // для выбора родителя при назначении в группу
+let selectedChildForParent = null;    // выбранный ребёнок после выбора родителя
 
 // Тестовые аккаунты
 const TEST_ACCOUNTS = [
@@ -187,7 +189,7 @@ async function renderKids() {
   } else if(role === "teacher" || role === "admin") {
     const kids = await db.collection("kids").get();
     let list = "";
-    kids.forEach(k => list += `<div class="kid-item">👶 ${escapeHtml(k.data().name)}</div>`);
+    kids.forEach(k => list += `<div class="kid-item">👶 ${escapeHtml(k.data().name)} (родитель: ${escapeHtml(k.data().parentId?.slice(0,8))}...)</div>`);
     return `<div class="card"><h3><i class="fas fa-users-viewfinder"></i> Все дети</h3>${list}</div>`;
   }
   return `<div class="card"><div class="locked-message">Доступ только родителям</div></div>`;
@@ -213,39 +215,119 @@ async function renderGroups() {
   let groupHtml = "";
   groups.forEach(g => groupHtml += `<div class="schedule-item"><span>📁 ${escapeHtml(g.data().name)}</span><button onclick="deleteGroup('${g.id}')" style="width:auto;">🗑️</button></div>`);
   
+  // ВСЕ ПОЛЬЗОВАТЕЛИ (воспитатели и родители)
   const usersSnap = await db.collection("users").get();
-  let userSelect = `<select id="assignUserId"><option value="">Выбрать пользователя</option>`;
-  usersSnap.forEach(u => userSelect += `<option value="${u.id}">${escapeHtml(u.data().name)} (${u.data().role})</option>`);
-  userSelect += `</select><select id="assignGroupId"><option value="">Выбрать группу</option>`;
-  groups.forEach(g => userSelect += `<option value="${g.id}">${escapeHtml(g.data().name)}</option>`);
-  userSelect += `</select><button onclick="assignUserToGroup()">Назначить в группу</button>`;
+  let allUsers = [];
+  usersSnap.forEach(u => allUsers.push({ id: u.id, name: u.data().name, role: u.data().role, email: u.data().email }));
   
+  // Отдельно воспитатели и родители
+  let teachers = allUsers.filter(u => u.role === 'teacher');
+  let parents = allUsers.filter(u => u.role === 'parent');
+  
+  let selectHtml = `
+    <div style="background:#f7efdb; border-radius:30px; padding:12px; margin:10px 0;">
+      <h4>👩‍🏫 Назначить ВОСПИТАТЕЛЯ в группу</h4>
+      <select id="assignTeacherId"><option value="">Выбрать воспитателя</option>
+      ${teachers.map(t => `<option value="${t.id}">${escapeHtml(t.name)} (${escapeHtml(t.email)})</option>`).join("")}
+      </select>
+      <select id="assignTeacherGroupId"><option value="">Выбрать группу</option>
+      ${groups.map(g => `<option value="${g.id}">${escapeHtml(g.data().name)}</option>`).join("")}
+      </select>
+      <button onclick="assignTeacherToGroup()">👩‍🏫 Назначить воспитателя</button>
+    </div>
+    
+    <div style="background:#f7efdb; border-radius:30px; padding:12px; margin:10px 0;">
+      <h4>👪 Назначить РОДИТЕЛЯ в группу (через ребёнка)</h4>
+      <select id="selectParentForGroup" onchange="onParentSelectForGroup()"><option value="">Выбрать родителя</option>
+      ${parents.map(p => `<option value="${p.id}">${escapeHtml(p.name)} (${escapeHtml(p.email)})</option>`).join("")}
+      </select>
+      <div id="parentKidsContainer"></div>
+      <select id="assignParentGroupId" style="margin-top:10px;"><option value="">Выбрать группу</option>
+      ${groups.map(g => `<option value="${g.id}">${escapeHtml(g.data().name)}</option>`).join("")}
+      </select>
+      <button onclick="assignParentToGroup()">👪 Назначить ребёнка родителя в группу</button>
+    </div>
+  `;
+  
+  // Назначение ребёнка напрямую
   const kidsSnap = await db.collection("kids").get();
-  let kidSelect = `<select id="assignKidId"><option value="">Выбрать ребёнка</option>`;
-  kidsSnap.forEach(k => kidSelect += `<option value="${k.id}">${escapeHtml(k.data().name)}</option>`);
+  let kidSelect = `<div style="background:#f7efdb; border-radius:30px; padding:12px; margin:10px 0;">
+    <h4>👶 Назначить РЕБЁНКА в группу (напрямую)</h4>
+    <select id="assignKidId"><option value="">Выбрать ребёнка</option>`;
+  kidsSnap.forEach(k => kidSelect += `<option value="${k.id}">${escapeHtml(k.data().name)} (родитель: ${escapeHtml(k.data().parentId?.slice(0,8))})</option>`);
   kidSelect += `</select><select id="assignKidGroupId"><option value="">Выбрать группу</option>`;
   groups.forEach(g => kidSelect += `<option value="${g.id}">${escapeHtml(g.data().name)}</option>`);
-  kidSelect += `</select><button onclick="assignKidToGroup()">Назначить ребёнка</button>`;
+  kidSelect += `</select><button onclick="assignKidToGroup()">👶 Назначить ребёнка</button></div>`;
   
-  return `<div class="card"><h3><i class="fas fa-layer-group"></i> Группы</h3><input id="newGroup" placeholder="Название группы"><button onclick="createGroup()">➕ Создать</button><div>${groupHtml}</div><hr><h4>Назначить пользователя</h4>${userSelect}<hr><h4>Назначить ребёнка</h4>${kidSelect}</div>`;
+  return `<div class="card"><h3><i class="fas fa-layer-group"></i> Управление группами</h3>
+    <input id="newGroup" placeholder="Название группы"><button onclick="createGroup()">➕ Создать группу</button>
+    <div>${groupHtml}</div><hr>
+    ${selectHtml}
+    ${kidSelect}
+  </div>`;
 }
-window.createGroup = async () => { const name = document.getElementById("newGroup")?.value.trim(); if(name){ await db.collection("groups").add({name}); document.getElementById("newGroup").value=""; renderGroups(); } };
-window.deleteGroup = async (id) => { if(confirm("Удалить?")){ await db.collection("groups").doc(id).delete(); renderGroups(); } };
-window.assignUserToGroup = async () => {
-  const uid = document.getElementById("assignUserId")?.value, gid = document.getElementById("assignGroupId")?.value;
-  if(!uid||!gid) { alert("Выберите всё"); return; }
-  const userRef = db.collection("users").doc(uid);
+
+// Выбор родителя - показываем его детей
+window.onParentSelectForGroup = async () => {
+  const parentId = document.getElementById("selectParentForGroup")?.value;
+  if(!parentId) { document.getElementById("parentKidsContainer").innerHTML = ""; return; }
+  const kids = await db.collection("kids").where("parentId", "==", parentId).get();
+  let html = `<label style="margin-top:10px; display:block;">Дети этого родителя:</label>
+    <select id="selectedChildForParent"><option value="">Выбрать ребёнка</option>`;
+  kids.forEach(k => html += `<option value="${k.id}">${escapeHtml(k.data().name)}</option>`);
+  html += `</select>`;
+  document.getElementById("parentKidsContainer").innerHTML = html;
+};
+
+// Назначить воспитателя в группу
+window.assignTeacherToGroup = async () => {
+  const teacherId = document.getElementById("assignTeacherId")?.value;
+  const groupId = document.getElementById("assignTeacherGroupId")?.value;
+  if(!teacherId || !groupId) { alert("Выберите воспитателя и группу"); return; }
+  const userRef = db.collection("users").doc(teacherId);
   const data = (await userRef.get()).data();
   const groups = data.groupIds || [];
-  if(!groups.includes(gid)) groups.push(gid);
+  if(!groups.includes(groupId)) groups.push(groupId);
   await userRef.update({ groupIds: groups });
-  alert("Назначен!");
+  alert("✅ Воспитатель назначен в группу!");
 };
+
+// Назначить родителя (через его ребёнка)
+window.assignParentToGroup = async () => {
+  const parentId = document.getElementById("selectParentForGroup")?.value;
+  const childId = document.getElementById("selectedChildForParent")?.value;
+  const groupId = document.getElementById("assignParentGroupId")?.value;
+  if(!parentId) { alert("Выберите родителя"); return; }
+  if(!childId) { alert("Выберите ребёнка этого родителя"); return; }
+  if(!groupId) { alert("Выберите группу"); return; }
+  
+  // Назначаем ребёнка в группу
+  await db.collection("kids").doc(childId).update({ groupId: groupId });
+  alert(`✅ Ребёнок назначен в группу! Теперь родитель будет видеть чат этой группы.`);
+};
+
+// Назначить ребёнка напрямую
 window.assignKidToGroup = async () => {
-  const kid = document.getElementById("assignKidId")?.value, gid = document.getElementById("assignKidGroupId")?.value;
+  const kid = document.getElementById("assignKidId")?.value;
+  const gid = document.getElementById("assignKidGroupId")?.value;
   if(!kid||!gid) { alert("Выберите всё"); return; }
   await db.collection("kids").doc(kid).update({ groupId: gid });
-  alert("Ребёнок назначен в группу!");
+  alert("✅ Ребёнок назначен в группу!");
+};
+
+window.createGroup = async () => { 
+  const name = document.getElementById("newGroup")?.value.trim(); 
+  if(name){ 
+    await db.collection("groups").add({name, members: []}); 
+    document.getElementById("newGroup").value=""; 
+    renderGroups(); 
+  } else { alert("Введите название группы"); }
+};
+window.deleteGroup = async (id) => { 
+  if(confirm("Удалить группу?")){ 
+    await db.collection("groups").doc(id).delete(); 
+    renderGroups(); 
+  } 
 };
 
 // ========= КРУЖКИ =========

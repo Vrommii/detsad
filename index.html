@@ -175,7 +175,7 @@ async function doRegister() {
   } catch(e) { err.style.display="block"; err.innerText=e.message; }
 }
 
-// ========= ДЕТИ (РОДИТЕЛИ + АДМИН МОЖЕТ УДАЛЯТЬ) =========
+// ========= ДЕТИ =========
 async function renderKids() {
   const user = auth.currentUser;
   if(!user) return `<div class="card"><div class="locked-message">Войдите</div></div>`;
@@ -188,12 +188,10 @@ async function renderKids() {
     const activeHtml = currentChildId ? `<div class="success-msg" style="display:block">✅ Активный ребёнок выбран</div>` : `<div class="error-msg" style="display:block">⚠️ Выберите активного ребёнка</div>`;
     return `<div class="card"><h3><i class="fas fa-baby-carriage"></i> Мои дети</h3>${kidsList||"<div>Нет детей</div>"}<input id="newKidName" placeholder="Имя"><button onclick="addKid()">➕ Добавить</button><hr>${activeHtml}<button onclick="navigate('chat',null)">💬 Чат для ребёнка</button></div>`;
   } else if(role === "admin") {
-    // Админ может видеть и удалять ЛЮБЫХ детей
     const kids = await db.collection("kids").get();
     let list = "";
     for(const k of kids.docs) {
       const kidData = k.data();
-      // Получаем имя родителя
       let parentName = "Неизвестно";
       if(kidData.parentId) {
         const parentDoc = await db.collection("users").doc(kidData.parentId).get();
@@ -205,42 +203,21 @@ async function renderKids() {
       </div>`;
     }
     return `<div class="card"><h3><i class="fas fa-users-viewfinder"></i> Все дети (админ)</h3>
-      <div class="small">⚠️ Здесь можно удалить любого ребёнка</div>
       ${list || "<div>Нет детей</div>"}
-      <hr>
-      <button onclick="deleteAllAnya()" class="danger" style="background:#ff8888;">🔥 УДАЛИТЬ ВСЕХ "АНЯ"</button>
     </div>`;
   } else if(role === "teacher") {
     const kids = await db.collection("kids").get();
     let list = "";
-    kids.forEach(k => list += `<div class="kid-item">👶 ${escapeHtml(k.data().name)} (родитель: ${escapeHtml(k.data().parentId?.slice(0,8))}...)</div>`);
+    kids.forEach(k => list += `<div class="kid-item">👶 ${escapeHtml(k.data().name)}</div>`);
     return `<div class="card"><h3><i class="fas fa-users-viewfinder"></i> Все дети</h3>${list}</div>`;
   }
   return `<div class="card"><div class="locked-message">Доступ только родителям</div></div>`;
 }
 
-// Функция удаления конкретного ребёнка (для админа)
 window.deleteKid = async (kidId) => {
   if(confirm("Удалить этого ребёнка навсегда?")) {
     await db.collection("kids").doc(kidId).delete();
     alert("Ребёнок удалён!");
-    renderKids();
-  }
-};
-
-// Функция удаления всех детей с именем "Аня" (без учёта регистра)
-window.deleteAllAnya = async () => {
-  if(confirm("⚠️ ВНИМАНИЕ! Это удалит ВСЕХ детей с именем 'Аня' (включая 'аня', 'АНЯ', 'АнЯ'). Продолжить?")) {
-    const kids = await db.collection("kids").get();
-    let deletedCount = 0;
-    for(const k of kids.docs) {
-      const name = k.data().name;
-      if(name && name.toLowerCase() === "аня") {
-        await db.collection("kids").doc(k.id).delete();
-        deletedCount++;
-      }
-    }
-    alert(`✅ Удалено ${deletedCount} детей с именем "Аня"`);
     renderKids();
   }
 };
@@ -302,14 +279,14 @@ async function renderGroups() {
   let kidSelect = `<div style="background:#f7efdb; border-radius:30px; padding:12px; margin:10px 0;">
     <h4>👶 Назначить РЕБЁНКА в группу (напрямую)</h4>
     <select id="assignKidId"><option value="">Выбрать ребёнка</option>`;
-  kidsSnap.forEach(k => kidSelect += `<option value="${k.id}">${escapeHtml(k.data().name)} (родитель: ${escapeHtml(k.data().parentId?.slice(0,8))})</option>`);
+  kidsSnap.forEach(k => kidSelect += `<option value="${k.id}">${escapeHtml(k.data().name)}</option>`);
   kidSelect += `</select><select id="assignKidGroupId"><option value="">Выбрать группу</option>`;
   groups.forEach(g => kidSelect += `<option value="${g.id}">${escapeHtml(g.data().name)}</option>`);
   kidSelect += `</select><button onclick="assignKidToGroup()">👶 Назначить ребёнка</button></div>`;
   
   return `<div class="card"><h3><i class="fas fa-layer-group"></i> Управление группами</h3>
     <input id="newGroup" placeholder="Название группы"><button onclick="createGroup()">➕ Создать группу</button>
-    <div>${groupHtml}</div><hr>
+    <div id="groupsList">${groupHtml}</div><hr>
     ${selectHtml}
     ${kidSelect}
   </div>`;
@@ -339,11 +316,9 @@ window.assignTeacherToGroup = async () => {
 };
 
 window.assignParentToGroup = async () => {
-  const parentId = document.getElementById("selectParentForGroup")?.value;
   const childId = document.getElementById("selectedChildForParent")?.value;
   const groupId = document.getElementById("assignParentGroupId")?.value;
-  if(!parentId) { alert("Выберите родителя"); return; }
-  if(!childId) { alert("Выберите ребёнка этого родителя"); return; }
+  if(!childId) { alert("Выберите ребёнка"); return; }
   if(!groupId) { alert("Выберите группу"); return; }
   await db.collection("kids").doc(childId).update({ groupId: groupId });
   alert(`✅ Ребёнок назначен в группу!`);
@@ -352,7 +327,7 @@ window.assignParentToGroup = async () => {
 window.assignKidToGroup = async () => {
   const kid = document.getElementById("assignKidId")?.value;
   const gid = document.getElementById("assignKidGroupId")?.value;
-  if(!kid||!gid) { alert("Выберите всё"); return; }
+  if(!kid||!gid) { alert("Выберите ребёнка и группу"); return; }
   await db.collection("kids").doc(kid).update({ groupId: gid });
   alert("✅ Ребёнок назначен в группу!");
 };
@@ -361,10 +336,11 @@ window.createGroup = async () => {
   const name = document.getElementById("newGroup")?.value.trim(); 
   if(name){ 
     await db.collection("groups").add({name, members: []}); 
-    document.getElementById("newGroup").value=""; 
+    document.getElementById("newGroup").value = ""; 
     renderGroups(); 
   } else { alert("Введите название группы"); }
 };
+
 window.deleteGroup = async (id) => { 
   if(confirm("Удалить группу?")){ 
     await db.collection("groups").doc(id).delete(); 

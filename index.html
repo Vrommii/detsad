@@ -23,6 +23,8 @@ h3 { font-size: 1.3rem; color: #7b5a3b; margin-bottom: 14px; display: flex; alig
 h4 { font-size: 1rem; color: #9b7a5a; margin: 12px 0 6px 0; }
 button { background: #fed287; border: none; border-radius: 60px; padding: 10px 14px; font-weight: 700; margin-top: 10px; cursor: pointer; width: 100%; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s; color: #4f2d1a; }
 button:hover { background: #ffc46b; transform: scale(0.97); }
+button.danger { background: #ffaaaa; color: #a00; }
+button.danger:hover { background: #ff8888; }
 input, select, textarea { width: 100%; padding: 10px 14px; margin-top: 8px; border-radius: 48px; border: 1.5px solid #ffe0b5; background: #fffaf2; outline: none; }
 input:focus { border-color: #ffb351; box-shadow: 0 0 0 3px rgba(255,180,81,0.2); }
 .chat-box { height: 320px; overflow-y: auto; background: #fff6ea; border-radius: 28px; padding: 10px; margin: 10px 0; border: 1px solid #ffdfb3; }
@@ -79,8 +81,6 @@ const db = firebase.firestore();
 let unsubscribeMessages = null;
 let currentGroupId = null;
 let currentChildId = null;
-let selectedParentIdForGroup = null; // для выбора родителя при назначении в группу
-let selectedChildForParent = null;    // выбранный ребёнок после выбора родителя
 
 // Тестовые аккаунты
 const TEST_ACCOUNTS = [
@@ -175,18 +175,42 @@ async function doRegister() {
   } catch(e) { err.style.display="block"; err.innerText=e.message; }
 }
 
-// ========= ДЕТИ (РОДИТЕЛИ) =========
+// ========= ДЕТИ (РОДИТЕЛИ + АДМИН МОЖЕТ УДАЛЯТЬ) =========
 async function renderKids() {
   const user = auth.currentUser;
   if(!user) return `<div class="card"><div class="locked-message">Войдите</div></div>`;
   const role = await getUserRole(user);
+  
   if(role === "parent") {
     const kidsSnap = await db.collection("kids").where("parentId","==",user.uid).get();
     let kidsList = "";
     kidsSnap.forEach(d => kidsList += `<div class="kid-item"><span>👶 ${escapeHtml(d.data().name)} ${d.data().groupId ? '✅ в группе' : '⏳ без группы'}</span><button onclick="selectChild('${d.id}')" style="width:auto;padding:4px 12px;">Выбрать</button></div>`);
     const activeHtml = currentChildId ? `<div class="success-msg" style="display:block">✅ Активный ребёнок выбран</div>` : `<div class="error-msg" style="display:block">⚠️ Выберите активного ребёнка</div>`;
     return `<div class="card"><h3><i class="fas fa-baby-carriage"></i> Мои дети</h3>${kidsList||"<div>Нет детей</div>"}<input id="newKidName" placeholder="Имя"><button onclick="addKid()">➕ Добавить</button><hr>${activeHtml}<button onclick="navigate('chat',null)">💬 Чат для ребёнка</button></div>`;
-  } else if(role === "teacher" || role === "admin") {
+  } else if(role === "admin") {
+    // Админ может видеть и удалять ЛЮБЫХ детей
+    const kids = await db.collection("kids").get();
+    let list = "";
+    for(const k of kids.docs) {
+      const kidData = k.data();
+      // Получаем имя родителя
+      let parentName = "Неизвестно";
+      if(kidData.parentId) {
+        const parentDoc = await db.collection("users").doc(kidData.parentId).get();
+        if(parentDoc.exists) parentName = parentDoc.data().name || parentDoc.data().email;
+      }
+      list += `<div class="kid-item">
+        <span>👶 <strong>${escapeHtml(kidData.name)}</strong><br><small>Родитель: ${escapeHtml(parentName)}</small></span>
+        <button onclick="deleteKid('${k.id}')" class="danger" style="width:auto;padding:4px 12px;background:#ffaaaa;">🗑️ Удалить</button>
+      </div>`;
+    }
+    return `<div class="card"><h3><i class="fas fa-users-viewfinder"></i> Все дети (админ)</h3>
+      <div class="small">⚠️ Здесь можно удалить любого ребёнка</div>
+      ${list || "<div>Нет детей</div>"}
+      <hr>
+      <button onclick="deleteAllAnya()" class="danger" style="background:#ff8888;">🔥 УДАЛИТЬ ВСЕХ "АНЯ"</button>
+    </div>`;
+  } else if(role === "teacher") {
     const kids = await db.collection("kids").get();
     let list = "";
     kids.forEach(k => list += `<div class="kid-item">👶 ${escapeHtml(k.data().name)} (родитель: ${escapeHtml(k.data().parentId?.slice(0,8))}...)</div>`);
@@ -194,6 +218,33 @@ async function renderKids() {
   }
   return `<div class="card"><div class="locked-message">Доступ только родителям</div></div>`;
 }
+
+// Функция удаления конкретного ребёнка (для админа)
+window.deleteKid = async (kidId) => {
+  if(confirm("Удалить этого ребёнка навсегда?")) {
+    await db.collection("kids").doc(kidId).delete();
+    alert("Ребёнок удалён!");
+    renderKids();
+  }
+};
+
+// Функция удаления всех детей с именем "Аня" (без учёта регистра)
+window.deleteAllAnya = async () => {
+  if(confirm("⚠️ ВНИМАНИЕ! Это удалит ВСЕХ детей с именем 'Аня' (включая 'аня', 'АНЯ', 'АнЯ'). Продолжить?")) {
+    const kids = await db.collection("kids").get();
+    let deletedCount = 0;
+    for(const k of kids.docs) {
+      const name = k.data().name;
+      if(name && name.toLowerCase() === "аня") {
+        await db.collection("kids").doc(k.id).delete();
+        deletedCount++;
+      }
+    }
+    alert(`✅ Удалено ${deletedCount} детей с именем "Аня"`);
+    renderKids();
+  }
+};
+
 window.addKid = async () => {
   const user = auth.currentUser;
   const name = document.getElementById("newKidName")?.value.trim();
@@ -215,12 +266,10 @@ async function renderGroups() {
   let groupHtml = "";
   groups.forEach(g => groupHtml += `<div class="schedule-item"><span>📁 ${escapeHtml(g.data().name)}</span><button onclick="deleteGroup('${g.id}')" style="width:auto;">🗑️</button></div>`);
   
-  // ВСЕ ПОЛЬЗОВАТЕЛИ (воспитатели и родители)
   const usersSnap = await db.collection("users").get();
   let allUsers = [];
   usersSnap.forEach(u => allUsers.push({ id: u.id, name: u.data().name, role: u.data().role, email: u.data().email }));
   
-  // Отдельно воспитатели и родители
   let teachers = allUsers.filter(u => u.role === 'teacher');
   let parents = allUsers.filter(u => u.role === 'parent');
   
@@ -249,7 +298,6 @@ async function renderGroups() {
     </div>
   `;
   
-  // Назначение ребёнка напрямую
   const kidsSnap = await db.collection("kids").get();
   let kidSelect = `<div style="background:#f7efdb; border-radius:30px; padding:12px; margin:10px 0;">
     <h4>👶 Назначить РЕБЁНКА в группу (напрямую)</h4>
@@ -267,7 +315,6 @@ async function renderGroups() {
   </div>`;
 }
 
-// Выбор родителя - показываем его детей
 window.onParentSelectForGroup = async () => {
   const parentId = document.getElementById("selectParentForGroup")?.value;
   if(!parentId) { document.getElementById("parentKidsContainer").innerHTML = ""; return; }
@@ -279,7 +326,6 @@ window.onParentSelectForGroup = async () => {
   document.getElementById("parentKidsContainer").innerHTML = html;
 };
 
-// Назначить воспитателя в группу
 window.assignTeacherToGroup = async () => {
   const teacherId = document.getElementById("assignTeacherId")?.value;
   const groupId = document.getElementById("assignTeacherGroupId")?.value;
@@ -292,7 +338,6 @@ window.assignTeacherToGroup = async () => {
   alert("✅ Воспитатель назначен в группу!");
 };
 
-// Назначить родителя (через его ребёнка)
 window.assignParentToGroup = async () => {
   const parentId = document.getElementById("selectParentForGroup")?.value;
   const childId = document.getElementById("selectedChildForParent")?.value;
@@ -300,13 +345,10 @@ window.assignParentToGroup = async () => {
   if(!parentId) { alert("Выберите родителя"); return; }
   if(!childId) { alert("Выберите ребёнка этого родителя"); return; }
   if(!groupId) { alert("Выберите группу"); return; }
-  
-  // Назначаем ребёнка в группу
   await db.collection("kids").doc(childId).update({ groupId: groupId });
-  alert(`✅ Ребёнок назначен в группу! Теперь родитель будет видеть чат этой группы.`);
+  alert(`✅ Ребёнок назначен в группу!`);
 };
 
-// Назначить ребёнка напрямую
 window.assignKidToGroup = async () => {
   const kid = document.getElementById("assignKidId")?.value;
   const gid = document.getElementById("assignKidGroupId")?.value;

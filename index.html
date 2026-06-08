@@ -10,38 +10,267 @@
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 
-<!-- Font Awesome -->
+<!-- Font Awesome 6 -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
 <style>
-* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui; }
-body { background: linear-gradient(135deg, #cbe6fe, #dcfce8); padding: 16px 12px 90px 12px; }
-.app { max-width: 550px; margin: 0 auto; background: #fffef7; border-radius: 48px; box-shadow: 0 20px 35px -12px rgba(0,0,0,0.2); overflow: hidden; }
-.header { background: linear-gradient(115deg, #FFB347, #FF8C42); padding: 18px; text-align: center; font-size: 24px; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 10px; color: #2d2b26; }
-.card { background: rgba(255, 255, 245, 0.95); margin: 16px; padding: 20px; border-radius: 36px; box-shadow: 0 6px 14px rgba(0,0,0,0.05); border: 1px solid #ffefdb; }
-h3 { font-size: 1.4rem; color: #7b5a3b; margin-bottom: 16px; display: flex; align-items: center; gap: 10px; border-left: 5px solid #ffb86b; padding-left: 14px; }
-button { background: #fed287; border: none; border-radius: 60px; padding: 12px 16px; font-weight: 700; margin-top: 12px; cursor: pointer; width: 100%; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s; color: #4f2d1a; }
-button:hover { background: #ffc46b; transform: scale(0.97); }
-input, select { width: 100%; padding: 12px 16px; margin-top: 10px; border-radius: 48px; border: 1.5px solid #ffe0b5; background: #fffaf2; outline: none; }
-input:focus { border-color: #ffb351; box-shadow: 0 0 0 3px rgba(255,180,81,0.2); }
-.error-msg, .success-msg { padding: 10px; border-radius: 60px; margin-top: 12px; text-align: center; display: none; font-size: 0.85rem; }
-.error-msg { background: #ffe1e1; color: #c23d3d; }
-.success-msg { background: #daf7da; color: #267c26; }
-.tabbar { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #fff9f0; display: flex; padding: 8px 20px; border-radius: 60px; gap: 20px; box-shadow: 0 8px 20px rgba(0,0,0,0.2); z-index: 200; }
-.tab { font-size: 24px; cursor: pointer; opacity: 0.5; transition: 0.2s; padding: 5px; }
-.tab.active { opacity: 1; transform: scale(1.2); background: #ffe0bf; border-radius: 50px; }
-.locked-message { text-align: center; padding: 30px; background: #fff2e4; border-radius: 40px; }
-.small { font-size: 0.7rem; color: #ad8b64; text-align: center; margin-top: 12px; }
-.loading { text-align: center; padding: 40px; color: #7b5a3b; }
-.badge { background: #e9ddce; border-radius: 30px; padding: 4px 12px; font-size: 0.7rem; font-weight: bold; display: inline-block; }
-.badge.admin { background: #d4af7a; }
-.badge.teacher { background: #fdca83; }
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+
+body {
+  background: linear-gradient(135deg, #cbe6fe 0%, #dcfce8 100%);
+  padding: 16px 12px 90px 12px;
+  min-height: 100vh;
+}
+
+.app {
+  max-width: 550px;
+  margin: 0 auto;
+  background: #fffef7;
+  border-radius: 48px;
+  box-shadow: 0 20px 35px -12px rgba(0,0,0,0.2);
+  overflow: hidden;
+}
+
+.header {
+  background: linear-gradient(115deg, #FFB347, #FF8C42);
+  padding: 18px;
+  text-align: center;
+  font-size: 24px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  color: #2d2b26;
+}
+
+.header i {
+  font-size: 28px;
+}
+
+.card {
+  background: rgba(255, 255, 245, 0.95);
+  backdrop-filter: blur(2px);
+  margin: 16px;
+  padding: 20px;
+  border-radius: 36px;
+  box-shadow: 0 6px 14px rgba(0,0,0,0.05);
+  border: 1px solid #ffefdb;
+  transition: transform 0.2s;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+}
+
+h3 {
+  font-size: 1.4rem;
+  color: #7b5a3b;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-left: 5px solid #ffb86b;
+  padding-left: 14px;
+}
+
+h4 {
+  font-size: 1.1rem;
+  color: #9b7a5a;
+  margin: 12px 0 8px 0;
+}
+
+button, .btn-like {
+  background: #fed287;
+  border: none;
+  border-radius: 60px;
+  padding: 12px 16px;
+  font-weight: 700;
+  margin-top: 12px;
+  cursor: pointer;
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+  color: #4f2d1a;
+  font-size: 0.95rem;
+}
+
+button:hover {
+  background: #ffc46b;
+  transform: scale(0.97);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+input, select, textarea {
+  width: 100%;
+  padding: 12px 16px;
+  margin-top: 10px;
+  border-radius: 48px;
+  border: 1.5px solid #ffe0b5;
+  background: #fffaf2;
+  outline: none;
+  font-size: 0.95rem;
+  transition: 0.2s;
+}
+
+input:focus, select:focus {
+  border-color: #ffb351;
+  background: white;
+  box-shadow: 0 0 0 3px rgba(255, 180, 81, 0.2);
+}
+
+.badge {
+  background: #e9ddce;
+  border-radius: 30px;
+  padding: 4px 12px;
+  font-size: 0.7rem;
+  font-weight: bold;
+  display: inline-block;
+}
+
+.badge.admin {
+  background: #d4af7a;
+  color: #2c1a0c;
+}
+
+.badge.teacher {
+  background: #fdca83;
+  color: #542f12;
+}
+
+.badge.parent {
+  background: #cbe0c3;
+  color: #2d5a2d;
+}
+
+.tabbar {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #fff9f0;
+  display: flex;
+  padding: 8px 20px;
+  border-radius: 60px;
+  gap: 25px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+  z-index: 200;
+  border: 1px solid #ffeaca;
+}
+
+.tab {
+  font-size: 28px;
+  cursor: pointer;
+  opacity: 0.5;
+  transition: 0.2s;
+  padding: 5px;
+  border-radius: 50px;
+}
+
+.tab.active {
+  opacity: 1;
+  transform: scale(1.2);
+  background: #ffe0bf;
+}
+
+.locked-message {
+  text-align: center;
+  padding: 30px;
+  background: #fff2e4;
+  border-radius: 40px;
+  color: #8b6946;
+}
+
+.error-msg, .success-msg {
+  padding: 10px;
+  border-radius: 60px;
+  margin-top: 12px;
+  text-align: center;
+  display: none;
+  font-size: 0.85rem;
+}
+
+.error-msg {
+  background: #ffe1e1;
+  color: #c23d3d;
+}
+
+.success-msg {
+  background: #daf7da;
+  color: #267c26;
+}
+
+hr {
+  margin: 16px 0;
+  border-color: #ffe0b5;
+}
+
+.small {
+  font-size: 0.7rem;
+  color: #ad8b64;
+  text-align: center;
+  margin-top: 12px;
+}
+
+.loading {
+  text-align: center;
+  padding: 40px;
+  color: #7b5a3b;
+}
+
+.flex-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.mt-20 {
+  margin-top: 20px;
+}
+
+.mb-10 {
+  margin-bottom: 10px;
+}
+
+/* Стили для списков */
+.schedule-item, .kid-item, .circle-item {
+  background: #fef2e2;
+  padding: 10px 16px;
+  border-radius: 40px;
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
 </style>
 </head>
 <body>
 <div class="app">
-  <div class="header"><i class="fas fa-sun"></i><span>Ладушки PRO</span><i class="fas fa-children"></i></div>
-  <div id="screen"><div class="loading"><i class="fas fa-spinner fa-pulse"></i> Загрузка...</div></div>
+  <div class="header">
+    <i class="fas fa-sun"></i>
+    <span>Ладушки PRO</span>
+    <i class="fas fa-children"></i>
+  </div>
+  <div id="screen">
+    <div class="loading">
+      <i class="fas fa-spinner fa-pulse"></i> Загрузка...
+    </div>
+  </div>
   <div class="tabbar">
     <div class="tab" onclick="navigate('home', this)"><i class="fas fa-home"></i></div>
     <div class="tab" onclick="navigate('profile', this)"><i class="fas fa-user"></i></div>
@@ -49,7 +278,7 @@ input:focus { border-color: #ffb351; box-shadow: 0 0 0 3px rgba(255,180,81,0.2);
 </div>
 
 <script>
-// ========= FIREBASE КОНФИГ =========
+// ========= FIREBASE КОНФИГУРАЦИЯ =========
 const firebaseConfig = { 
   apiKey: "AIzaSyAuZgI5XVWNSfHKWhAp26SWdD_Ye-3gBzs", 
   authDomain: "detsad-7ca3d.firebaseapp.com", 
@@ -57,11 +286,12 @@ const firebaseConfig = {
   storageBucket: "detsad-7ca3d.firebasestorage.app" 
 };
 
+// Инициализация Firebase
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-// Тестовые аккаунты
+// ========= ТЕСТОВЫЕ АККАУНТЫ =========
 const TEST_ACCOUNTS = [
   { email: "admin@ladushki.ru", password: "Admin2025", name: "Главный Админ", role: "admin" },
   { email: "teacher@ladushki.ru", password: "Ladushki2025", name: "Воспитатель Анна", role: "teacher" },
@@ -70,10 +300,13 @@ const TEST_ACCOUNTS = [
 
 // ========= АВТОМАТИЧЕСКОЕ СОЗДАНИЕ ТЕСТОВЫХ АККАУНТОВ =========
 async function createTestAccounts() {
+  console.log("Проверка тестовых аккаунтов...");
+  
   for (const account of TEST_ACCOUNTS) {
     try {
       // Пытаемся войти
       await auth.signInWithEmailAndPassword(account.email, account.password);
+      console.log(`✓ Аккаунт ${account.email} уже существует`);
       await auth.signOut();
     } catch (error) {
       // Если пользователь не найден - создаём
@@ -88,6 +321,7 @@ async function createTestAccounts() {
             name: account.name,
             createdAt: firebase.firestore.FieldValue.serverTimestamp()
           });
+          console.log(`✓ Аккаунт ${account.email} создан`);
           await auth.signOut();
         } catch (createError) {
           console.error(`Ошибка создания ${account.email}:`, createError);
@@ -96,52 +330,111 @@ async function createTestAccounts() {
     }
   }
   
-  // Создаём общее расписание
-  const scheduleRef = db.collection("settings").doc("commonSchedule");
-  const scheduleDoc = await scheduleRef.get();
-  if(!scheduleDoc.exists) {
-    await scheduleRef.set({ items: ["🍳 08:30 — Завтрак", "🎨 10:00 — Творчество", "🚶 11:30 — Прогулка", "🍲 12:30 — Обед", "😴 13:30 — Тихий час", "🍎 15:30 — Полдник"] });
+  // Создаём общее расписание, если его нет
+  try {
+    const scheduleRef = db.collection("settings").doc("commonSchedule");
+    const scheduleDoc = await scheduleRef.get();
+    if(!scheduleDoc.exists) {
+      await scheduleRef.set({ 
+        items: [
+          "🍳 08:30 — Завтрак", 
+          "🎨 10:00 — Творчество", 
+          "🚶 11:30 — Прогулка", 
+          "🍲 12:30 — Обед", 
+          "😴 13:30 — Тихий час", 
+          "🍎 15:30 — Полдник"
+        ] 
+      });
+      console.log("✓ Общее расписание создано");
+    }
+  } catch(e) {
+    console.warn("Ошибка создания расписания:", e);
   }
+  
+  console.log("Готово!");
 }
 
-// ========= ВХОД =========
+// ========= ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ =========
+function escapeHtml(str) {
+  if(!str) return '';
+  return str.replace(/[&<>]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[m]));
+}
+
+async function getUserRole(user) {
+  if(!user) return null;
+  if(user.email === "admin@ladushki.ru") return "admin";
+  if(user.email === "teacher@ladushki.ru") return "teacher";
+  
+  try {
+    const doc = await db.collection("users").doc(user.uid).get();
+    if(doc.exists) {
+      return doc.data().role;
+    }
+  } catch(e) {
+    console.warn("Ошибка получения роли:", e);
+  }
+  return "parent";
+}
+
+// ========= ФОРМА ВХОДА =========
 function showLogin() {
   document.getElementById("screen").innerHTML = `
     <div class="card">
       <h3><i class="fas fa-duck"></i> Вход в аккаунт</h3>
-      <input id="loginEmail" placeholder="Email" type="email" autocomplete="email">
-      <input id="loginPass" type="password" placeholder="Пароль" autocomplete="current-password">
-      <div id="loginError" class="error-msg"></div>
-      <button onclick="doLogin()"><i class="fas fa-sign-in-alt"></i> Войти</button>
       
-      <hr style="margin: 16px 0;">
+      <input id="loginEmail" type="email" placeholder="Email" autocomplete="email">
+      <input id="loginPass" type="password" placeholder="Пароль" autocomplete="current-password">
+      
+      <div id="loginError" class="error-msg"></div>
+      
+      <button onclick="doLogin()">
+        <i class="fas fa-sign-in-alt"></i> Войти
+      </button>
+      
+      <hr>
+      
       <div class="small">
         <strong><i class="fas fa-key"></i> Тестовые аккаунты:</strong><br>
-        👑 Админ: admin@ladushki.ru / Admin2025<br>
-        👩‍🏫 Воспитатель: teacher@ladushki.ru / Ladushki2025<br>
-        👪 Родитель: parent@test.ru / Parent123
+        👑 Администратор: <b>admin@ladushki.ru</b> / Admin2025<br>
+        👩‍🏫 Воспитатель: <b>teacher@ladushki.ru</b> / Ladushki2025<br>
+        👪 Родитель: <b>parent@test.ru</b> / Parent123
       </div>
       
-      <div class="small">Нет аккаунта? <span style="color:#e68a2e;cursor:pointer;font-weight:bold;" onclick="showRegister()">Зарегистрироваться</span></div>
+      <div class="small">
+        Нет аккаунта? 
+        <span style="color:#e68a2e;cursor:pointer;font-weight:bold;" onclick="showRegister()">
+          Зарегистрироваться
+        </span>
+      </div>
     </div>
   `;
 }
 
+// ========= ФУНКЦИЯ ВХОДА =========
 async function doLogin() {
   const email = document.getElementById("loginEmail")?.value.trim();
   const pass = document.getElementById("loginPass")?.value;
   const errorDiv = document.getElementById("loginError");
   
+  // Очищаем предыдущие ошибки
+  errorDiv.style.display = "none";
+  errorDiv.innerText = "";
+  
+  // Проверка заполнения
   if (!email || !pass) {
     errorDiv.style.display = "block";
     errorDiv.innerText = "❌ Заполните оба поля";
     return;
   }
   
+  // Простейшая валидация email
+  if (!email.includes('@') || !email.includes('.')) {
+    errorDiv.style.display = "block";
+    errorDiv.innerText = "❌ Введите корректный email (например: name@mail.ru)";
+    return;
+  }
+  
   try {
-    errorDiv.style.display = "none";
-    errorDiv.innerText = "";
-    
     console.log("Попытка входа:", email);
     const userCredential = await auth.signInWithEmailAndPassword(email, pass);
     console.log("Успешный вход:", userCredential.user.email);
@@ -156,49 +449,62 @@ async function doLogin() {
     // Понятные сообщения об ошибках
     switch(error.code) {
       case 'auth/invalid-credential':
-        errorDiv.innerText = "❌ Неверный email или пароль. Проверьте правильность ввода.";
+        errorDiv.innerHTML = "❌ <strong>Неверный email или пароль</strong><br>Проверьте правильность ввода. Учитывайте регистр букв.";
         break;
       case 'auth/user-not-found':
-        errorDiv.innerText = "❌ Пользователь не найден. Зарегистрируйтесь сначала.";
+        errorDiv.innerHTML = "❌ <strong>Пользователь не найден</strong><br>Зарегистрируйтесь или используйте тестовые аккаунты.";
         break;
       case 'auth/wrong-password':
-        errorDiv.innerText = "❌ Неверный пароль. Попробуйте ещё раз.";
+        errorDiv.innerHTML = "❌ <strong>Неверный пароль</strong><br>Попробуйте ещё раз.";
         break;
       case 'auth/invalid-email':
-        errorDiv.innerText = "❌ Неверный формат email. Пример: name@mail.ru";
+        errorDiv.innerHTML = "❌ <strong>Неверный формат email</strong><br>Пример: name@mail.ru";
         break;
       case 'auth/too-many-requests':
-        errorDiv.innerText = "❌ Слишком много попыток. Подождите немного.";
+        errorDiv.innerHTML = "❌ <strong>Слишком много попыток</strong><br>Подождите несколько минут и попробуйте снова.";
         break;
       case 'auth/network-request-failed':
-        errorDiv.innerText = "❌ Ошибка сети. Запустите через Live Server (не двойным кликом).";
+        errorDiv.innerHTML = "❌ <strong>Ошибка сети</strong><br>Запустите через Live Server (не двойным кликом по файлу).";
         break;
       default:
-        errorDiv.innerText = `❌ Ошибка: ${error.message}`;
+        errorDiv.innerHTML = `❌ <strong>Ошибка:</strong> ${error.message}`;
     }
   }
 }
 
-// ========= РЕГИСТРАЦИЯ =========
+// ========= ФОРМА РЕГИСТРАЦИИ =========
 function showRegister() {
   document.getElementById("screen").innerHTML = `
     <div class="card">
       <h3><i class="fas fa-child"></i> Регистрация</h3>
-      <input id="regName" placeholder="Ваше имя">
-      <input id="regEmail" placeholder="Email" type="email">
+      
+      <input id="regName" type="text" placeholder="Ваше имя">
+      <input id="regEmail" type="email" placeholder="Email">
       <input id="regPass" type="password" placeholder="Пароль (минимум 6 символов)">
+      
       <select id="regRole">
-        <option value="parent">Родитель</option>
-        <option value="teacher">Воспитатель</option>
+        <option value="parent">👪 Родитель</option>
+        <option value="teacher">👩‍🏫 Воспитатель</option>
       </select>
+      
       <div id="regError" class="error-msg"></div>
       <div id="regSuccess" class="success-msg"></div>
-      <button onclick="doRegister()"><i class="fas fa-user-plus"></i> Зарегистрироваться</button>
-      <div class="small">Уже есть аккаунт? <span style="color:#e68a2e;cursor:pointer;font-weight:bold;" onclick="showLogin()">Войти</span></div>
+      
+      <button onclick="doRegister()">
+        <i class="fas fa-user-plus"></i> Зарегистрироваться
+      </button>
+      
+      <div class="small">
+        Уже есть аккаунт? 
+        <span style="color:#e68a2e;cursor:pointer;font-weight:bold;" onclick="showLogin()">
+          Войти
+        </span>
+      </div>
     </div>
   `;
 }
 
+// ========= ФУНКЦИЯ РЕГИСТРАЦИИ =========
 async function doRegister() {
   const name = document.getElementById("regName")?.value.trim();
   const email = document.getElementById("regEmail")?.value.trim();
@@ -207,147 +513,278 @@ async function doRegister() {
   const errorDiv = document.getElementById("regError");
   const successDiv = document.getElementById("regSuccess");
   
+  // Скрываем предыдущие сообщения
   errorDiv.style.display = "none";
   successDiv.style.display = "none";
   
+  // Валидация
   if (!name || !email || !pass) {
     errorDiv.style.display = "block";
-    errorDiv.innerText = "Заполните все поля";
+    errorDiv.innerText = "❌ Заполните все поля";
     return;
   }
   
   if (pass.length < 6) {
     errorDiv.style.display = "block";
-    errorDiv.innerText = "Пароль должен быть не менее 6 символов";
+    errorDiv.innerText = "❌ Пароль должен быть не менее 6 символов";
+    return;
+  }
+  
+  if (!email.includes('@') || !email.includes('.')) {
+    errorDiv.style.display = "block";
+    errorDiv.innerText = "❌ Введите корректный email";
     return;
   }
   
   try {
     const cred = await auth.createUserWithEmailAndPassword(email, pass);
     await cred.user.updateProfile({ displayName: name });
+    
     await db.collection("users").doc(cred.user.uid).set({
-      name, email, role: role,
+      name: name,
+      email: email,
+      role: role,
       createdAt: firebase.firestore.FieldValue.serverTimestamp()
     });
     
     successDiv.style.display = "block";
-    successDiv.innerText = "✅ Регистрация успешна! Перенаправление...";
+    successDiv.innerHTML = "✅ <strong>Регистрация успешна!</strong><br>Перенаправление...";
     
-    setTimeout(() => navigate('home', document.querySelector(".tab")), 1500);
+    setTimeout(() => {
+      navigate('home', document.querySelector(".tab"));
+    }, 1500);
+    
   } catch(error) {
     errorDiv.style.display = "block";
+    
     switch(error.code) {
       case 'auth/email-already-in-use':
-        errorDiv.innerText = "❌ Этот email уже зарегистрирован. Войдите в аккаунт.";
+        errorDiv.innerHTML = "❌ <strong>Email уже зарегистрирован</strong><br>Используйте другой email или войдите в аккаунт.";
         break;
       case 'auth/invalid-email':
-        errorDiv.innerText = "❌ Неверный формат email";
+        errorDiv.innerHTML = "❌ <strong>Неверный формат email</strong><br>Пример: name@mail.ru";
         break;
       case 'auth/weak-password':
-        errorDiv.innerText = "❌ Слишком слабый пароль. Используйте 6+ символов";
+        errorDiv.innerHTML = "❌ <strong>Слишком слабый пароль</strong><br>Используйте не менее 6 символов";
         break;
       default:
-        errorDiv.innerText = `❌ Ошибка: ${error.message}`;
+        errorDiv.innerHTML = `❌ <strong>Ошибка:</strong> ${error.message}`;
     }
   }
+}
+
+// ========= ГЛАВНАЯ СТРАНИЦА =========
+async function renderHome() {
+  const user = auth.currentUser;
+  
+  // Если пользователь не авторизован - показываем форму входа
+  if (!user) {
+    return `
+      <div class="card">
+        <div class="locked-message">
+          <i class="fas fa-sun" style="font-size: 48px;"></i>
+          <h3 style="margin-top: 10px;">Добро пожаловать!</h3>
+          <p style="margin: 15px 0;">Войдите или зарегистрируйтесь, чтобы продолжить</p>
+          <button onclick="showLogin()" style="background: #ffb86b;">
+            <i class="fas fa-sign-in-alt"></i> Войти
+          </button>
+          <button onclick="showRegister()">
+            <i class="fas fa-user-plus"></i> Регистрация
+          </button>
+        </div>
+      </div>
+    `;
+  }
+  
+  // Получаем роль пользователя
+  let role = "parent";
+  try {
+    const doc = await db.collection("users").doc(user.uid).get();
+    if(doc.exists) role = doc.data().role;
+  } catch(e) {
+    console.warn(e);
+  }
+  
+  // Определяем иконку и текст роли
+  let roleIcon = "👪";
+  let roleText = "Родитель";
+  let roleClass = "parent";
+  
+  if(role === "admin") {
+    roleIcon = "👑";
+    roleText = "Администратор";
+    roleClass = "admin";
+  } else if(role === "teacher") {
+    roleIcon = "👩‍🏫";
+    roleText = "Воспитатель";
+    roleClass = "teacher";
+  }
+  
+  return `
+    <div class="card">
+      <h3><i class="fas fa-home"></i> Главная</h3>
+      
+      <div class="text-center mt-20 mb-10">
+        <i class="fas fa-user-circle" style="font-size: 70px; color: #ffb86b;"></i>
+        <div style="margin-top: 10px;">
+          <strong style="font-size: 1.3rem;">${escapeHtml(user.displayName || user.email)}</strong><br>
+          <span class="badge ${roleClass}">${roleIcon} ${roleText}</span><br>
+          <small style="color: #8b6946;">${escapeHtml(user.email)}</small>
+        </div>
+      </div>
+      
+      <hr>
+      
+      <div class="small text-center">
+        <i class="fas fa-info-circle"></i> Добро пожаловать в систему управления детским садом "Ладушки PRO"
+      </div>
+      
+      <button onclick="showLogin()" style="background: #ff6b6b; margin-top: 20px;">
+        <i class="fas fa-exchange-alt"></i> Сменить аккаунт
+      </button>
+      
+      <button onclick="logout()">
+        <i class="fas fa-sign-out-alt"></i> Выйти
+      </button>
+    </div>
+  `;
 }
 
 // ========= ПРОФИЛЬ =========
 async function renderProfile() {
   const user = auth.currentUser;
+  
   if (!user) {
-    return `<div class="card">
-      <div class="locked-message">
-        <i class="fas fa-lock"></i> Вы не авторизованы
-        <button onclick="showLogin()">Войти</button>
-        <button onclick="showRegister()">Регистрация</button>
+    return `
+      <div class="card">
+        <div class="locked-message">
+          <i class="fas fa-lock"></i> Вы не авторизованы
+          <button onclick="showLogin()">Войти</button>
+          <button onclick="showRegister()">Регистрация</button>
+        </div>
       </div>
-    </div>`;
+    `;
   }
   
   let role = "parent";
+  let roleName = "Родитель";
+  let roleIcon = "👪";
+  let roleClass = "parent";
+  
   try {
     const doc = await db.collection("users").doc(user.uid).get();
-    role = doc.exists ? doc.data().role : "parent";
-  } catch(e) { console.warn(e); }
+    if(doc.exists) {
+      role = doc.data().role;
+      if(role === "admin") {
+        roleName = "Администратор";
+        roleIcon = "👑";
+        roleClass = "admin";
+      } else if(role === "teacher") {
+        roleName = "Воспитатель";
+        roleIcon = "👩‍🏫";
+        roleClass = "teacher";
+      }
+    }
+  } catch(e) {
+    console.warn(e);
+  }
   
-  return `<div class="card">
-    <h3><i class="fas fa-user-circle"></i> Профиль</h3>
-    <div style="text-align: center; margin: 20px 0;">
-      <i class="fas fa-user-circle" style="font-size: 80px; color: #ffb86b;"></i>
-      <div style="margin-top: 10px;">
-        <strong style="font-size: 1.3rem;">${escapeHtml(user.displayName || user.email)}</strong><br>
-        <span class="badge ${role}">${role === 'admin' ? '👑 Администратор' : (role === 'teacher' ? '👩‍🏫 Воспитатель' : '👪 Родитель')}</span><br>
-        <small style="color: #8b6946;">${escapeHtml(user.email)}</small>
+  // Форматируем дату регистрации (если есть)
+  let createdAt = "Неизвестно";
+  try {
+    const userDoc = await db.collection("users").doc(user.uid).get();
+    if(userDoc.exists && userDoc.data().createdAt) {
+      const date = userDoc.data().createdAt.toDate();
+      createdAt = date.toLocaleDateString('ru-RU');
+    }
+  } catch(e) {}
+  
+  return `
+    <div class="card">
+      <h3><i class="fas fa-id-card"></i> Мой профиль</h3>
+      
+      <div class="text-center mt-20 mb-10">
+        <i class="fas fa-user-circle" style="font-size: 80px; color: #ffb86b;"></i>
+        <div style="margin-top: 15px;">
+          <strong style="font-size: 1.4rem;">${escapeHtml(user.displayName || "Пользователь")}</strong><br>
+          <span class="badge ${roleClass}" style="margin-top: 5px;">${roleIcon} ${roleName}</span>
+        </div>
       </div>
+      
+      <div style="background: #f7efdb; border-radius: 30px; padding: 15px; margin: 15px 0;">
+        <div class="flex-row" style="justify-content: space-between;">
+          <span><i class="fas fa-envelope"></i> Email:</span>
+          <span><strong>${escapeHtml(user.email)}</strong></span>
+        </div>
+        <div class="flex-row" style="justify-content: space-between; margin-top: 8px;">
+          <span><i class="fas fa-calendar-alt"></i> Дата регистрации:</span>
+          <span><strong>${createdAt}</strong></span>
+        </div>
+        <div class="flex-row" style="justify-content: space-between; margin-top: 8px;">
+          <span><i class="fas fa-fingerprint"></i> ID:</span>
+          <span><small>${user.uid.substring(0, 16)}...</small></span>
+        </div>
+      </div>
+      
+      <button onclick="logout()">
+        <i class="fas fa-sign-out-alt"></i> Выйти из аккаунта
+      </button>
     </div>
-    <button onclick="logout()"><i class="fas fa-sign-out-alt"></i> Выйти из аккаунта</button>
-  </div>`;
+  `;
 }
 
+// ========= ВЫХОД =========
 async function logout() {
-  await auth.signOut();
-  navigate('home', document.querySelector(".tab"));
-}
-
-// ========= ГЛАВНАЯ =========
-async function renderHome() {
-  const user = auth.currentUser;
-  if (!user) {
-    return `<div class="card">
-      <div class="locked-message">
-        <i class="fas fa-sun"></i> <strong>Добро пожаловать в Ладушки PRO!</strong><br><br>
-        <button onclick="showLogin()"><i class="fas fa-sign-in-alt"></i> Войти</button>
-        <button onclick="showRegister()"><i class="fas fa-user-plus"></i> Регистрация</button>
-      </div>
-    </div>`;
-  }
-  
-  let role = "parent";
   try {
-    const doc = await db.collection("users").doc(user.uid).get();
-    role = doc.exists ? doc.data().role : "parent";
-  } catch(e) { console.warn(e); }
-  
-  return `<div class="card">
-    <h3><i class="fas fa-home"></i> Добро пожаловать!</h3>
-    <div style="text-align: center; margin: 15px 0;">
-      <i class="fas fa-smile-wink" style="font-size: 50px;"></i>
-      <div><strong style="font-size: 1.2rem;">${escapeHtml(user.displayName || "")}</strong><br>
-      <span class="badge ${role}">${role === 'admin' ? '👑 Администратор' : (role === 'teacher' ? '👩‍🏫 Воспитатель' : '👪 Родитель')}</span></div>
-    </div>
-    <button onclick="showLogin()" style="background: #ff6b6b;"><i class="fas fa-exchange-alt"></i> Сменить аккаунт</button>
-  </div>`;
-}
-
-function escapeHtml(str) {
-  if(!str) return '';
-  return str.replace(/[&<>]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[m]));
+    await auth.signOut();
+    console.log("Выход выполнен");
+    navigate('home', document.querySelector(".tab"));
+  } catch(error) {
+    console.error("Ошибка выхода:", error);
+  }
 }
 
 // ========= НАВИГАЦИЯ =========
 async function navigate(screen, tabEl) {
+  // Обновляем активную вкладку
   if(tabEl) {
     document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
     tabEl.classList.add("active");
   }
   
   const root = document.getElementById("screen");
+  if(!root) return;
+  
+  // Анимация загрузки
   root.style.opacity = "0";
   
   setTimeout(async () => {
     let html = "";
-    if (screen === "home") html = await renderHome();
-    else if (screen === "profile") html = await renderProfile();
-    else html = `<div class="card">Страница в разработке</div>`;
+    
+    if (screen === "home") {
+      html = await renderHome();
+    } else if (screen === "profile") {
+      html = await renderProfile();
+    } else {
+      html = `<div class="card">Страница в разработке</div>`;
+    }
     
     root.innerHTML = html;
     root.style.opacity = "1";
-  }, 50);
+  }, 100);
 }
 
-// ========= ЗАПУСК =========
+// ========= ЗАПУСК ПРИЛОЖЕНИЯ =========
+// Создаём тестовые аккаунты и запускаем приложение
 createTestAccounts().then(() => {
+  // Подписываемся на изменения состояния авторизации
+  auth.onAuthStateChanged((user) => {
+    console.log("Состояние авторизации:", user ? user.email : "не авторизован");
+    navigate('home', document.querySelector(".tab"));
+  });
+}).catch(error => {
+  console.error("Ошибка инициализации:", error);
+  // Даже если ошибка, показываем интерфейс
   auth.onAuthStateChanged((user) => {
     navigate('home', document.querySelector(".tab"));
   });

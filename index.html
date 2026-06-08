@@ -3,26 +3,25 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Ладушки PRO — Детский сад + Админ | Группы, Кружки, Медкарта</title>
+<title>Ладушки PRO — Групповой чат + Дети</title>
 
 <!-- Firebase SDKs -->
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
-
-<!-- Font Awesome 6 -->
+<!-- Font Awesome -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 <style>
-* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', 'Comic Neue', system-ui; }
-body { background: linear-gradient(135deg, #cbe6fe, #dcfce8); padding: 16px 12px 90px 12px; min-height: 100vh; }
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui; }
+body { background: linear-gradient(135deg, #cbe6fe, #dcfce8); padding: 16px 12px 90px 12px; }
 .app { max-width: 550px; margin: 0 auto; background: #fffef7; border-radius: 48px; box-shadow: 0 20px 35px -12px rgba(0,0,0,0.2); overflow: hidden; }
-.header { background: linear-gradient(115deg, #FFB347, #FF8C42); padding: 20px; text-align: center; font-size: 26px; font-weight: 800; color: #2d2b26; display: flex; align-items: center; justify-content: center; gap: 12px; }
-.card { background: #ffffffdd; backdrop-filter: blur(2px); margin: 18px; padding: 20px; border-radius: 36px; box-shadow: 0 6px 14px rgba(0,0,0,0.05); transition: 0.2s; border: 1px solid #ffefdb; }
-h3 { font-size: 1.5rem; color: #7b5a3b; margin-bottom: 16px; display: flex; align-items: center; gap: 10px; border-left: 5px solid #ffb86b; padding-left: 14px; }
+.header { background: linear-gradient(115deg, #FFB347, #FF8C42); padding: 18px; text-align: center; font-size: 24px; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 10px; color: #2d2b26; }
+.card { background: #ffffffdd; backdrop-filter: blur(2px); margin: 16px; padding: 20px; border-radius: 36px; box-shadow: 0 6px 14px rgba(0,0,0,0.05); border: 1px solid #ffefdb; }
+h3 { font-size: 1.4rem; color: #7b5a3b; margin-bottom: 16px; display: flex; align-items: center; gap: 10px; border-left: 5px solid #ffb86b; padding-left: 14px; }
 button, .btn-like { background: #fed287; border: none; border-radius: 60px; padding: 10px 16px; font-weight: 700; margin-top: 12px; cursor: pointer; width: 100%; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s; color: #4f2d1a; }
 button:hover { background: #ffc46b; transform: scale(0.97); }
-input, select, textarea { width: 100%; padding: 12px 16px; margin-top: 10px; border-radius: 48px; border: 1.5px solid #ffe0b5; background: #fffaf2; outline: none; }
+input, select { width: 100%; padding: 12px 16px; margin-top: 10px; border-radius: 48px; border: 1.5px solid #ffe0b5; background: #fffaf2; outline: none; }
 .chat-box { height: 360px; overflow-y: auto; background: #fff6ea; border-radius: 32px; padding: 12px; margin: 12px 0; border: 1px solid #ffdfb3; }
 .message { background: white; border-radius: 24px; padding: 12px; margin-bottom: 12px; display: flex; gap: 12px; }
 .avatar { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; background: #fcd6a8; }
@@ -40,6 +39,7 @@ input, select, textarea { width: 100%; padding: 12px 16px; margin-top: 10px; bor
 .success-msg { background: #daf7da; color: #267c26; }
 hr { margin: 12px 0; border-color: #ffe0b5; }
 .flex-row { display: flex; gap: 10px; flex-wrap: wrap; }
+.group-selector { background: #f7efdb; border-radius: 40px; padding: 8px 12px; margin-bottom: 15px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
 </style>
 </head>
 <body>
@@ -62,8 +62,8 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth(), db = firebase.firestore(), storage = firebase.storage();
 
 let unsubscribeMessages = null;
-let currentUserRole = null;
-let currentUserDoc = null;
+let currentGroupId = null;       // выбранная группа для чата и расписания (для воспитателя)
+let currentChildId = null;       // для родителя: активный ребёнок
 
 const ADMIN_EMAIL = "admin@ladushki.ru";
 const ADMIN_PASS = "Admin2025";
@@ -78,58 +78,209 @@ async function getUserRole(user) {
   const doc = await db.collection("users").doc(user.uid).get();
   return doc.exists ? doc.data().role : "parent";
 }
+async function getUserGroups(userId, role) {
+  if(role === "admin") {
+    const snap = await db.collection("groups").get();
+    return snap.docs.map(d => ({id: d.id, name: d.data().name}));
+  }
+  if(role === "teacher") {
+    const teacherDoc = await db.collection("users").doc(userId).get();
+    const groupId = teacherDoc.data()?.groupIds?.[0];
+    if(groupId) { const g = await db.collection("groups").doc(groupId).get(); return g.exists ? [{id: g.id, name: g.data().name}] : []; }
+    return [];
+  }
+  if(role === "parent") {
+    const kidsSnap = await db.collection("kids").where("parentId", "==", userId).get();
+    let groupsSet = new Set();
+    for(const kid of kidsSnap.docs) {
+      const groupId = kid.data().groupId;
+      if(groupId) groupsSet.add(groupId);
+    }
+    let groups = [];
+    for(let gid of groupsSet) { const g = await db.collection("groups").doc(gid).get(); if(g.exists) groups.push({id: g.id, name: g.data().name}); }
+    return groups;
+  }
+  return [];
+}
 
-// ========= РЕГИСТРАЦИЯ И ВХОД (РОЛИ) =========
+// ========= СОЗДАНИЕ АДМИНА/ВОСПИТАТЕЛЯ =========
 async function ensureAdminTeacher() {
   try { await auth.signInWithEmailAndPassword(ADMIN_EMAIL, ADMIN_PASS).catch(async()=>{ await auth.createUserWithEmailAndPassword(ADMIN_EMAIL, ADMIN_PASS); await auth.currentUser.updateProfile({displayName:"Главный Админ"}); await db.collection("users").doc(auth.currentUser.uid).set({email:ADMIN_EMAIL, role:"admin", name:"Главный Админ"}); await auth.signOut(); }); } catch(e){}
-  try { await auth.signInWithEmailAndPassword(TEACHER_EMAIL, TEACHER_PASS).catch(async()=>{ await auth.createUserWithEmailAndPassword(TEACHER_EMAIL, TEACHER_PASS); await auth.currentUser.updateProfile({displayName:"Воспитатель Анна"}); await db.collection("users").doc(auth.currentUser.uid).set({email:TEACHER_EMAIL, role:"teacher", name:"Воспитатель Анна"}); await auth.signOut(); }); } catch(e){}
+  try { await auth.signInWithEmailAndPassword(TEACHER_EMAIL, TEACHER_PASS).catch(async()=>{ await auth.createUserWithEmailAndPassword(TEACHER_EMAIL, TEACHER_PASS); await auth.currentUser.updateProfile({displayName:"Воспитатель Анна"}); await db.collection("users").doc(auth.currentUser.uid).set({email:TEACHER_EMAIL, role:"teacher", name:"Воспитатель Анна", groupIds:[]}); await auth.signOut(); }); } catch(e){}
 }
+
+// ========= ВХОД/РЕГИСТРАЦИЯ =========
 function showLogin() { document.getElementById("screen").innerHTML = `<div class="card"><h3><i class="fas fa-duck"></i> Вход</h3><input id="loginEmail" placeholder="Email"><input id="loginPass" type="password" placeholder="Пароль"><div id="loginError" class="error-msg"></div><button onclick="doLogin()">Войти</button><div class="small">Нет аккаунта? <span style="color:#e68a2e;cursor:pointer;" onclick="showRegister()">Регистрация</span></div></div>`; }
 async function doLogin() { const email=document.getElementById("loginEmail")?.value.trim(), pass=document.getElementById("loginPass")?.value, errDiv=document.getElementById("loginError"); if(!email||!pass){ errDiv.style.display="block"; errDiv.innerText="Заполните поля"; return; } try{ await auth.signInWithEmailAndPassword(email,pass); navigate('home',document.querySelector(".tab")); } catch(e){ errDiv.style.display="block"; errDiv.innerText="Ошибка: "+e.message; } }
-function showRegister(){ document.getElementById("screen").innerHTML = `<div class="card"><h3><i class="fas fa-child"></i> Регистрация</h3><input id="regName" placeholder="Имя"><input id="regEmail" placeholder="Email"><input id="regPass" type="password" placeholder="Пароль"><select id="regRole"><option value="parent">Родитель</option><option value="teacher">Воспитатель</option></select><div id="regError" class="error-msg"></div><button onclick="doRegister()">Зарегистрироваться</button><div class="small">Роль воспитателя требует подтверждения администратором.</div></div>`; }
+function showRegister(){ document.getElementById("screen").innerHTML = `<div class="card"><h3><i class="fas fa-child"></i> Регистрация</h3><input id="regName" placeholder="Имя"><input id="regEmail" placeholder="Email"><input id="regPass" type="password" placeholder="Пароль"><select id="regRole"><option value="parent">Родитель</option><option value="teacher">Воспитатель</option></select><div id="regError" class="error-msg"></div><button onclick="doRegister()">Зарегистрироваться</button><div class="small">Воспитателя должен подтвердить админ.</div></div>`; }
 async function doRegister(){ const name=document.getElementById("regName")?.value.trim(), email=document.getElementById("regEmail")?.value.trim(), pass=document.getElementById("regPass")?.value, roleSelect=document.getElementById("regRole")?.value, errDiv=document.getElementById("regError"); if(!name||!email||!pass){ errDiv.style.display="block"; errDiv.innerText="Заполните всё"; return; } try{ const cred=await auth.createUserWithEmailAndPassword(email,pass); await cred.user.updateProfile({displayName:name}); let finalRole = (roleSelect==="teacher" ? "teacher" : "parent"); if(email===ADMIN_EMAIL) finalRole="admin"; await db.collection("users").doc(cred.user.uid).set({name, email, role:finalRole, createdAt:firebase.firestore.FieldValue.serverTimestamp()}); alert("Регистрация успешна!"); navigate('home',document.querySelector(".tab")); } catch(e){ errDiv.style.display="block"; errDiv.innerText=e.message; } }
 
-// ========= ГРУППЫ (админ) =========
-async function renderGroups(){ const user=auth.currentUser; if(!user) return `<div class="card"><div class="locked-message">Войдите</div></div>`; const role=await getUserRole(user); if(role!=="admin") return `<div class="card"><div class="locked-message">Только администратор может управлять группами</div></div>`; const groupsSnap=await db.collection("groups").get(); let groupsHtml=""; groupsSnap.forEach(doc=>{ const g=doc.data(); groupsHtml+=`<div class="schedule-item"><span><i class="fas fa-users"></i> ${escapeHtml(g.name)}</span><button onclick="deleteGroup('${doc.id}')" style="width:auto;padding:4px 12px;">🗑️</button></div>`; }); return `<div class="card"><h3><i class="fas fa-layer-group"></i> Управление группами</h3><input id="groupName" placeholder="Название группы (Ягодки)"><button onclick="createGroup()">➕ Создать группу</button><div id="groupsList">${groupsHtml||"<div>Нет групп</div>"}</div><hr><h3>Назначить в группу</h3><select id="userSelect"></select><select id="groupSelect"></select><button onclick="assignToGroup()">Назначить в группу</button></div>`; }
-window.createGroup=async ()=>{ const name=document.getElementById("groupName")?.value.trim(); if(!name) return; await db.collection("groups").add({name, members:[]}); document.getElementById("groupName").value=""; renderGroups(); };
-window.deleteGroup=async (id)=>{ await db.collection("groups").doc(id).delete(); renderGroups(); };
-window.assignToGroup=async()=>{/* лениво, но логика будет позже */ alert("Демо: реализовано в бэке");};
+// ========= ДОБАВЛЕНИЕ РЕБЕНКА (ИСПРАВЛЕНО) =========
+async function renderKids() {
+  const user = auth.currentUser;
+  if(!user) return `<div class="card"><div class="locked-message">Войдите</div></div>`;
+  const role = await getUserRole(user);
+  if(role === "parent") {
+    const kidsSnap = await db.collection("kids").where("parentId", "==", user.uid).get();
+    let kidsList = "";
+    let kidsArray = [];
+    kidsSnap.forEach(d => { kidsArray.push({id: d.id, name: d.data().name, groupId: d.data().groupId}); kidsList += `<div class="kid-item"><span>👶 ${escapeHtml(d.data().name)} ${d.data().groupId ? '✅ в группе' : '⏳ без группы'}</span> <button onclick="selectChild('${d.id}')" style="width:auto; padding:4px 12px;">Выбрать</button></div>`; });
+    const activeKidHtml = currentChildId ? `<div class="success-msg" style="display:block;">Активный ребёнок: ${escapeHtml(kidsArray.find(k=>k.id===currentChildId)?.name || '')}</div>` : `<div class="error-msg" style="display:block;">Не выбран активный ребёнок</div>`;
+    return `<div class="card"><h3><i class="fas fa-baby-carriage"></i> Мои дети</h3>${kidsList || "Нет детей"}<input id="newKidName" placeholder="Имя ребенка"><button onclick="addKid()">➕ Добавить ребенка</button><hr>${activeKidHtml}<button onclick="navigate('chat',null)">💬 Перейти в чат для активного ребёнка</button></div>`;
+  } else if(role === "teacher" || role === "admin") {
+    const allKids = await db.collection("kids").get();
+    let allList = "";
+    allKids.forEach(k => allList += `<div class="kid-item">${escapeHtml(k.data().name)} (родитель: ${escapeHtml(k.data().parentId?.slice(0,6))})</div>`);
+    return `<div class="card"><h3><i class="fas fa-users-viewfinder"></i> Все дети</h3>${allList}</div>`;
+  }
+  return `<div class="card">Нет доступа</div>`;
+}
+window.addKid = async () => {
+  const user = auth.currentUser;
+  if(!user) { alert("Войдите"); return; }
+  const name = document.getElementById("newKidName")?.value.trim();
+  if(!name) { alert("Введите имя"); return; }
+  await db.collection("kids").add({ name, parentId: user.uid, groupId: null });
+  document.getElementById("newKidName").value = "";
+  renderKids();
+};
+window.selectChild = (childId) => {
+  currentChildId = childId;
+  alert("Выбран активный ребёнок. Теперь чат будет показывать сообщения его группы.");
+  renderKids();
+};
 
-// ========= КРУЖКИ (воспитатели создают, родители записывают) =========
-async function renderCircles(){ const user=auth.currentUser; if(!user) return `<div class="card"><div class="locked-message">Войдите</div></div>`; const role=await getUserRole(user); const circlesSnap=await db.collection("circles").get(); let circlesList=""; for(const doc of circlesSnap.docs){ const c=doc.data(); let enrolledHtml=""; if(role==="parent"){ const parentKidRef=await db.collection("kids").where("parentId","==",user.uid).get(); const kidNames=[]; parentKidRef.forEach(k=> kidNames.push({id:k.id,name:k.data().name})); enrolledHtml=`<div><select id="kidSelect_${doc.id}"><option value="">Выбрать ребенка</option>${kidNames.map(k=>`<option value="${k.id}">${escapeHtml(k.name)}</option>`).join("")}</select><button onclick="enrollToCircle('${doc.id}')">Записать</button></div>`; } else if(role==="teacher" || role==="admin"){ enrolledHtml=`<button onclick="viewCircleEnrollments('${doc.id}')"><i class="fas fa-eye"></i> Список детей</button>`; } circlesList+=`<div class="circle-item"><div><strong>${escapeHtml(c.name)}</strong><br><small>${escapeHtml(c.description||"")}</small></div><div>${enrolledHtml}</div></div>`; } let addForm=""; if(role==="teacher"||role==="admin"){ addForm=`<input id="newCircleName" placeholder="Название кружка"><input id="newCircleDesc" placeholder="Описание"><button onclick="addCircle()">➕ Добавить кружок</button>`; } return `<div class="card"><h3><i class="fas fa-paintbrush"></i> Кружки и секции</h3>${circlesList||"<div>Нет кружков</div>"}${addForm}</div>`; }
-window.enrollToCircle=async(circleId)=>{ const user=auth.currentUser; if(!user) return; const select=document.getElementById(`kidSelect_${circleId}`); const kidId=select?.value; if(!kidId){ alert("Выберите ребенка"); return; } const circleRef=db.collection("circles").doc(circleId); const circle=await circleRef.get(); const members=circle.data()?.enrolledKids||[]; if(!members.includes(kidId)){ members.push(kidId); await circleRef.update({enrolledKids:members}); alert("Ребенок записан!"); }else alert("Уже записан"); };
-window.addCircle=async()=>{ const name=document.getElementById("newCircleName")?.value.trim(); const desc=document.getElementById("newCircleDesc")?.value.trim(); if(!name) return; await db.collection("circles").add({name, description:desc, enrolledKids:[]}); renderCircles(); };
-window.viewCircleEnrollments=async(circleId)=>{ const circle=await db.collection("circles").doc(circleId).get(); const kidsIds=circle.data()?.enrolledKids||[]; let kidsList=""; for(let id of kidsIds){ const kid=await db.collection("kids").doc(id).get(); if(kid.exists) kidsList+=`- ${escapeHtml(kid.data().name)}<br>`; } alert(`Записаны дети:\n${kidsList||"Нет"}`); };
+// ========= ГРУППЫ + НАЗНАЧЕНИЕ (только для админа/воспитателя) =========
+async function renderGroups() {
+  const user = auth.currentUser;
+  if(!user) return `<div class="card"><div class="locked-message">Войдите</div></div>`;
+  const role = await getUserRole(user);
+  if(role !== "admin") return `<div class="card"><div class="locked-message">Только администратор управляет группами</div></div>`;
+  const groupsSnap = await db.collection("groups").get();
+  let groupsHtml = "";
+  groupsSnap.forEach(doc => { const g = doc.data(); groupsHtml += `<div class="schedule-item"><span><i class="fas fa-users"></i> ${escapeHtml(g.name)}</span><button onclick="deleteGroup('${doc.id}')" style="width:auto;">🗑️</button></div>`; });
+  const usersSnap = await db.collection("users").get();
+  let usersSelect = `<select id="assignUserId"><option value="">Выберите пользователя</option>`;
+  usersSnap.forEach(u => { if(u.data().role !== "admin") usersSelect += `<option value="${u.id}">${escapeHtml(u.data().name)} (${u.data().role})</option>`; });
+  usersSelect += `</select><select id="assignGroupId"><option value="">Группа</option>`;
+  groupsSnap.forEach(g => usersSelect += `<option value="${g.id}">${escapeHtml(g.data().name)}</option>`);
+  usersSelect += `</select><button onclick="assignUserToGroup()">Назначить в группу</button>`;
+  return `<div class="card"><h3><i class="fas fa-layer-group"></i> Управление группами</h3><input id="groupName" placeholder="Название"><button onclick="createGroup()">Создать группу</button><div id="groupsList">${groupsHtml||"Нет"}</div><hr>${usersSelect}</div>`;
+}
+window.createGroup = async () => { const name = document.getElementById("groupName")?.value.trim(); if(name) { await db.collection("groups").add({name, members:[]}); document.getElementById("groupName").value=""; renderGroups(); } };
+window.deleteGroup = async (id) => { await db.collection("groups").doc(id).delete(); renderGroups(); };
+window.assignUserToGroup = async () => { const userId = document.getElementById("assignUserId")?.value; const groupId = document.getElementById("assignGroupId")?.value; if(!userId || !groupId) return; const userRef = db.collection("users").doc(userId); const userDoc = await userRef.get(); let current = userDoc.data()?.groupIds || []; if(!current.includes(groupId)) current.push(groupId); await userRef.update({groupIds: current}); alert("Назначен"); renderGroups(); };
 
-// ========= ИНДИВИДУАЛЬНОЕ РАСПИСАНИЕ + ОБЩЕЕ =========
-async function renderSchedule(){ const user=auth.currentUser; if(!user) return `<div class="card"><div class="locked-message">Войдите</div></div>`; const role=await getUserRole(user); const commonSchedule=(await db.collection("settings").doc("commonSchedule").get()).data()?.items||["09:00 Зарядка","10:00 Занятие","12:00 Обед"]; let commonHtml=commonSchedule.map((t,i)=>`<div class="schedule-item"><span>📌 ${escapeHtml(t)}</span>${(role==="teacher"||role==="admin")?`<button onclick="editCommonItem(${i})" style="width:auto;">✏️</button>`:""}</div>`).join(""); let individualHtml=""; if(role==="teacher"||role==="admin"){ const kidsSnap=await db.collection("kids").get(); let kidsSelect=`<select id="kidForIndividual"><option value="">Выберите ребенка</option>`; kidsSnap.forEach(k=> kidsSelect+=`<option value="${k.id}">${escapeHtml(k.data().name)}</option>`); kidsSelect+=`</select><input id="individualEvent" placeholder="Занятие для ребенка"><button onclick="addIndividualEvent()">Добавить индивидуально</button>`; const allIndEvents=await db.collection("individualSchedule").get(); let eventsHtml=""; allIndEvents.forEach(doc=>{ const ev=doc.data(); eventsHtml+=`<div class="schedule-item"><span>🧸 ${escapeHtml(ev.childName||"ребенок")} : ${escapeHtml(ev.event)}</span></div>`; }); individualHtml=`<hr><h3>Индивидуальное расписание</h3>${kidsSelect}<div id="indivList">${eventsHtml||"Нет"}</div>`; } else if(role==="parent"){ const kidsSnap=await db.collection("kids").where("parentId","==",user.uid).get(); let myKidsEvents=""; for(const kidDoc of kidsSnap.docs){ const kidId=kidDoc.id; const eventsSnap=await db.collection("individualSchedule").where("childId","==",kidId).get(); eventsSnap.forEach(ev=>{ myKidsEvents+=`<div class="schedule-item">👶 ${escapeHtml(kidDoc.data().name)}: ${escapeHtml(ev.data().event)}</div>`; }); } individualHtml=`<hr><h3>Индивидуальные занятия моего ребенка</h3>${myKidsEvents||"Нет"} `; } return `<div class="card"><h3><i class="fas fa-calendar-week"></i> Расписание</h3><h4>Общее</h4>${commonHtml}${(role==="teacher"||role==="admin")?`<input id="newCommonItem" placeholder="Новое общее событие"><button onclick="addCommonItem()">Добавить в общее</button>`:""}${individualHtml}</div>`; }
-window.addCommonItem=async()=>{ const val=document.getElementById("newCommonItem")?.value.trim(); if(val){ const ref=db.collection("settings").doc("commonSchedule"); const data=(await ref.get()).data(); const items=data?.items||[]; items.push(val); await ref.set({items}); renderSchedule(); } };
-window.editCommonItem=async(idx)=>{ const ref=db.collection("settings").doc("commonSchedule"); const data=(await ref.get()).data(); const items=data?.items||[]; const newVal=prompt("Изменить:",items[idx]); if(newVal){ items[idx]=newVal; await ref.set({items}); renderSchedule(); } };
-window.addIndividualEvent=async()=>{ const kidId=document.getElementById("kidForIndividual")?.value; const eventText=document.getElementById("individualEvent")?.value.trim(); if(!kidId||!eventText) return; const kidDoc=await db.collection("kids").doc(kidId).get(); const childName=kidDoc.exists?kidDoc.data().name:"Ребенок"; await db.collection("individualSchedule").add({childId:kidId, childName, event:eventText, addedBy:auth.currentUser.uid}); renderSchedule(); };
+// ========= КРУЖКИ (запись детей) =========
+async function renderCircles() {
+  const user = auth.currentUser;
+  if(!user) return `<div class="card"><div class="locked-message">Войдите</div></div>`;
+  const role = await getUserRole(user);
+  const circlesSnap = await db.collection("circles").get();
+  let circlesList = "";
+  for(const doc of circlesSnap.docs) {
+    const c = doc.data();
+    let actionHtml = "";
+    if(role === "parent") {
+      const kidsSnap = await db.collection("kids").where("parentId","==",user.uid).get();
+      let kidOptions = `<select id="kidSelect_${doc.id}"><option value="">Выбрать ребёнка</option>`;
+      kidsSnap.forEach(k => kidOptions += `<option value="${k.id}">${escapeHtml(k.data().name)}</option>`);
+      kidOptions += `</select><button onclick="enrollToCircle('${doc.id}')">Записать</button>`;
+      actionHtml = kidOptions;
+    } else if(role === "teacher" || role === "admin") {
+      actionHtml = `<button onclick="viewCircleEnrollments('${doc.id}')">Список детей</button>`;
+    }
+    circlesList += `<div class="circle-item"><div><strong>${escapeHtml(c.name)}</strong><br><small>${escapeHtml(c.description||"")}</small></div><div>${actionHtml}</div></div>`;
+  }
+  let addForm = (role==="teacher"||role==="admin") ? `<input id="newCircleName" placeholder="Название"><input id="newCircleDesc" placeholder="Описание"><button onclick="addCircle()">➕ Добавить кружок</button>` : "";
+  return `<div class="card"><h3><i class="fas fa-paintbrush"></i> Кружки</h3>${circlesList||"Нет"}${addForm}</div>`;
+}
+window.enrollToCircle = async (circleId) => { const select = document.getElementById(`kidSelect_${circleId}`); const kidId = select?.value; if(!kidId) { alert("Выберите ребёнка"); return; } const circleRef = db.collection("circles").doc(circleId); const circle = await circleRef.get(); let members = circle.data()?.enrolledKids||[]; if(!members.includes(kidId)) members.push(kidId); await circleRef.update({enrolledKids:members}); alert("Записан!"); };
+window.addCircle = async () => { const name=document.getElementById("newCircleName")?.value.trim(); if(name){ await db.collection("circles").add({name, description:document.getElementById("newCircleDesc")?.value.trim(), enrolledKids:[]}); renderCircles(); } };
+window.viewCircleEnrollments = async (circleId) => { const circle=await db.collection("circles").doc(circleId).get(); const kidsIds=circle.data()?.enrolledKids||[]; let list=""; for(let id of kidsIds){ const kid=await db.collection("kids").doc(id).get(); if(kid.exists) list+=`- ${kid.data().name}\n`; } alert(`Записаны:\n${list||"Нет"}`); };
 
-// ========= МЕДКАРТА (прививки, справки, добавляет воспитатель) =========
-async function renderHealth(){ const user=auth.currentUser; if(!user) return `<div class="card"><div class="locked-message">Войдите</div></div>`; const role=await getUserRole(user); if(role==="parent"){ const kidsSnap=await db.collection("kids").where("parentId","==",user.uid).get(); let healthHtml=""; for(const doc of kidsSnap.docs){ const kidData=doc.data(); const card=await db.collection("medicalCards").doc(doc.id).get(); const data=card.exists?card.data():{vaccinations:[], certificates:[]}; healthHtml+=`<div class="schedule-item"><strong>${escapeHtml(kidData.name)}</strong><br>💉 Прививки: ${data.vaccinations.join(", ")||"нет"}<br>📄 Справки: ${data.certificates.join(", ")||"нет"}</div>`; } return `<div class="card"><h3><i class="fas fa-notes-medical"></i> Медкарта детей</h3>${healthHtml}</div>`; } else if(role==="teacher"||role==="admin"){ const kidsSnap=await db.collection("kids").get(); let selectKid=`<select id="medKidSelect"><option value="">Выбрать ребенка</option>`; kidsSnap.forEach(k=> selectKid+=`<option value="${k.id}">${escapeHtml(k.data().name)}</option>`); selectKid+=`</select><input id="newVaccine" placeholder="Добавить прививку"><button onclick="addVaccine()">➕ Прививка</button><input id="newCert" placeholder="Добавить справку"><button onclick="addCertificate()">📄 Справка</button><div id="medInfo"></div>`; return `<div class="card"><h3><i class="fas fa-clinic-medical"></i> Медицинские данные (воспитатель)</h3>${selectKid}</div>`; } else return `<div class="card">Доступ запрещен</div>`; }
-window.addVaccine=async()=>{ const kidId=document.getElementById("medKidSelect")?.value; const vac=document.getElementById("newVaccine")?.value.trim(); if(!kidId||!vac) return; const ref=db.collection("medicalCards").doc(kidId); const doc=await ref.get(); const data=doc.exists?doc.data():{vaccinations:[], certificates:[]}; data.vaccinations.push(vac); await ref.set(data); alert("Добавлено"); renderHealth(); };
-window.addCertificate=async()=>{ const kidId=document.getElementById("medKidSelect")?.value; const cert=document.getElementById("newCert")?.value.trim(); if(!kidId||!cert) return; const ref=db.collection("medicalCards").doc(kidId); const doc=await ref.get(); const data=doc.exists?doc.data():{vaccinations:[], certificates:[]}; data.certificates.push(cert); await ref.set(data); alert("Добавлено"); };
+// ========= РАСПИСАНИЕ (общее + индивидуальное) =========
+async function renderSchedule() {
+  const user = auth.currentUser;
+  if(!user) return `<div class="card"><div class="locked-message">Войдите</div></div>`;
+  const role = await getUserRole(user);
+  const commonSchedule = (await db.collection("settings").doc("commonSchedule").get()).data()?.items || ["09:00 Зарядка","10:00 Занятие"];
+  let commonHtml = commonSchedule.map((t,i)=>`<div class="schedule-item"><span>📌 ${escapeHtml(t)}</span>${(role==="teacher"||role==="admin")?`<button onclick="editCommonItem(${i})" style="width:auto;">✏️</button>`:""}</div>`).join("");
+  let individualHtml = "";
+  if(role === "teacher" || role === "admin") {
+    const kidsSnap = await db.collection("kids").get();
+    let kidSelect = `<select id="indivKidSelect"><option value="">Выберите ребёнка</option>`;
+    kidsSnap.forEach(k => kidSelect += `<option value="${k.id}">${escapeHtml(k.data().name)}</option>`);
+    kidSelect += `</select><input id="indivEvent" placeholder="Занятие"><button onclick="addIndividualEvent()">➕ Добавить</button>`;
+    const eventsSnap = await db.collection("individualSchedule").get();
+    let eventsHtml = "";
+    eventsSnap.forEach(ev => eventsHtml += `<div class="schedule-item">🧸 ${escapeHtml(ev.data().childName)}: ${escapeHtml(ev.data().event)}</div>`);
+    individualHtml = `<hr><h3>Индивидуальное расписание</h3>${kidSelect}<div>${eventsHtml||"Нет"}</div>`;
+  } else if(role === "parent") {
+    if(!currentChildId) individualHtml = `<div class="error-msg" style="display:block;">Сначала выберите активного ребёнка (вкладка Дети)</div>`;
+    else {
+      const eventsSnap = await db.collection("individualSchedule").where("childId","==",currentChildId).get();
+      let myHtml = "";
+      eventsSnap.forEach(ev => myHtml += `<div class="schedule-item">👶 ${escapeHtml(ev.data().event)}</div>`);
+      individualHtml = `<hr><h3>Индивидуальные занятия</h3>${myHtml||"Нет"}`;
+    }
+  }
+  return `<div class="card"><h3><i class="fas fa-calendar-week"></i> Расписание</h3><h4>Общее</h4>${commonHtml}${(role==="teacher"||role==="admin")?`<input id="newCommonItem" placeholder="Новое событие"><button onclick="addCommonItem()">Добавить</button>`:""}${individualHtml}</div>`;
+}
+window.addCommonItem = async () => { const val = document.getElementById("newCommonItem")?.value.trim(); if(val){ const ref = db.collection("settings").doc("commonSchedule"); const data = (await ref.get()).data(); const items = data?.items||[]; items.push(val); await ref.set({items}); renderSchedule(); } };
+window.editCommonItem = async (idx) => { const ref = db.collection("settings").doc("commonSchedule"); const data=(await ref.get()).data(); const items=data?.items||[]; const nv=prompt("Изменить:",items[idx]); if(nv){ items[idx]=nv; await ref.set({items}); renderSchedule(); } };
+window.addIndividualEvent = async () => { const kidId = document.getElementById("indivKidSelect")?.value; const eventText = document.getElementById("indivEvent")?.value.trim(); if(!kidId||!eventText) return; const kid = await db.collection("kids").doc(kidId).get(); await db.collection("individualSchedule").add({childId:kidId, childName:kid.data().name, event:eventText}); renderSchedule(); };
 
-// ========= ДЕТИ (родители добавляют) =========
-async function renderKids(){ const user=auth.currentUser; if(!user) return ""; const role=await getUserRole(user); if(role==="parent"){ const kidsSnap=await db.collection("kids").where("parentId","==",user.uid).get(); let kidsList=""; kidsSnap.forEach(d=> kidsList+=`<div class="kid-item">👶 ${escapeHtml(d.data().name)}</div>`); return `<div class="card"><h3><i class="fas fa-baby-carriage"></i> Мои дети</h3>${kidsList||"Нет детей"}<input id="newKidName" placeholder="Имя ребенка"><button onclick="addKid()">Добавить ребенка</button></div>`; } else return `<div class="card"><h3>Дети в саду</h3><div id="allKidsList">Загрузка...</div></div>`; }
-window.addKid=async()=>{ const name=document.getElementById("newKidName")?.value.trim(); if(!name) return; await db.collection("kids").add({name, parentId:auth.currentUser.uid, groupId:null}); renderKids(); };
-
-// ========= ЧАТ (общий) =========
-async function renderChat(){ const user=auth.currentUser; if(!user) return `<div class="card"><div class="locked-message">Войдите в чат</div></div>`; return `<div class="card"><h3><i class="fas fa-comments"></i> Общий чат</h3><div id="chatBox" class="chat-box">Загрузка...</div><div class="input-area"><input id="messageInput" placeholder="Сообщение..."><button onclick="sendMessage()">📤</button></div></div>`; }
-async function sendMessage(){ const user=auth.currentUser; const text=document.getElementById("messageInput")?.value.trim(); if(!text||!user) return; const role=await getUserRole(user); await db.collection("messages").add({text, uid:user.uid, name:user.displayName||user.email, role, createdAt:firebase.firestore.FieldValue.serverTimestamp()}); document.getElementById("messageInput").value=""; }
-function loadMessages(){ const box=document.getElementById("chatBox"); if(!box) return; if(unsubscribeMessages) unsubscribeMessages(); unsubscribeMessages=db.collection("messages").orderBy("createdAt","asc").limitToLast(80).onSnapshot(snap=>{ if(!box) return; let msgs=[]; snap.forEach(d=>msgs.push(d.data())); if(msgs.length===0){ box.innerHTML="<div class='empty-chat'>Нет сообщений</div>"; return; } box.innerHTML=""; msgs.forEach(m=>{ const div=document.createElement("div"); div.className="message"; div.innerHTML=`<img class="avatar" src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png"><div><b>${escapeHtml(m.name)} ${m.role==='teacher'?'👩‍🏫':m.role==='admin'?'👑':''}</b><br><span>${escapeHtml(m.text)}</span></div></div>`; box.appendChild(div); }); box.scrollTop=box.scrollHeight; }); }
+// ========= ЧАТ ПО ГРУППАМ =========
+async function renderChat() {
+  const user = auth.currentUser;
+  if(!user) return `<div class="card"><div class="locked-message">Войдите</div></div>`;
+  const role = await getUserRole(user);
+  let groups = await getUserGroups(user.uid, role);
+  if(groups.length === 0) return `<div class="card"><div class="locked-message">Вы не состоите ни в одной группе. Обратитесь к администратору.</div></div>`;
+  let selectedGroupId = currentGroupId;
+  if(role === "parent" && currentChildId) {
+    const kidDoc = await db.collection("kids").doc(currentChildId).get();
+    if(kidDoc.exists && kidDoc.data().groupId) selectedGroupId = kidDoc.data().groupId;
+    else return `<div class="card"><div class="locked-message">Ваш активный ребёнок не добавлен в группу</div></div>`;
+  }
+  if(!selectedGroupId && groups.length) selectedGroupId = groups[0].id;
+  currentGroupId = selectedGroupId;
+  let groupSelectorHtml = `<div class="group-selector"><i class="fas fa-users"></i> <select id="groupChatSelect">${groups.map(g=>`<option value="${g.id}" ${g.id===selectedGroupId?'selected':''}>${escapeHtml(g.name)}</option>`).join("")}</select><button onclick="changeChatGroup()" style="width:auto; margin-top:0;">Выбрать</button></div>`;
+  return `<div class="card"><h3><i class="fas fa-comments"></i> Чат группы</h3>${groupSelectorHtml}<div id="chatBox" class="chat-box">Загрузка...</div><div class="input-area" style="display:flex; gap:8px;"><input id="messageInput" placeholder="Сообщение..."><button onclick="sendGroupMessage()">📤</button></div></div>`;
+}
+window.changeChatGroup = async () => { const select = document.getElementById("groupChatSelect"); if(select) { currentGroupId = select.value; renderChat(); } };
+async function sendGroupMessage() { const user = auth.currentUser; const text = document.getElementById("messageInput")?.value.trim(); if(!text || !currentGroupId) return; const role = await getUserRole(user); await db.collection("groupMessages").add({ text, groupId: currentGroupId, uid: user.uid, name: user.displayName || user.email, role, createdAt: firebase.firestore.FieldValue.serverTimestamp() }); document.getElementById("messageInput").value = ""; }
+function loadGroupMessages() { const box = document.getElementById("chatBox"); if(!box || !currentGroupId) return; if(unsubscribeMessages) unsubscribeMessages(); unsubscribeMessages = db.collection("groupMessages").where("groupId", "==", currentGroupId).orderBy("createdAt","asc").limitToLast(80).onSnapshot(snap => { if(!box) return; let msgs=[]; snap.forEach(d=>msgs.push(d.data())); if(msgs.length===0){ box.innerHTML="<div class='empty-chat'>Нет сообщений</div>"; return; } box.innerHTML=""; msgs.forEach(m=>{ const div=document.createElement("div"); div.className="message"; div.innerHTML=`<img class="avatar" src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png"><div><b>${escapeHtml(m.name)} ${m.role==='teacher'?'👩‍🏫':m.role==='admin'?'👑':''}</b><br><span>${escapeHtml(m.text)}</span></div></div>`; box.appendChild(div); }); box.scrollTop=box.scrollHeight; }); }
 
 // ========= ПРОФИЛЬ =========
-async function renderProfile(){ const user=auth.currentUser; if(!user) return `<div class="card"><button onclick="showLogin()">Войти</button></div>`; const role=await getUserRole(user); return `<div class="card"><h3><i class="fas fa-user-circle"></i> Профиль</h3><div>${escapeHtml(user.displayName||user.email)}<br>Роль: <b>${role}</b></div><button onclick="logout()">Выйти</button></div>`; }
-async function logout(){ if(unsubscribeMessages) unsubscribeMessages(); await auth.signOut(); navigate('home',document.querySelector(".tab")); }
+async function renderProfile() { const user = auth.currentUser; if(!user) return `<div class="card"><button onclick="showLogin()">Войти</button></div>`; const role = await getUserRole(user); return `<div class="card"><h3><i class="fas fa-user-circle"></i> Профиль</h3><div>${escapeHtml(user.displayName||user.email)}<br>Роль: <b>${role}</b></div><button onclick="logout()">Выйти</button></div>`; }
+async function logout() { if(unsubscribeMessages) unsubscribeMessages(); await auth.signOut(); currentGroupId=null; currentChildId=null; navigate('home',document.querySelector(".tab")); }
 
 // ========= НАВИГАЦИЯ =========
-async function navigate(screen,tabEl){ if(tabEl){ document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active")); tabEl.classList.add("active"); } const root=document.getElementById("screen"); root.style.opacity="0"; setTimeout(async()=>{ let html=""; if(screen==="home") html=await renderHome(); else if(screen==="groups") html=await renderGroups(); else if(screen==="circles") html=await renderCircles(); else if(screen==="schedule") html=await renderSchedule(); else if(screen==="health") html=await renderHealth(); else if(screen==="chat") html=await renderChat(); else if(screen==="profile") html=await renderProfile(); else if(screen==="kids") html=await renderKids(); else html=`<div class="card">Страница в разработке</div>`; root.innerHTML=html; if(screen==="chat" && auth.currentUser) loadMessages(); else if(unsubscribeMessages){ unsubscribeMessages(); unsubscribeMessages=null; } root.style.opacity="1"; },50);}
-async function renderHome(){ const user=auth.currentUser; if(!user) return `<div class="card"><div class="locked-message"><button onclick="showLogin()">Вход</button><button onclick="showRegister()">Регистрация</button></div></div>`; const role=await getUserRole(user); return `<div class="card"><h3>🏠 Добро пожаловать, ${escapeHtml(user.displayName||"")}</h3><p>Ваша роль: <b>${role}</b></p>${role==="parent"?'<button onclick="navigate(\'kids\',null)">👶 Мои дети</button>':''}${role==="teacher"||role==="admin"?'<button onclick="navigate(\'health\',null)">🩺 Медкарты детей</button>':''}${role==="parent"?'<button onclick="navigate(\'health\',null)">📋 Медкарта ребенка</button>':''}</div>`; }
+async function navigate(screen, tabEl) {
+  if(tabEl) { document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active")); tabEl.classList.add("active"); }
+  const root = document.getElementById("screen");
+  root.style.opacity = "0";
+  setTimeout(async () => {
+    let html = "";
+    if(screen === "home") html = await renderHome();
+    else if(screen === "groups") html = await renderGroups();
+    else if(screen === "circles") html = await renderCircles();
+    else if(screen === "schedule") html = await renderSchedule();
+    else if(screen === "chat") html = await renderChat();
+    else if(screen === "profile") html = await renderProfile();
+    else if(screen === "kids") html = await renderKids();
+    else html = `<div class="card">Страница в разработке</div>`;
+    root.innerHTML = html;
+    if(screen === "chat" && currentGroupId) loadGroupMessages();
+    else if(unsubscribeMessages) { unsubscribeMessages(); unsubscribeMessages=null; }
+    root.style.opacity = "1";
+  }, 40);
+}
+async function renderHome() { const user=auth.currentUser; if(!user) return `<div class="card"><button onclick="showLogin()">Вход</button><button onclick="showRegister()">Регистрация</button></div>`; const role=await getUserRole(user); return `<div class="card"><h3>🏠 Добро пожаловать, ${escapeHtml(user.displayName||"")}</h3><p>Роль: <b>${role}</b></p>${role==="parent"?'<button onclick="navigate(\'kids\',null)">👶 Мои дети</button>':''}${role==="teacher"||role==="admin"?'<button onclick="navigate(\'kids\',null)">👶 Все дети</button>':''}<button onclick="navigate('chat',null)">💬 Чат группы</button></div>`; }
 
-ensureAdminTeacher().then(()=>{ auth.onAuthStateChanged(()=>{ navigate('home',document.querySelector(".tab")); }); });
+ensureAdminTeacher().then(() => { auth.onAuthStateChanged(() => { navigate('home',document.querySelector(".tab")); }); });
 </script>
 </body>
 </html>

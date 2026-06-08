@@ -3,65 +3,345 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Ладушки - Детский сад</title>
+<title>Ладушки ☀️ Детский сад</title>
 
+<!-- Firebase SDKs -->
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
 
+<!-- Font Awesome 6 (свободные иконки) -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
 <style>
-* { margin: 0; padding: 0; box-sizing: border-box; }
-body { background: #c8d5b9; font-family: 'Segoe UI', Arial, sans-serif; padding: 20px 16px 90px 16px; }
-.app { max-width: 600px; margin: 0 auto; background: #fffcf5; border-radius: 30px; overflow: hidden; }
-.header { background: #fdebb3; padding: 20px; text-align: center; font-size: 24px; font-weight: bold; color: #a5673f; }
-.card { background: white; margin: 16px; padding: 20px; border-radius: 24px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-h3 { color: #846b48; margin-bottom: 16px; }
-button { background: #ffd89a; border: none; border-radius: 30px; padding: 12px; margin-top: 10px; cursor: pointer; width: 100%; font-size: 16px; font-weight: bold; }
-button:hover { background: #f7ca7a; }
-input { width: 100%; padding: 12px; margin-top: 10px; border-radius: 30px; border: 1px solid #eeddbb; outline: none; }
-input:focus { border-color: #f7bc6c; }
-.chat-box { height: 400px; overflow-y: auto; background: #fef7e9; border-radius: 20px; padding: 15px; margin: 10px 0; border: 1px solid #f7e5ca; }
-.message { background: white; border-radius: 15px; padding: 12px; margin-bottom: 12px; display: flex; gap: 12px; align-items: flex-start; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
-.message-teacher { background: #fdebb3; border-left: 4px solid #f7bc6c; }
-.avatar { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; background: #ffd89a; }
-.message-content { flex: 1; }
-.message-name { font-weight: bold; font-size: 13px; color: #684f2e; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-.message-text { font-size: 14px; margin-top: 5px; word-break: break-word; }
-.message-time { font-size: 10px; color: #aa936e; font-weight: normal; }
-.teacher-badge { background: #fbc490; color: #6b3f1c; padding: 2px 8px; border-radius: 20px; font-size: 10px; font-weight: bold; }
-.tabbar { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #fef3e2; display: flex; padding: 10px 25px; border-radius: 50px; gap: 30px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 100; }
-.tab { font-size: 28px; cursor: pointer; opacity: 0.55; transition: 0.2s; padding: 5px; border-radius: 40px; }
-.tab.active { opacity: 1; transform: scale(1.15); background: #ffefcf; }
-.schedule-item { background: #f7efdb; padding: 12px 16px; border-radius: 30px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
-.small { font-size: 11px; color: #aa936e; margin-top: 12px; text-align: center; }
-.locked-message { text-align: center; padding: 40px 20px; background: #fef3e6; border-radius: 24px; }
-.error-msg { background: #ffe0e0; color: #c23d3d; padding: 10px; border-radius: 20px; margin-top: 10px; text-align: center; display: none; }
-.success-msg { background: #e0ffe0; color: #2d6a2d; padding: 10px; border-radius: 20px; margin-top: 10px; text-align: center; display: none; }
-.input-area { display: flex; gap: 10px; margin-top: 12px; }
-.input-area input { flex: 1; margin-top: 0; }
-.input-area button { width: auto; padding: 12px 24px; margin-top: 0; }
-.empty-chat { text-align: center; padding: 40px; color: #aa936e; }
-.profile-card { display: flex; gap: 15px; align-items: center; background: #fef1df; border-radius: 50px; padding: 15px; }
-.badge { background: #d9e0b5; border-radius: 20px; padding: 5px 12px; font-size: 12px; }
-.badge.teacher { background: #fbc490; }
-.loading { text-align: center; padding: 20px; color: #846b48; }
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', 'Comic Neue', 'Comic Neue', 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+
+body {
+  background: linear-gradient(135deg, #e0f0da 0%, #cfe3c3 100%);
+  padding: 16px 12px 90px 12px;
+  min-height: 100vh;
+}
+
+/* Главная карточка приложения */
+.app {
+  max-width: 550px;
+  margin: 0 auto;
+  background: #fffef7;
+  border-radius: 48px 48px 40px 40px;
+  box-shadow: 0 20px 35px -12px rgba(0,0,0,0.2);
+  overflow: hidden;
+  transition: all 0.2s ease;
+}
+
+/* Шапка с игривым градиентом */
+.header {
+  background: linear-gradient(115deg, #FFD966, #FFB347);
+  padding: 20px 20px;
+  text-align: center;
+  font-size: 28px;
+  font-weight: 800;
+  color: #3b2a1f;
+  letter-spacing: -0.5px;
+  text-shadow: 2px 2px 0 #ffe0a3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+.header i {
+  font-size: 34px;
+  color: #fbf5cf;
+  text-shadow: 2px 2px 0 #c16f1a;
+}
+
+/* Карточки контента */
+.card {
+  background: #ffffffdd;
+  backdrop-filter: blur(2px);
+  margin: 20px 18px;
+  padding: 24px 20px;
+  border-radius: 36px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+  transition: transform 0.2s;
+  border: 1px solid #fff5e6;
+}
+.card:hover {
+  transform: translateY(-3px);
+}
+
+h3 {
+  font-size: 1.7rem;
+  font-weight: 700;
+  color: #7b5a3b;
+  margin-bottom: 18px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-left: 6px solid #ffb86b;
+  padding-left: 16px;
+}
+
+/* Кнопки веселые и дружелюбные */
+button, .btn-like {
+  background: #fed287;
+  border: none;
+  border-radius: 60px;
+  padding: 12px 18px;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: 0.2s;
+  width: 100%;
+  margin-top: 12px;
+  color: #4f2d1a;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+button i, .btn-like i {
+  font-size: 1.2rem;
+}
+button:hover {
+  background: #ffc46b;
+  transform: scale(0.98);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+/* Поля ввода */
+input, textarea {
+  width: 100%;
+  padding: 14px 18px;
+  margin-top: 12px;
+  border-radius: 48px;
+  border: 1.5px solid #ffe0b5;
+  background: #fffaf2;
+  font-size: 1rem;
+  outline: none;
+  transition: all 0.2s;
+}
+input:focus, textarea:focus {
+  border-color: #ffb351;
+  background: white;
+  box-shadow: 0 0 0 3px rgba(255, 180, 81, 0.2);
+}
+
+/* Чат блоки */
+.chat-box {
+  height: 420px;
+  overflow-y: auto;
+  background: #fff6ea;
+  border-radius: 32px;
+  padding: 16px;
+  margin: 16px 0;
+  border: 1px solid #ffdfb3;
+  scroll-behavior: smooth;
+}
+.message {
+  background: #ffffff;
+  border-radius: 26px;
+  padding: 14px;
+  margin-bottom: 16px;
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+  transition: 0.1s;
+}
+.message-teacher {
+  background: #fef0de;
+  border-left: 6px solid #f7b05e;
+}
+.avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: #ffddb0;
+  border: 2px solid #ffe0b5;
+}
+.message-content {
+  flex: 1;
+}
+.message-name {
+  font-weight: 700;
+  color: #7a5c3c;
+  font-size: 0.9rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.message-text {
+  font-size: 0.95rem;
+  margin-top: 6px;
+  word-break: break-word;
+  color: #4b3621;
+  line-height: 1.4;
+}
+.message-time {
+  font-size: 0.7rem;
+  color: #b48c5c;
+  font-weight: normal;
+}
+.teacher-badge {
+  background: #f9bc7c;
+  color: #4e2a10;
+  font-size: 0.7rem;
+  padding: 3px 10px;
+  border-radius: 50px;
+  font-weight: bold;
+}
+/* панель ввода чата */
+.input-area {
+  display: flex;
+  gap: 12px;
+  margin-top: 12px;
+}
+.input-area input {
+  margin-top: 0;
+  flex: 1;
+}
+.input-area button {
+  width: auto;
+  margin-top: 0;
+  padding: 12px 20px;
+}
+/* Расписание */
+.schedule-item {
+  background: #fef2e2;
+  padding: 12px 18px;
+  border-radius: 50px;
+  margin-bottom: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 500;
+  font-size: 1rem;
+}
+/* Таббар снизу */
+.tabbar {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #fff9f0;
+  backdrop-filter: blur(10px);
+  display: flex;
+  padding: 8px 20px;
+  border-radius: 60px;
+  gap: 30px;
+  box-shadow: 0 12px 28px rgba(0,0,0,0.2);
+  z-index: 200;
+  border: 1px solid #ffeaca;
+}
+.tab {
+  font-size: 32px;
+  cursor: pointer;
+  opacity: 0.5;
+  transition: 0.2s;
+  padding: 6px;
+  border-radius: 60px;
+  color: #aa7d50;
+}
+.tab.active {
+  opacity: 1;
+  transform: scale(1.2);
+  background: #ffe0bf;
+  color: #e68a2e;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+/* вспомогательные блоки */
+.locked-message {
+  text-align: center;
+  padding: 30px 15px;
+  background: #fff2e4;
+  border-radius: 40px;
+}
+.error-msg, .success-msg {
+  padding: 10px;
+  border-radius: 60px;
+  margin-top: 15px;
+  text-align: center;
+  font-weight: bold;
+  display: none;
+}
+.error-msg {
+  background: #ffe1e1;
+  color: #c23d3d;
+}
+.success-msg {
+  background: #daf7da;
+  color: #267c26;
+}
+.badge {
+  background: #e9ddce;
+  border-radius: 30px;
+  padding: 4px 12px;
+  font-size: 0.75rem;
+  font-weight: bold;
+}
+.badge.teacher {
+  background: #fdca83;
+  color: #542f12;
+}
+.profile-card {
+  display: flex;
+  gap: 18px;
+  align-items: center;
+  background: #fcf3e8;
+  border-radius: 55px;
+  padding: 12px 18px;
+  margin-bottom: 20px;
+}
+.loading {
+  text-align: center;
+  padding: 30px;
+  font-size: 1.2rem;
+}
+.small {
+  font-size: 0.7rem;
+  text-align: center;
+  color: #ad8b64;
+  margin-top: 18px;
+}
+.empty-chat {
+  text-align: center;
+  color: #c7aa82;
+  padding: 40px 20px;
+}
+/* разное */
+.fa, .fas, .far {
+  pointer-events: none;
+}
 </style>
 </head>
 <body>
 <div class="app">
-  <div class="header">🧸 Ладушки</div>
-  <div id="screen"><div class="loading">Загрузка...</div></div>
+  <div class="header">
+    <i class="fas fa-sun"></i>
+    <span>Ладушки</span>
+    <i class="fas fa-palette"></i>
+  </div>
+  <div id="screen"><div class="loading"><i class="fas fa-spinner fa-pulse"></i> Загрузка...</div></div>
   <div class="tabbar">
-    <div class="tab" onclick="navigate('home', this)">🏠</div>
-    <div class="tab" onclick="navigate('schedule', this)">📅</div>
-    <div class="tab" onclick="navigate('chat', this)">💬</div>
-    <div class="tab" onclick="navigate('profile', this)">👤</div>
+    <div class="tab" onclick="navigate('home', this)"><i class="fas fa-home"></i></div>
+    <div class="tab" onclick="navigate('schedule', this)"><i class="fas fa-calendar-alt"></i></div>
+    <div class="tab" onclick="navigate('chat', this)"><i class="fas fa-comment-dots"></i></div>
+    <div class="tab" onclick="navigate('profile', this)"><i class="fas fa-user"></i></div>
   </div>
 </div>
 
 <script>
-// ========= FIREBASE КЛЮЧИ =========
+// ----- КОНФИГ FIREBASE -----
 const firebaseConfig = {
   apiKey: "AIzaSyAuZgI5XVWNSfHKWhAp26SWdD_Ye-3gBzs",
   authDomain: "detsad-7ca3d.firebaseapp.com",
@@ -69,20 +349,23 @@ const firebaseConfig = {
   storageBucket: "detsad-7ca3d.firebasestorage.app"
 };
 
-// Инициализация
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 const storage = firebase.storage();
 
-// Данные
 let unsubscribeMessages = null;
 let scheduleItems = [];
 
 const TEACHER_EMAIL = "teacher@ladushki.ru";
 const TEACHER_PASSWORD = "Ladushki2025";
 
-// Проверка воспитателя
+// ========= ВСПОМОГАТЕЛЬНЫЕ =========
+function escapeHtml(str) {
+  if (!str) return '';
+  return str.replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[m]));
+}
+
 async function isTeacher(user) {
   if (!user) return false;
   if (user.email === TEACHER_EMAIL) return true;
@@ -92,19 +375,14 @@ async function isTeacher(user) {
   } catch(e) { return false; }
 }
 
-// Проверка существования email в Firebase Auth (перед регистрацией)
 async function checkEmailExists(email) {
   try {
-    // Метод fetchSignInMethodsForEmail проверяет, существует ли email в системе
     const methods = await auth.fetchSignInMethodsForEmail(email);
     return methods.length > 0;
-  } catch(e) {
-    console.warn("Ошибка проверки email:", e);
-    return false;
-  }
+  } catch(e) { return false; }
 }
 
-// Загрузка расписания
+// ЗАГРУЗКА РАСПИСАНИЯ
 async function loadSchedule() {
   try {
     const doc = await db.collection("settings").doc("dailySchedule").get();
@@ -118,36 +396,36 @@ async function loadSchedule() {
   return scheduleItems;
 }
 
-// ========= ГЛАВНАЯ =========
+// ========= ЭКРАНЫ =========
 async function renderHome() {
   const user = auth.currentUser;
   if (user) {
-    const isTeacherFlag = await isTeacher(user);
+    const teacherFlag = await isTeacher(user);
     return `
       <div class="card">
-        <h3>🌞 Добро пожаловать</h3>
-        <div style="display:flex; align-items:center; gap:15px; margin-bottom:15px;">
-          <img src="${user.photoURL || 'https://via.placeholder.com/60'}" class="avatar" style="width:60px;height:60px;" onerror="this.src='https://via.placeholder.com/60'">
+        <h3><i class="fas fa-tree"></i> Добро пожаловать</h3>
+        <div style="display:flex; align-items:center; gap:18px; margin-bottom:20px;">
+          <img src="${user.photoURL || 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png'}" class="avatar" style="width:68px;height:68px;" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3135/3135715.png'">
           <div>
-            <strong style="font-size:18px;">${escapeHtml(user.displayName || user.email)}</strong>
-            ${isTeacherFlag ? '<div class="badge teacher" style="margin-top:5px;">👩‍🏫 Воспитатель</div>' : '<div class="badge" style="margin-top:5px;">👪 Родитель</div>'}
+            <strong style="font-size:1.3rem;">${escapeHtml(user.displayName || user.email)}</strong><br>
+            ${teacherFlag ? '<span class="badge teacher"><i class="fas fa-chalkboard-user"></i> Воспитатель</span>' : '<span class="badge"><i class="fas fa-heart"></i> Родитель</span>'}
           </div>
         </div>
-        <button onclick="navigate('schedule', document.querySelectorAll('.tab')[1])">📋 Расписание</button>
-        <button onclick="navigate('chat', document.querySelectorAll('.tab')[2])">💬 Чат</button>
-        <button onclick="logout()">🚪 Выйти</button>
+        <button onclick="navigate('schedule', document.querySelectorAll('.tab')[1])"><i class="fas fa-clock"></i> Наше расписание</button>
+        <button onclick="navigate('chat', document.querySelectorAll('.tab')[2])"><i class="fas fa-comments"></i> Общий чат</button>
+        <button onclick="logout()"><i class="fas fa-sign-out-alt"></i> Выйти</button>
       </div>
     `;
   } else {
     return `
       <div class="card">
-        <h3>🍎 Добро пожаловать</h3>
+        <h3><i class="fas fa-cookie-bite"></i> Привет, дружок!</h3>
         <div class="locked-message">
-          <p>🔒 Чат и расписание доступны после регистрации</p>
-          <button onclick="showLogin()">🍎 Войти</button>
-          <button onclick="showRegister()">🐣 Регистрация</button>
+          <p><i class="fas fa-lock"></i> Чтобы попасть в чат и расписание, войди или зарегистрируйся</p>
+          <button onclick="showLogin()"><i class="fas fa-door-open"></i> Войти</button>
+          <button onclick="showRegister()"><i class="fas fa-child"></i> Регистрация</button>
         </div>
-        <div class="small">👩‍🏫 Воспитатель: teacher@ladushki.ru</div>
+        <div class="small"><i class="fas fa-apple-alt"></i> Воспитатель: teacher@ladushki.ru</div>
       </div>
     `;
   }
@@ -157,158 +435,113 @@ async function renderHome() {
 function showLogin() {
   document.getElementById("screen").innerHTML = `
     <div class="card">
-      <h3>🍎 Вход</h3>
+      <h3><i class="fas fa-duck"></i> Вход в садик</h3>
       <input id="loginEmail" placeholder="Email" type="email">
       <input id="loginPass" type="password" placeholder="Пароль">
       <div id="loginError" class="error-msg"></div>
-      <button onclick="doLogin()">Войти</button>
-      <div class="small">Нет аккаунта? <span style="cursor:pointer;color:#a5673f;" onclick="showRegister()">Регистрация</span></div>
+      <button onclick="doLogin()"><i class="fas fa-arrow-right-to-bracket"></i> Войти</button>
+      <div class="small">Нет аккаунта? <span style="cursor:pointer;color:#e68a2e;" onclick="showRegister()">Создать</span></div>
     </div>
   `;
 }
-
 async function doLogin() {
   const email = document.getElementById("loginEmail")?.value.trim();
   const pass = document.getElementById("loginPass")?.value;
   const errorDiv = document.getElementById("loginError");
-  if (!email || !pass) { errorDiv.style.display = "block"; errorDiv.innerText = "Заполните поля"; return; }
+  if (!email || !pass) { errorDiv.style.display = "block"; errorDiv.innerText = "Заполни оба поля ☀️"; return; }
   try {
     await auth.signInWithEmailAndPassword(email, pass);
-    // После входа сессия сохранится автоматически
     navigate('home', document.querySelector(".tab"));
   } catch(e) {
     errorDiv.style.display = "block";
-    if (e.code === 'auth/user-not-found') errorDiv.innerText = "Пользователь не найден";
-    else if (e.code === 'auth/wrong-password') errorDiv.innerText = "Неверный пароль";
-    else if (e.code === 'auth/invalid-email') errorDiv.innerText = "Неверный формат email";
+    if (e.code === 'auth/user-not-found') errorDiv.innerText = "Пользователь не найден 🧸";
+    else if (e.code === 'auth/wrong-password') errorDiv.innerText = "Неверный пароль 🌟";
     else errorDiv.innerText = "Ошибка: " + e.message;
   }
 }
 
-// ========= РЕГИСТРАЦИЯ С ПРОВЕРКОЙ EMAIL =========
+// ========= РЕГИСТРАЦИЯ =========
 function showRegister() {
   document.getElementById("screen").innerHTML = `
     <div class="card">
-      <h3>🐣 Регистрация</h3>
-      <input id="regName" placeholder="Ваше имя">
+      <h3><i class="fas fa-pencil-ruler"></i> Давай дружить!</h3>
+      <input id="regName" placeholder="Твоё имя">
       <input id="regEmail" placeholder="Email" type="email">
-      <input id="regPass" type="password" placeholder="Пароль (мин 6 символов)">
+      <input id="regPass" type="password" placeholder="Пароль (минимум 6)">
       <div id="regError" class="error-msg"></div>
       <div id="regSuccess" class="success-msg"></div>
-      <button onclick="doRegister()">Зарегистрироваться</button>
-      <div class="small">Уже есть аккаунт? <span style="cursor:pointer;color:#a5673f;" onclick="showLogin()">Войти</span></div>
+      <button onclick="doRegister()"><i class="fas fa-user-plus"></i> Зарегистрироваться</button>
+      <div class="small">Уже с нами? <span style="cursor:pointer;color:#e68a2e;" onclick="showLogin()">Войти</span></div>
     </div>
   `;
 }
-
 async function doRegister() {
   const name = document.getElementById("regName")?.value.trim();
   const email = document.getElementById("regEmail")?.value.trim();
   const pass = document.getElementById("regPass")?.value;
   const errorDiv = document.getElementById("regError");
   const successDiv = document.getElementById("regSuccess");
-  
   errorDiv.style.display = "none";
   successDiv.style.display = "none";
-  
-  // Проверка заполнения
   if (!name || !email || !pass) {
-    errorDiv.style.display = "block";
-    errorDiv.innerText = "Заполните все поля";
-    return;
+    errorDiv.style.display = "block"; errorDiv.innerText = "Заполни все поля 🎨"; return;
   }
-  
-  // Проверка длины пароля
   if (pass.length < 6) {
-    errorDiv.style.display = "block";
-    errorDiv.innerText = "Пароль должен быть не менее 6 символов";
-    return;
+    errorDiv.style.display = "block"; errorDiv.innerText = "Пароль должен быть длиннее 6 букв 🔐"; return;
   }
-  
-  // Проверка валидности email
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailRegex.test(email)) {
-    errorDiv.style.display = "block";
-    errorDiv.innerText = "Введите корректный email";
-    return;
-  }
-  
-  // ⭐ ПРОВЕРКА: существует ли уже такой email в Firebase Auth
   errorDiv.style.display = "block";
-  errorDiv.innerText = "Проверка email...";
-  
+  errorDiv.innerText = "Проверяем...";
+  const emailExists = await checkEmailExists(email);
+  if (emailExists) {
+    errorDiv.style.display = "block";
+    errorDiv.innerText = "❌ Email уже используется. Войди в аккаунт!";
+    return;
+  }
+  errorDiv.style.display = "none";
   try {
-    const emailExists = await checkEmailExists(email);
-    if (emailExists) {
-      errorDiv.style.display = "block";
-      errorDiv.innerText = "❌ Этот email уже зарегистрирован. Войдите в аккаунт.";
-      return;
-    }
-    
-    errorDiv.style.display = "none";
-    
-    // Регистрация
     const cred = await auth.createUserWithEmailAndPassword(email, pass);
     await cred.user.updateProfile({ displayName: name });
-    await db.collection("users").doc(cred.user.uid).set({ 
-      name, 
-      email, 
-      role: "parent",
-      createdAt: firebase.firestore.FieldValue.serverTimestamp()
-    });
-    
+    await db.collection("users").doc(cred.user.uid).set({ name, email, role: "parent", createdAt: firebase.firestore.FieldValue.serverTimestamp() });
     successDiv.style.display = "block";
-    successDiv.innerText = "✅ Регистрация успешна! Перенаправление...";
-    
+    successDiv.innerText = "Ура! Регистрация прошла успешно 🌈";
     setTimeout(() => navigate('home', document.querySelector(".tab")), 1500);
-    
   } catch(e) {
     errorDiv.style.display = "block";
-    if (e.code === 'auth/email-already-in-use') {
-      errorDiv.innerText = "❌ Этот email уже используется";
-    } else if (e.code === 'auth/invalid-email') {
-      errorDiv.innerText = "❌ Неверный формат email";
-    } else if (e.code === 'auth/weak-password') {
-      errorDiv.innerText = "❌ Слишком слабый пароль";
-    } else {
-      errorDiv.innerText = "Ошибка: " + e.message;
-    }
+    if (e.code === 'auth/email-already-in-use') errorDiv.innerText = "Email уже занят";
+    else errorDiv.innerText = "Ошибка: " + e.message;
   }
 }
 
 // ========= РАСПИСАНИЕ =========
 async function renderSchedule() {
   const user = auth.currentUser;
-  if (!user) {
-    return `<div class="card"><div class="locked-message"><p>📅 Расписание доступно после входа</p><button onclick="showLogin()">Войти</button></div></div>`;
-  }
-  const isTeacherFlag = await isTeacher(user);
+  if (!user) return `<div class="card"><div class="locked-message"><i class="fas fa-calendar-xmark"></i> Войди, чтобы увидеть расписание 🕊️<br><button onclick="showLogin()">Войти</button></div></div>`;
+  const teacherFlag = await isTeacher(user);
   await loadSchedule();
   const listHtml = scheduleItems.map((item, idx) => `
     <div class="schedule-item">
-      <span>${escapeHtml(item)}</span>
-      ${isTeacherFlag ? `<div><button onclick="editItem(${idx})" style="width:auto; padding:5px 12px; margin:0;">✏️</button>
-                         <button onclick="deleteItem(${idx})" style="width:auto; padding:5px 12px; margin:0;">🗑️</button></div>` : ''}
+      <span><i class="fas fa-star-of-life" style="font-size:10px; color:#f7b05e;"></i> ${escapeHtml(item)}</span>
+      ${teacherFlag ? `<div><button onclick="editItem(${idx})" style="width:auto; padding:6px 14px; margin:0;"><i class="fas fa-edit"></i></button>
+                       <button onclick="deleteItem(${idx})" style="width:auto; padding:6px 14px; margin:0; margin-left:5px;"><i class="fas fa-trash-alt"></i></button></div>` : ''}
     </div>
   `).join('');
   return `
     <div class="card">
-      <h3>📋 Расписание дня</h3>
+      <h3><i class="fas fa-chalkboard"></i> Режим дня</h3>
       <div id="scheduleList">${listHtml || '<div class="small">Нет событий</div>'}</div>
-      ${isTeacherFlag ? `
-        <div style="margin-top:15px;">
-          <input id="newItem" placeholder="Новое событие...">
-          <button onclick="addItem()">➕ Добавить</button>
+      ${teacherFlag ? `
+        <div style="margin-top:18px;">
+          <input id="newItem" placeholder="➕ Новое занятие...">
+          <button onclick="addItem()"><i class="fas fa-plus-circle"></i> Добавить</button>
         </div>
       ` : ''}
     </div>
   `;
 }
-
 window.editItem = async function(idx) {
   const user = auth.currentUser;
   if (!user || !(await isTeacher(user))) return;
-  const newVal = prompt("Редактировать:", scheduleItems[idx]);
+  const newVal = prompt("Отредактируйте событие:", scheduleItems[idx]);
   if (newVal?.trim()) {
     scheduleItems[idx] = newVal.trim();
     await db.collection("settings").doc("dailySchedule").set({ items: scheduleItems });
@@ -318,7 +551,7 @@ window.editItem = async function(idx) {
 window.deleteItem = async function(idx) {
   const user = auth.currentUser;
   if (!user || !(await isTeacher(user))) return;
-  if (confirm("Удалить?")) {
+  if (confirm("Удалить эту запись?")) {
     scheduleItems.splice(idx, 1);
     await db.collection("settings").doc("dailySchedule").set({ items: scheduleItems });
     refreshSchedule();
@@ -339,12 +572,12 @@ async function refreshSchedule() {
   const container = document.getElementById("scheduleList");
   if (container) {
     const user = auth.currentUser;
-    const isTeacherFlag = user ? await isTeacher(user) : false;
+    const teacherFlag = user ? await isTeacher(user) : false;
     container.innerHTML = scheduleItems.map((item, idx) => `
       <div class="schedule-item">
-        <span>${escapeHtml(item)}</span>
-        ${isTeacherFlag ? `<div><button onclick="editItem(${idx})" style="width:auto; padding:5px 12px; margin:0;">✏️</button>
-                           <button onclick="deleteItem(${idx})" style="width:auto; padding:5px 12px; margin:0;">🗑️</button></div>` : ''}
+        <span>🍎 ${escapeHtml(item)}</span>
+        ${teacherFlag ? `<div><button onclick="editItem(${idx})" style="width:auto; padding:6px 12px;"><i class="fas fa-pen"></i></button>
+                         <button onclick="deleteItem(${idx})" style="width:auto; padding:6px 12px;"><i class="fas fa-trash"></i></button></div>` : ''}
       </div>
     `).join('');
   }
@@ -353,36 +586,27 @@ async function refreshSchedule() {
 // ========= ЧАТ =========
 async function renderChat() {
   const user = auth.currentUser;
-  if (!user) {
-    return `<div class="card"><div class="locked-message"><p>💬 Чат доступен после входа</p><button onclick="showLogin()">Войти</button></div></div>`;
-  }
+  if (!user) return `<div class="card"><div class="locked-message"><i class="fas fa-comment-slash"></i> Чат только для наших семей<br><button onclick="showLogin()">Войти в чат</button></div></div>`;
   return `
     <div class="card">
-      <h3>💬 Общий чат</h3>
+      <h3><i class="fas fa-comment-dots"></i> Общий чатик</h3>
       <div id="chatBox" class="chat-box">Загрузка...</div>
       <div class="input-area">
-        <input id="messageInput" type="text" placeholder="Напишите сообщение..." maxlength="500">
-        <button onclick="sendMessage()">📤</button>
+        <input id="messageInput" type="text" placeholder="Напиши сообщение... 🧸" maxlength="500">
+        <button onclick="sendMessage()"><i class="fas fa-paper-plane"></i></button>
       </div>
-      <div class="small">✨ Все видят сообщения друг друга</div>
+      <div class="small"><i class="fas fa-smile-wink"></i> Будьте вежливы и добры!</div>
     </div>
   `;
 }
-
 async function sendMessage() {
   const input = document.getElementById("messageInput");
   if (!input) return;
   const text = input.value.trim();
   if (!text) return;
-  
   const user = auth.currentUser;
-  if (!user) {
-    alert("Войдите в аккаунт");
-    return;
-  }
-  
+  if (!user) { alert("Войдите в аккаунт"); return; }
   const isTeacherUser = user.email === TEACHER_EMAIL;
-  
   try {
     await db.collection("messages").add({
       text: text,
@@ -395,84 +619,60 @@ async function sendMessage() {
     input.value = "";
     const box = document.getElementById("chatBox");
     if (box) box.scrollTop = box.scrollHeight;
-  } catch(e) {
-    console.error("Ошибка:", e);
-    alert("Ошибка отправки: " + e.message);
-  }
+  } catch(e) { alert("Ошибка: " + e.message); }
 }
-
 function loadMessages() {
   const chatBox = document.getElementById("chatBox");
   if (!chatBox) return;
-  
-  if (unsubscribeMessages) {
-    unsubscribeMessages();
-    unsubscribeMessages = null;
-  }
-  
-  unsubscribeMessages = db.collection("messages")
-    .orderBy("createdAt", "asc")
-    .limitToLast(100)
-    .onSnapshot((snapshot) => {
-      if (!chatBox) return;
-      
-      const messages = [];
-      snapshot.forEach(doc => messages.push({ id: doc.id, ...doc.data() }));
-      
-      if (messages.length === 0) {
-        chatBox.innerHTML = '<div class="empty-chat">💬 Пока нет сообщений</div>';
-        return;
-      }
-      
-      chatBox.innerHTML = "";
-      messages.forEach(msg => {
-        const div = document.createElement("div");
-        div.className = `message ${msg.isTeacher ? 'message-teacher' : ''}`;
-        const time = msg.createdAt?.toDate ? msg.createdAt.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "";
-        div.innerHTML = `
-          <img src="${msg.photoURL || 'https://via.placeholder.com/45'}" class="avatar" onerror="this.src='https://via.placeholder.com/45'">
-          <div class="message-content">
-            <div class="message-name">
-              ${escapeHtml(msg.name || "Пользователь")}
-              ${msg.isTeacher ? '<span class="teacher-badge">👩‍🏫 Воспитатель</span>' : ''}
-              <span class="message-time">${time}</span>
-            </div>
-            <div class="message-text">${escapeHtml(msg.text || "")}</div>
+  if (unsubscribeMessages) unsubscribeMessages();
+  unsubscribeMessages = db.collection("messages").orderBy("createdAt", "asc").limitToLast(100).onSnapshot((snapshot) => {
+    if (!chatBox) return;
+    const msgs = [];
+    snapshot.forEach(doc => msgs.push({ id: doc.id, ...doc.data() }));
+    if (msgs.length === 0) { chatBox.innerHTML = '<div class="empty-chat"><i class="far fa-comment-dots"></i> Пока тишина... напиши первое!</div>'; return; }
+    chatBox.innerHTML = "";
+    msgs.forEach(msg => {
+      const div = document.createElement("div");
+      div.className = `message ${msg.isTeacher ? 'message-teacher' : ''}`;
+      const time = msg.createdAt?.toDate ? msg.createdAt.toDate().toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' }) : "";
+      div.innerHTML = `
+        <img src="${msg.photoURL || 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png'}" class="avatar" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3135/3135715.png'">
+        <div class="message-content">
+          <div class="message-name">
+            ${escapeHtml(msg.name || "Друг")}
+            ${msg.isTeacher ? '<span class="teacher-badge"><i class="fas fa-chalkboard"></i> Воспитатель</span>' : ''}
+            <span class="message-time">${time}</span>
           </div>
-        `;
-        chatBox.appendChild(div);
-      });
-      chatBox.scrollTop = chatBox.scrollHeight;
-    }, (error) => {
-      console.error("Ошибка чата:", error);
-      chatBox.innerHTML = '<div class="empty-chat">⚠️ Ошибка загрузки чата</div>';
+          <div class="message-text">${escapeHtml(msg.text)}</div>
+        </div>
+      `;
+      chatBox.appendChild(div);
     });
+    chatBox.scrollTop = chatBox.scrollHeight;
+  });
 }
 
 // ========= ПРОФИЛЬ =========
 async function renderProfile() {
   const user = auth.currentUser;
-  if (!user) {
-    return `<div class="card"><button onclick="showLogin()">Войти</button><button onclick="showRegister()">Регистрация</button></div>`;
-  }
-  const isTeacherFlag = await isTeacher(user);
+  if (!user) return `<div class="card"><div class="locked-message"><i class="fas fa-user-lock"></i> Авторизуйся, чтобы увидеть профиль</div><button onclick="showLogin()">Войти</button><button onclick="showRegister()">Регистрация</button></div>`;
+  const teacherFlag = await isTeacher(user);
   return `
     <div class="card">
-      <h3>👤 Профиль</h3>
+      <h3><i class="fas fa-id-card"></i> Мой профиль</h3>
       <div class="profile-card">
-        <img src="${user.photoURL || 'https://via.placeholder.com/70'}" class="avatar" style="width:70px;height:70px;" onerror="this.src='https://via.placeholder.com/70'">
+        <img src="${user.photoURL || 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png'}" class="avatar" style="width:70px;height:70px;" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3135/3135715.png'">
         <div>
           <strong>${escapeHtml(user.displayName || user.email)}</strong><br>
           <small>${escapeHtml(user.email)}</small>
-          ${isTeacherFlag ? '<div class="badge teacher" style="margin-top:8px;">👩‍🏫 Воспитатель</div>' : '<div class="badge" style="margin-top:8px;">👪 Родитель</div>'}
+          ${teacherFlag ? '<div class="badge teacher" style="margin-top:5px;"><i class="fas fa-crown"></i> Воспитатель</div>' : '<div class="badge" style="margin-top:5px;"><i class="fas fa-baby-carriage"></i> Родитель</div>'}
         </div>
       </div>
-      <button onclick="updateAvatar()">🖼️ Сменить аватар</button>
-      <button onclick="logout()">🚪 Выйти</button>
+      <button onclick="updateAvatar()"><i class="fas fa-camera"></i> Сменить аватарку</button>
+      <button onclick="logout()"><i class="fas fa-sign-out-alt"></i> Выйти</button>
     </div>
   `;
 }
-
 async function updateAvatar() {
   const input = document.createElement('input');
   input.type = 'file';
@@ -488,33 +688,26 @@ async function updateAvatar() {
       const url = await ref.getDownloadURL();
       await user.updateProfile({ photoURL: url });
       await db.collection("users").doc(user.uid).set({ photoURL: url }, { merge: true });
-      alert("Аватар обновлён");
+      alert("Аватар обновлён ✨");
       navigate('profile');
     } catch(e) { alert("Ошибка: " + e.message); }
   };
   input.click();
 }
-
 async function logout() {
-  if (unsubscribeMessages) {
-    unsubscribeMessages();
-    unsubscribeMessages = null;
-  }
+  if (unsubscribeMessages) unsubscribeMessages();
   await auth.signOut();
-  alert("Вы вышли");
+  alert("До скорой встречи! 🐣");
   navigate('home', document.querySelector(".tab"));
 }
 
-// ========= СОЗДАНИЕ ВОСПИТАТЕЛЯ =========
+// ========= СОЗДАНИЕ УЧЁТКИ ВОСПИТАТЕЛЯ =========
 async function createTeacher() {
   try {
     const existing = await auth.signInWithEmailAndPassword(TEACHER_EMAIL, TEACHER_PASSWORD).catch(() => null);
-    if (existing) {
-      await auth.signOut();
-      return;
-    }
+    if (existing) { await auth.signOut(); return; }
     const newUser = await auth.createUserWithEmailAndPassword(TEACHER_EMAIL, TEACHER_PASSWORD);
-    await newUser.user.updateProfile({ displayName: "Воспитатель Анна" });
+    await newUser.user.updateProfile({ displayName: "Воспитатель Анна", photoURL: "https://cdn-icons-png.flaticon.com/512/6720/6720725.png" });
     await db.collection("users").doc(newUser.user.uid).set({ role: "teacher", email: TEACHER_EMAIL });
     await auth.signOut();
   } catch(e) { console.warn(e); }
@@ -526,49 +719,29 @@ async function navigate(screen, tabEl) {
     document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
     tabEl.classList.add("active");
   }
-  
   const root = document.getElementById("screen");
-  if (!root) return;
   root.style.opacity = "0";
-  
   setTimeout(async () => {
     let html = "";
     if (screen === "home") html = await renderHome();
     else if (screen === "schedule") html = await renderSchedule();
     else if (screen === "chat") html = await renderChat();
     else if (screen === "profile") html = await renderProfile();
-    
     root.innerHTML = html;
-    
-    if (screen === "chat" && auth.currentUser) {
-      loadMessages();
-    } else if (unsubscribeMessages) {
-      unsubscribeMessages();
-      unsubscribeMessages = null;
-    }
-    
+    if (screen === "chat" && auth.currentUser) loadMessages();
+    else if (unsubscribeMessages) { unsubscribeMessages(); unsubscribeMessages = null; }
     root.style.opacity = "1";
-  }, 50);
+  }, 40);
 }
 
-function escapeHtml(str) {
-  if (!str) return "";
-  return str.replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[m]));
-}
-
-// ========= ЗАПУСК =========
-// Сохраняем сессию — Firebase Auth автоматически сохраняет состояние в localStorage
-// При перезагрузке страницы пользователь останется в системе
-
+// СТАРТ
 createTeacher().then(() => {
-  // Подписываемся на изменения состояния авторизации
-  // Firebase Auth автоматически восстанавливает сессию при загрузке
   auth.onAuthStateChanged((user) => {
-    const active = document.querySelector(".tab.active");
-    if (active) {
-      const idx = Array.from(document.querySelectorAll('.tab')).indexOf(active);
-      const screens = ['home', 'schedule', 'chat', 'profile'];
-      navigate(screens[idx], active);
+    const activeTab = document.querySelector(".tab.active");
+    if (activeTab) {
+      const idx = Array.from(document.querySelectorAll('.tab')).indexOf(activeTab);
+      const pages = ['home', 'schedule', 'chat', 'profile'];
+      navigate(pages[idx], activeTab);
     } else {
       navigate('home', document.querySelector(".tab"));
     }

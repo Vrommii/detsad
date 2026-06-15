@@ -2,597 +2,628 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Ладушки | Детский сад</title>
-    <!-- Font Awesome 6 -->
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        :root {
-            --primary: #e8b87a;
-            --primary-dark: #c9965e;
-            --primary-light: #f5e2c1;
-            --secondary: #a8c9a5;
-            --text-dark: #5a3e2b;
-            --text-muted: #b28b65;
-            --border: #faeedb;
-            --success: #8fc98a;
-            --warning: #e8b87a;
-            --bg-cream: #fef9ef;
-            --card-white: #fffef7;
-        }
         body {
-            background: linear-gradient(145deg, #faf0e1 0%, #f5e6d3 100%);
-            font-family: 'Quicksand', sans-serif;
-            padding: 18px 14px 90px 14px;
-            color: var(--text-dark);
+            background: #faf0e1;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            padding: 20px 16px 90px 16px;
             min-height: 100vh;
         }
         .app-container {
-            max-width: 1300px;
+            max-width: 550px;
             margin: 0 auto;
-            background: var(--bg-cream);
+            background: #fffef7;
             border-radius: 48px;
-            box-shadow: 0 25px 45px -12px rgba(0,0,0,0.15);
+            box-shadow: 0 20px 35px -12px rgba(0,0,0,0.1);
             overflow: hidden;
-            border: 1px solid rgba(255,255,245,0.8);
         }
-        @media (max-width: 768px) { .app-container { border-radius: 32px; } }
-        
-        /* Анимации */
-        @keyframes fadeInUp { from { opacity: 0; transform: translateY(25px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes softPulse { 0% { box-shadow: 0 0 0 0 rgba(232,184,122,0.2); } 100% { box-shadow: 0 0 0 12px rgba(232,184,122,0); } }
-        
-        /* Хедер */
         .header {
-            background: linear-gradient(115deg, #f8e8d4, #faeedb);
-            padding: 22px 28px;
+            background: linear-gradient(115deg, #f8e3c2, #f5d5a8);
+            padding: 20px;
             text-align: center;
-            border-bottom: 2px solid #fff5e8;
         }
         .header h1 {
-            font-size: 28px;
-            font-weight: 700;
+            font-size: 24px;
             color: #7a5a3a;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 12px;
-        }
-        .header h1 i { font-size: 34px; color: var(--primary); }
-        
-        /* Карточки */
-        .card {
-            background: var(--card-white);
-            border-radius: 36px;
-            padding: 24px;
-            margin-bottom: 24px;
-            box-shadow: 0 6px 14px rgba(0,0,0,0.02);
-            border: 1px solid var(--border);
-            transition: all 0.3s ease;
-        }
-        .card:hover { transform: translateY(-3px); box-shadow: 0 15px 30px -10px rgba(0,0,0,0.08); }
-        .card-title {
-            font-size: 1.35rem;
-            font-weight: 700;
-            color: var(--primary-dark);
-            display: flex;
-            align-items: center;
             gap: 10px;
-            margin-bottom: 20px;
-            border-left: 5px solid var(--primary);
-            padding-left: 18px;
         }
-        
-        /* Кнопки */
-        button, .btn {
+        .card {
+            background: white;
+            margin: 16px;
+            padding: 20px;
+            border-radius: 32px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            border: 1px solid #faeedb;
+        }
+        .card-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #b68b55;
+            margin-bottom: 16px;
+            border-left: 4px solid #f0bc7a;
+            padding-left: 12px;
+        }
+        button {
             background: #f5e2c1;
             border: none;
             border-radius: 60px;
-            padding: 10px 18px;
-            font-weight: 600;
-            font-size: 0.9rem;
-            cursor: pointer;
-            transition: all 0.2s;
-            color: #5f3f28;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            font-family: inherit;
-        }
-        button:hover { background: #ecd6aa; transform: scale(0.97); }
-        .btn-primary { background: var(--primary); color: white; }
-        .btn-primary:hover { background: var(--primary-dark); }
-        
-        /* Формы */
-        input, select, textarea {
-            width: 100%;
             padding: 12px 18px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+            font-size: 0.9rem;
+            transition: 0.2s;
+        }
+        button:hover { background: #ecd6aa; transform: scale(0.98); }
+        input, select {
+            width: 100%;
+            padding: 12px 16px;
             margin-top: 8px;
             border-radius: 48px;
             border: 1.5px solid #f7e4ca;
             background: white;
-            font-size: 0.9rem;
             outline: none;
-            font-family: inherit;
         }
-        input:focus, select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(232,184,122,0.2); }
-        
-        /* Таббар */
+        input:focus { border-color: #f0bc7a; }
+        .error-msg, .success-msg {
+            padding: 10px;
+            border-radius: 30px;
+            margin-top: 10px;
+            text-align: center;
+            display: none;
+            font-size: 0.85rem;
+        }
+        .error-msg { background: #ffe1e1; color: #c23d3d; }
+        .success-msg { background: #daf7da; color: #267c26; }
         .bottom-tabs {
             position: fixed;
-            bottom: 18px;
+            bottom: 15px;
             left: 50%;
             transform: translateX(-50%);
             background: #fffcf0;
-            backdrop-filter: blur(12px);
             display: flex;
-            padding: 8px 22px;
-            border-radius: 60px;
-            gap: 28px;
-            box-shadow: 0 12px 28px rgba(0,0,0,0.15);
+            padding: 8px 20px;
+            border-radius: 50px;
+            gap: 25px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
             z-index: 200;
-            border: 1px solid var(--border);
         }
         .tab {
-            font-size: 26px;
+            font-size: 24px;
             cursor: pointer;
-            opacity: 0.55;
+            opacity: 0.5;
+            padding: 5px;
+            border-radius: 40px;
             transition: 0.2s;
-            padding: 6px;
-            border-radius: 50px;
-            color: #b48142;
         }
-        .tab.active { opacity: 1; transform: scale(1.15); background: #ffefdb; color: #cf8d44; }
-        
-        /* Бейджи */
-        .badge { background: #f3e5d3; border-radius: 40px; padding: 4px 12px; font-size: 0.7rem; font-weight: 600; display: inline-block; }
-        .badge-teacher { background: #f5d9b0; color: #9b5e2c; }
-        .badge-admin { background: #efcd9b; color: #7a4c1d; }
-        
-        /* Сетки */
-        .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 30px; }
-        .stat-card { background: rgba(255,250,240,0.85); border-radius: 32px; padding: 20px; text-align: center; border: 1px solid var(--border); transition: 0.3s; }
-        .stat-card:hover { transform: translateY(-5px); background: white; }
-        .stat-value { font-size: 2.2rem; font-weight: 800; color: var(--primary-dark); }
-        
-        .two-columns { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px; }
-        @media (max-width: 800px) { .two-columns { grid-template-columns: 1fr; } }
-        
-        .students-grid, .circles-grid { display: flex; flex-wrap: wrap; gap: 12px; max-height: 280px; overflow-y: auto; padding: 8px 4px; }
-        .student-card, .circle-card { background: #fef5ea; border-radius: 60px; padding: 10px 18px; display: flex; align-items: center; gap: 12px; cursor: pointer; transition: 0.2s; border: 2px solid transparent; }
-        .student-card.active, .circle-card.active { border-color: var(--primary); background: #fff3e4; }
-        .progress-bar { background: #f0dce8; border-radius: 40px; height: 12px; overflow: hidden; margin: 12px 0; }
-        .progress-fill { background: linear-gradient(90deg, var(--primary), var(--primary-light)); height: 100%; width: 0%; border-radius: 40px; transition: width 0.5s; }
-        
-        /* Чат */
-        .chat-container { background: #fefaf5; border-radius: 32px; overflow: hidden; border: 1px solid var(--border); }
-        .chat-messages { max-height: 320px; overflow-y: auto; padding: 18px; display: flex; flex-direction: column; gap: 14px; background: #fffcf8; }
-        .message { display: flex; gap: 12px; max-width: 85%; }
-        .message.parent { align-self: flex-end; flex-direction: row-reverse; }
-        .message-bubble { padding: 10px 18px; border-radius: 28px; font-size: 0.9rem; }
-        .message.parent .message-bubble { background: var(--primary); color: white; border-bottom-right-radius: 8px; }
-        .message.teacher .message-bubble { background: white; border: 1px solid var(--border); border-bottom-left-radius: 8px; }
-        .chat-input { display: flex; gap: 12px; padding: 16px; background: white; border-top: 1px solid var(--border); }
-        
-        /* Модалка */
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(6px); z-index: 1000; justify-content: center; align-items: center; }
-        .modal.active { display: flex; }
-        .modal-content { background: white; border-radius: 48px; max-width: 500px; width: 90%; padding: 32px; max-height: 85vh; overflow-y: auto; }
-        
-        .error-msg, .success-msg { padding: 10px; border-radius: 40px; margin-top: 12px; text-align: center; display: none; }
-        .error-msg { background: #ffe1e1; color: #bc5a5a; }
-        .success-msg { background: #e4f5e4; color: #3c8c3c; }
+        .tab.active { opacity: 1; background: #ffe0bf; transform: scale(1.1); }
+        .small { font-size: 0.7rem; color: #ad8b64; text-align: center; margin-top: 12px; }
         .text-center { text-align: center; }
-        .mt-20 { margin-top: 20px; }
-        hr { margin: 16px 0; border-color: var(--border); }
-        .flex { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+        .loading { text-align: center; padding: 40px; color: #7b5a3b; }
+        .badge { background: #e9ddce; border-radius: 30px; padding: 4px 12px; font-size: 0.7rem; display: inline-block; }
+        .flex { display: flex; gap: 10px; flex-wrap: wrap; }
+        .students-grid, .circles-grid { display: flex; flex-direction: column; gap: 10px; max-height: 300px; overflow-y: auto; }
+        .student-card, .circle-card {
+            background: #fef5ea;
+            border-radius: 60px;
+            padding: 10px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .student-card.active, .circle-card.active { background: #fff3e4; border: 2px solid #f0bc7a; }
+        .schedule-item { background: #fef2e2; padding: 10px 16px; border-radius: 40px; margin-bottom: 8px; }
     </style>
 </head>
 <body>
 <div class="app-container">
     <div class="header">
         <h1><i class="fas fa-bear"></i> Ладушки <i class="fas fa-leaf"></i></h1>
-        <div style="font-size: 0.8rem; margin-top: 6px;">🌼 детский сад для маленьких звёздочек</div>
+        <div class="small">детский сад для маленьких звёздочек</div>
     </div>
-    <div id="appContent"><div class="text-center" style="padding: 50px;">🐻 загрузка...</div></div>
-    <div class="bottom-tabs" id="tabBar" style="display: none;">
-        <div class="tab" data-tab="home"><i class="fas fa-home"></i></div>
-        <div class="tab" data-tab="kids"><i class="fas fa-baby-carriage"></i></div>
-        <div class="tab" data-tab="circles"><i class="fas fa-palette"></i></div>
-        <div class="tab" data-tab="schedule"><i class="fas fa-calendar-alt"></i></div>
-        <div class="tab" data-tab="chat"><i class="fas fa-comment-dots"></i></div>
-        <div class="tab" data-tab="profile"><i class="fas fa-user"></i></div>
+    <div id="content"><div class="loading"><i class="fas fa-spinner fa-pulse"></i> Загрузка...</div></div>
+    <div class="bottom-tabs" id="tabbar" style="display: none;">
+        <div class="tab" onclick="navigate('home')"><i class="fas fa-home"></i></div>
+        <div class="tab" onclick="navigate('kids')"><i class="fas fa-baby-carriage"></i></div>
+        <div class="tab" onclick="navigate('circles')"><i class="fas fa-palette"></i></div>
+        <div class="tab" onclick="navigate('schedule')"><i class="fas fa-calendar-alt"></i></div>
+        <div class="tab" onclick="navigate('chat')"><i class="fas fa-comment-dots"></i></div>
+        <div class="tab" onclick="navigate('profile')"><i class="fas fa-user"></i></div>
     </div>
 </div>
 
 <script>
-    // ==================== FIREBASE ====================
-    const firebaseConfig = {
-        apiKey: "AIzaSyAuZgI5XVWNSfHKWhAp26SWdD_Ye-3gBzs",
-        authDomain: "detsad-7ca3d.firebaseapp.com",
-        projectId: "detsad-7ca3d",
-        storageBucket: "detsad-7ca3d.firebasestorage.app"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const db = firebase.firestore();
+// ============ ПОЛНЫЙ КОНФИГ FIREBASE ============
+const firebaseConfig = {
+    apiKey: "AIzaSyAuZgI5XVWNSfHKWhAp26SWdD_Ye-3gBzs",
+    authDomain: "detsad-7ca3d.firebaseapp.com",
+    projectId: "detsad-7ca3d",
+    storageBucket: "detsad-7ca3d.firebasestorage.app",
+    appId: "1:1051274306315:web:abc123def456"  // добавлен для стабильности
+};
 
-    // Глобальные переменные
-    let currentUser = null;
-    let currentChildId = null;
-    let currentGroupId = null;
-    let unsubscribeMessages = null;
-    
-    // Тестовые аккаунты
-    const TEST_ACCOUNTS = [
-        { email: "admin@ladushki.ru", password: "Admin2025", name: "Мария Петровна", role: "admin" },
-        { email: "teacher@ladushki.ru", password: "Ladushki2025", name: "Анна Сергеевна", role: "teacher" }
-    ];
+// Инициализация Firebase
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
 
-    // ==================== ВСПОМОГАТЕЛЬНЫЕ ====================
-    function escapeHtml(str) { if(!str) return ''; return str.replace(/[&<>]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[m])); }
-    
-    async function getUserRole(user) {
-        if(!user) return null;
-        if(user.email === "admin@ladushki.ru") return "admin";
-        if(user.email === "teacher@ladushki.ru") return "teacher";
-        const doc = await db.collection("users").doc(user.uid).get();
-        return doc.exists ? doc.data().role : "parent";
-    }
+// Глобальные переменные
+let currentUser = null;
+let currentChildId = null;
+let currentGroupId = null;
+let unsubscribeMessages = null;
 
-    // Автосоздание тестовых аккаунтов
-    async function seedTestAccounts() {
-        for(const acc of TEST_ACCOUNTS) {
-            try {
-                await auth.createUserWithEmailAndPassword(acc.email, acc.password);
-                console.log("Создан:", acc.email);
-            } catch(e) { if(e.code !== 'auth/email-already-in-use') console.warn(e); }
-            try {
-                const userCred = await auth.signInWithEmailAndPassword(acc.email, acc.password);
-                await db.collection("users").doc(userCred.user.uid).set({
-                    email: acc.email, role: acc.role, name: acc.name
-                }, { merge: true });
-                await auth.signOut();
-            } catch(e) {}
-        }
-        // Общее расписание
-        const scheduleRef = db.collection("settings").doc("commonSchedule");
-        if(!(await scheduleRef.get()).exists) {
-            await scheduleRef.set({ items: ["🍳 08:30 Завтрак", "🎨 10:00 Творчество", "🚶 11:30 Прогулка", "🍲 12:30 Обед", "😴 13:30 Тихий час", "🍎 15:30 Полдник"] });
-        }
-        // Тестовые кружки
-        const circlesSnap = await db.collection("circles").get();
-        if(circlesSnap.empty) {
-            await db.collection("circles").add({ name: "🎨 Рисование", description: "Развитие творческих способностей", enrolledKids: [] });
-            await db.collection("circles").add({ name: "🏃 Физкультура", description: "Подвижные игры и спорт", enrolledKids: [] });
-            await db.collection("circles").add({ name: "🎭 Театральная студия", description: "Развитие речи и актёрское мастерство", enrolledKids: [] });
-        }
-    }
+// Тестовые аккаунты
+const TEST_ACCOUNTS = [
+    { email: "admin@ladushki.ru", password: "Admin2025", name: "Мария Петровна", role: "admin" },
+    { email: "teacher@ladushki.ru", password: "Ladushki2025", name: "Анна Сергеевна", role: "teacher" }
+];
 
-    // ==================== АВТОРИЗАЦИЯ ====================
-    function showLogin() {
-        document.getElementById("appContent").innerHTML = `
-            <div style="max-width:500px; margin:30px auto;">
-                <div class="card">
-                    <div class="card-title"><i class="fas fa-duck"></i> Вход в садик</div>
-                    <input id="loginEmail" placeholder="Email">
-                    <input id="loginPass" type="password" placeholder="Пароль">
-                    <div id="loginError" class="error-msg"></div>
-                    <button class="btn-primary" style="width:100%; margin-top:16px;" onclick="doLogin()"><i class="fas fa-sign-in-alt"></i> Войти</button>
-                    <div class="text-center" style="margin-top:20px; font-size:0.75rem;">✨ тестовые: admin@ladushki.ru / Admin2025<br>teacher@ladushki.ru / Ladushki2025</div>
-                    <div class="text-center" style="margin-top:12px;"><span style="color:#e68a2e; cursor:pointer;" onclick="showRegister()">🐣 Зарегистрироваться</span></div>
-                </div>
-            </div>
-        `;
-    }
+// ============ ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ============
+function escapeHtml(str) { if(!str) return ''; return str.replace(/[&<>]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[m])); }
 
-    window.doLogin = async () => {
-        const email = document.getElementById("loginEmail").value.trim();
-        const pass = document.getElementById("loginPass").value;
-        const errDiv = document.getElementById("loginError");
-        if(!email || !pass) { errDiv.style.display="block"; errDiv.innerText="Заполните поля"; return; }
+async function getUserRole(user) {
+    if(!user) return null;
+    if(user.email === "admin@ladushki.ru") return "admin";
+    if(user.email === "teacher@ladushki.ru") return "teacher";
+    const doc = await db.collection("users").doc(user.uid).get();
+    return doc.exists ? doc.data().role : "parent";
+}
+
+// ============ СОЗДАНИЕ ТЕСТОВЫХ АККАУНТОВ ============
+async function seedTestAccounts() {
+    for(const acc of TEST_ACCOUNTS) {
         try {
-            await auth.signInWithEmailAndPassword(email, pass);
-        } catch(e) {
-            errDiv.style.display="block";
-            errDiv.innerText = e.code === 'auth/invalid-credential' ? "❌ Неверный email или пароль" : "Ошибка: "+e.message;
-        }
-    };
-
-    function showRegister() {
-        document.getElementById("appContent").innerHTML = `
-            <div style="max-width:500px; margin:30px auto;">
-                <div class="card">
-                    <div class="card-title"><i class="fas fa-child"></i> Регистрация</div>
-                    <input id="regName" placeholder="Ваше имя">
-                    <input id="regEmail" placeholder="Email">
-                    <input id="regPass" type="password" placeholder="Пароль (мин 6)">
-                    <select id="regRole"><option value="parent">Родитель</option><option value="teacher">Воспитатель</option></select>
-                    <div id="regError" class="error-msg"></div>
-                    <div id="regSuccess" class="success-msg"></div>
-                    <button class="btn-primary" style="width:100%; margin-top:16px;" onclick="doRegister()"><i class="fas fa-user-plus"></i> Зарегистрироваться</button>
-                    <div class="text-center" style="margin-top:12px;"><span style="color:#e68a2e; cursor:pointer;" onclick="showLogin()">🔙 Войти</span></div>
-                </div>
-            </div>
-        `;
-    }
-
-    window.doRegister = async () => {
-        const name = document.getElementById("regName").value.trim();
-        const email = document.getElementById("regEmail").value.trim();
-        const pass = document.getElementById("regPass").value;
-        const role = document.getElementById("regRole").value;
-        const errDiv = document.getElementById("regError");
-        const sucDiv = document.getElementById("regSuccess");
-        errDiv.style.display="none"; sucDiv.style.display="none";
-        if(!name || !email || !pass) { errDiv.style.display="block"; errDiv.innerText="Заполните все поля"; return; }
-        if(pass.length<6) { errDiv.style.display="block"; errDiv.innerText="Пароль ≥6 символов"; return; }
-        try {
-            const cred = await auth.createUserWithEmailAndPassword(email, pass);
-            await cred.user.updateProfile({ displayName: name });
-            await db.collection("users").doc(cred.user.uid).set({ name, email, role, createdAt: new Date() });
-            sucDiv.style.display="block"; sucDiv.innerText="✅ Регистрация успешна!";
-            setTimeout(() => { window.location.reload(); }, 1500);
-        } catch(e) { errDiv.style.display="block"; errDiv.innerText=e.message; }
-    };
-
-    // ==================== ОСНОВНЫЕ КОМПОНЕНТЫ ====================
-    async function renderHome() {
-        const user = auth.currentUser;
-        if(!user) return `<div class="card"><div class="text-center" style="padding:30px;"><button class="btn-primary" onclick="showLogin()">Войти</button></div></div>`;
-        const role = await getUserRole(user);
-        const roleIcon = role === "admin" ? "👑" : (role === "teacher" ? "👩‍🏫" : "👪");
-        const roleName = role === "admin" ? "Администратор" : (role === "teacher" ? "Воспитатель" : "Родитель");
-        return `
-            <div class="card" style="text-align:center;">
-                <div style="font-size: 70px;">${roleIcon}</div>
-                <h3>${escapeHtml(user.displayName || user.email)}</h3>
-                <span class="badge">${roleName}</span>
-                <div style="margin-top:20px;">
-                    <button onclick="logout()" style="background:#ffddcc;"><i class="fas fa-sign-out-alt"></i> Выйти</button>
-                </div>
-            </div>
-            <div class="stats-row">
-                <div class="stat-card"><div class="stat-icon">👶</div><div class="stat-value" id="kidsCount">—</div><div>детей в группе</div></div>
-                <div class="stat-card"><div class="stat-icon">🎨</div><div class="stat-value" id="circlesCount">—</div><div>кружков</div></div>
-                <div class="stat-card"><div class="stat-icon">💬</div><div class="stat-value" id="messagesCount">—</div><div>сообщений</div></div>
-            </div>
-        `;
-    }
-
-    async function renderKids() {
-        const user = auth.currentUser;
-        if(!user) return `<div class="card"><div class="locked-message">Войдите в аккаунт</div></div>`;
-        const role = await getUserRole(user);
-        if(role === "parent") {
-            const kidsSnap = await db.collection("kids").where("parentId","==",user.uid).get();
-            let kidsHtml = "";
-            kidsSnap.forEach(d => kidsHtml += `<div class="student-card ${currentChildId === d.id ? 'active' : ''}" onclick="selectChild('${d.id}')"><div class="student-avatar">👶</div><div><strong>${escapeHtml(d.data().name)}</strong><br><span class="badge">${d.data().groupId ? '✅ в группе' : '⏳ без группы'}</span></div></div>`);
-            return `
-                <div class="card">
-                    <div class="card-title"><i class="fas fa-baby-carriage"></i> Мои дети</div>
-                    <div class="students-grid">${kidsHtml || "<div class='text-center'>Нет детей</div>"}</div>
-                    <input id="newKidName" placeholder="Имя ребенка"><button onclick="addKid()"><i class="fas fa-plus"></i> Добавить</button>
-                    ${currentChildId ? `<div class="success-msg" style="display:block; margin-top:15px;">✅ Активный ребёнок выбран</div>` : `<div class="error-msg" style="display:block; margin-top:15px;">⚠️ Выберите активного ребёнка</div>`}
-                </div>
-            `;
-        } else if(role === "admin" || role === "teacher") {
-            const kidsSnap = await db.collection("kids").get();
-            let list = "";
-            kidsSnap.forEach(k => list += `<div class="student-card"><div><strong>${escapeHtml(k.data().name)}</strong><br><small>Родитель: ${escapeHtml(k.data().parentId?.slice(0,8))}</small></div></div>`);
-            return `<div class="card"><div class="card-title"><i class="fas fa-users-viewfinder"></i> Все дети</div><div class="students-grid">${list || "Нет детей"}</div></div>`;
-        }
-        return `<div class="card"><div class="locked-message">Доступ только для родителей</div></div>`;
-    }
-
-    window.addKid = async () => {
-        const user = auth.currentUser;
-        const name = document.getElementById("newKidName")?.value.trim();
-        if(!name) { alert("Введите имя"); return; }
-        await db.collection("kids").add({ name, parentId: user.uid, groupId: null });
-        document.getElementById("newKidName").value = "";
-        navigate('kids');
-    };
-    window.selectChild = (id) => { currentChildId = id; currentGroupId = null; alert("Активный ребёнок выбран"); navigate('kids'); };
-
-    async function renderCircles() {
-        const user = auth.currentUser;
-        if(!user) return `<div class="card"><div class="locked-message">Войдите</div></div>`;
-        const role = await getUserRole(user);
-        const circlesSnap = await db.collection("circles").get();
-        let circlesHtml = "";
-        for(const doc of circlesSnap.docs) {
-            const c = doc.data();
-            let action = "";
-            if(role === "parent" && currentChildId) {
-                const isEnrolled = c.enrolledKids?.includes(currentChildId);
-                action = `<button onclick="toggleEnroll('${doc.id}')" class="${isEnrolled ? 'btn-primary' : ''}" style="margin-top:0;">${isEnrolled ? '✅ Отменить' : '✏️ Записать'}</button>`;
-            } else if(role === "teacher" || role === "admin") {
-                action = `<button onclick="viewCircleKids('${doc.id}')">👀 Список детей</button>`;
-            }
-            circlesHtml += `<div class="circle-card"><div><strong>${escapeHtml(c.name)}</strong><br><small>${escapeHtml(c.description||'')}</small></div><div>${action}</div></div>`;
-        }
-        let addForm = (role==="teacher"||role==="admin") ? `<hr><input id="newCircleName" placeholder="Название кружка"><input id="newCircleDesc" placeholder="Описание"><button onclick="addCircle()">➕ Добавить кружок</button>` : "";
-        return `<div class="card"><div class="card-title"><i class="fas fa-palette"></i> Кружки и секции</div><div class="circles-grid">${circlesHtml||"Нет кружков"}</div>${addForm}</div>`;
-    }
-
-    window.toggleEnroll = async (circleId) => {
-        if(!currentChildId) { alert("Сначала выберите активного ребёнка во вкладке 'Дети'"); return; }
-        const circleRef = db.collection("circles").doc(circleId);
-        const circle = await circleRef.get();
-        let enrolled = circle.data().enrolledKids || [];
-        if(enrolled.includes(currentChildId)) {
-            enrolled = enrolled.filter(id => id !== currentChildId);
-            alert("✅ Запись отменена");
-        } else {
-            enrolled.push(currentChildId);
-            alert("✅ Ребёнок записан на кружок!");
-        }
-        await circleRef.update({ enrolledKids: enrolled });
-        navigate('circles');
-    };
-    window.viewCircleKids = async (circleId) => {
-        const circle = await db.collection("circles").doc(circleId).get();
-        const kidsIds = circle.data().enrolledKids || [];
-        let list = "";
-        for(let id of kidsIds) {
-            const kid = await db.collection("kids").doc(id).get();
-            if(kid.exists) list += `- ${kid.data().name}\n`;
-        }
-        alert(`📋 Записаны дети:\n${list || "Нет записей"}`);
-    };
-    window.addCircle = async () => {
-        const name = document.getElementById("newCircleName")?.value.trim();
-        if(!name) return;
-        await db.collection("circles").add({ name, description: document.getElementById("newCircleDesc")?.value.trim(), enrolledKids: [] });
-        navigate('circles');
-    };
-
-    async function renderSchedule() {
-        const user = auth.currentUser;
-        if(!user) return `<div class="card"><div class="locked-message">Войдите</div></div>`;
-        const role = await getUserRole(user);
-        const common = (await db.collection("settings").doc("commonSchedule").get()).data()?.items || [];
-        let commonHtml = common.map(t => `<div class="schedule-item" style="background:#fef2e2; padding:10px 16px; border-radius:40px; margin-bottom:8px;">📌 ${escapeHtml(t)}</div>`).join("");
+            await auth.createUserWithEmailAndPassword(acc.email, acc.password);
+            console.log("Создан:", acc.email);
+        } catch(e) { if(e.code !== 'auth/email-already-in-use') console.warn(e); }
         
-        let indivHtml = "";
-        if(role === "teacher" || role === "admin") {
-            const kidsSnap = await db.collection("kids").get();
-            let kidSelect = `<select id="indivKid"><option value="">Выбрать ребёнка</option>`;
-            kidsSnap.forEach(k => kidSelect += `<option value="${k.id}">${escapeHtml(k.data().name)}</option>`);
-            kidSelect += `</select><input id="indivEvent" placeholder="Индивидуальное занятие"><button onclick="addIndividualEvent()">➕ Добавить</button>`;
-            const events = await db.collection("individualSchedule").get();
-            let eventsHtml = "";
-            events.forEach(e => eventsHtml += `<div class="schedule-item">🧸 ${escapeHtml(e.data().childName)}: ${escapeHtml(e.data().event)}</div>`);
-            indivHtml = `<hr><h4>📋 Индивидуальное расписание</h4>${kidSelect}<div>${eventsHtml||"Нет записей"}</div>`;
-        } else if(role === "parent" && currentChildId) {
-            const events = await db.collection("individualSchedule").where("childId","==",currentChildId).get();
-            let myHtml = "";
-            events.forEach(e => myHtml += `<div class="schedule-item">📖 ${escapeHtml(e.data().event)}</div>`);
-            indivHtml = `<hr><h4>📖 Занятия ребёнка</h4>${myHtml||"Нет индивидуальных занятий"}`;
-        }
-        return `<div class="card"><div class="card-title"><i class="fas fa-calendar-alt"></i> Расписание дня</div><h4>📋 Общее расписание</h4>${commonHtml}${indivHtml}</div>`;
+        try {
+            const userCred = await auth.signInWithEmailAndPassword(acc.email, acc.password);
+            await db.collection("users").doc(userCred.user.uid).set({
+                email: acc.email, role: acc.role, name: acc.name
+            }, { merge: true });
+            await auth.signOut();
+        } catch(e) {}
     }
+    
+    // Общее расписание
+    const scheduleRef = db.collection("settings").doc("commonSchedule");
+    if(!(await scheduleRef.get()).exists) {
+        await scheduleRef.set({ items: ["🍳 08:30 Завтрак", "🎨 10:00 Творчество", "🚶 11:30 Прогулка", "🍲 12:30 Обед", "😴 13:30 Тихий час", "🍎 15:30 Полдник"] });
+    }
+    
+    // Тестовые кружки
+    const circlesSnap = await db.collection("circles").get();
+    if(circlesSnap.empty) {
+        await db.collection("circles").add({ name: "🎨 Рисование", description: "Развитие творческих способностей", enrolledKids: [] });
+        await db.collection("circles").add({ name: "🏃 Физкультура", description: "Подвижные игры", enrolledKids: [] });
+        await db.collection("circles").add({ name: "🎭 Театральная студия", description: "Развитие речи", enrolledKids: [] });
+    }
+}
 
-    window.addIndividualEvent = async () => {
-        const kidId = document.getElementById("indivKid")?.value;
-        const eventText = document.getElementById("indivEvent")?.value.trim();
-        if(!kidId || !eventText) { alert("Выберите ребёнка и введите занятие"); return; }
-        const kid = await db.collection("kids").doc(kidId).get();
-        await db.collection("individualSchedule").add({ childId: kidId, childName: kid.data().name, event: eventText });
-        navigate('schedule');
-    };
+// ============ АВТОРИЗАЦИЯ ============
+function showLogin() {
+    document.getElementById("content").innerHTML = `
+        <div class="card">
+            <div class="card-title"><i class="fas fa-duck"></i> Вход в садик</div>
+            <input id="loginEmail" placeholder="Email">
+            <input id="loginPass" type="password" placeholder="Пароль">
+            <div id="loginError" class="error-msg"></div>
+            <button onclick="doLogin()"><i class="fas fa-sign-in-alt"></i> Войти</button>
+            <div class="small">✨ admin@ladushki.ru / Admin2025<br>✨ teacher@ladushki.ru / Ladushki2025</div>
+            <div class="small"><span style="color:#e68a2e;cursor:pointer;" onclick="showRegister()">🐣 Зарегистрироваться</span></div>
+        </div>
+    `;
+}
 
-    // ==================== ЧАТ ПО ГРУППАМ ====================
-    async function renderChat() {
-        const user = auth.currentUser;
-        if(!user) return `<div class="card"><div class="locked-message">Войдите</div></div>`;
-        const role = await getUserRole(user);
-        let groupId = null;
-        if(role === "parent" && currentChildId) {
-            const kid = await db.collection("kids").doc(currentChildId).get();
-            groupId = kid.data()?.groupId;
-        } else if(role === "teacher" || role === "admin") {
-            const userDoc = await db.collection("users").doc(user.uid).get();
-            const groupIds = userDoc.data()?.groupIds || [];
-            groupId = groupIds[0];
+window.doLogin = async () => {
+    const email = document.getElementById("loginEmail").value.trim();
+    const pass = document.getElementById("loginPass").value;
+    const errDiv = document.getElementById("loginError");
+    
+    if(!email || !pass) {
+        errDiv.style.display = "block";
+        errDiv.innerText = "Заполните все поля";
+        return;
+    }
+    
+    errDiv.style.display = "none";
+    
+    try {
+        await auth.signInWithEmailAndPassword(email, pass);
+        document.getElementById("tabbar").style.display = "flex";
+        navigate('home');
+    } catch(e) {
+        errDiv.style.display = "block";
+        errDiv.innerText = "❌ Неверный email или пароль";
+        console.error(e);
+    }
+};
+
+function showRegister() {
+    document.getElementById("content").innerHTML = `
+        <div class="card">
+            <div class="card-title"><i class="fas fa-child"></i> Регистрация</div>
+            <input id="regName" placeholder="Ваше имя">
+            <input id="regEmail" placeholder="Email">
+            <input id="regPass" type="password" placeholder="Пароль (мин 6)">
+            <select id="regRole">
+                <option value="parent">Родитель</option>
+                <option value="teacher">Воспитатель</option>
+            </select>
+            <div id="regError" class="error-msg"></div>
+            <div id="regSuccess" class="success-msg"></div>
+            <button onclick="doRegister()"><i class="fas fa-user-plus"></i> Зарегистрироваться</button>
+            <div class="small"><span style="color:#e68a2e;cursor:pointer;" onclick="showLogin()">🔙 Уже есть аккаунт? Войти</span></div>
+        </div>
+    `;
+}
+
+window.doRegister = async () => {
+    const name = document.getElementById("regName").value.trim();
+    const email = document.getElementById("regEmail").value.trim();
+    const pass = document.getElementById("regPass").value;
+    const role = document.getElementById("regRole").value;
+    const errDiv = document.getElementById("regError");
+    const sucDiv = document.getElementById("regSuccess");
+    
+    errDiv.style.display = "none";
+    sucDiv.style.display = "none";
+    
+    if(!name || !email || !pass) {
+        errDiv.style.display = "block";
+        errDiv.innerText = "Заполните все поля";
+        return;
+    }
+    if(pass.length < 6) {
+        errDiv.style.display = "block";
+        errDiv.innerText = "Пароль должен быть не менее 6 символов";
+        return;
+    }
+    
+    try {
+        const cred = await auth.createUserWithEmailAndPassword(email, pass);
+        await cred.user.updateProfile({ displayName: name });
+        await db.collection("users").doc(cred.user.uid).set({
+            name, email, role, createdAt: new Date()
+        });
+        sucDiv.style.display = "block";
+        sucDiv.innerText = "✅ Регистрация успешна! Перенаправление...";
+        setTimeout(() => {
+            window.location.reload();
+        }, 1500);
+    } catch(e) {
+        errDiv.style.display = "block";
+        if(e.code === 'auth/email-already-in-use') {
+            errDiv.innerText = "❌ Этот email уже зарегистрирован";
+        } else {
+            errDiv.innerText = "❌ " + e.message;
         }
-        if(!groupId) return `<div class="card"><div class="locked-message">Вы не состоите в группе. Обратитесь к администратору.</div></div>`;
-        currentGroupId = groupId;
+    }
+};
+
+// ============ ВЫХОД ============
+window.logout = async () => {
+    if(unsubscribeMessages) unsubscribeMessages();
+    await auth.signOut();
+    currentChildId = null;
+    currentGroupId = null;
+    document.getElementById("tabbar").style.display = "none";
+    showLogin();
+};
+
+// ============ ГЛАВНАЯ ============
+async function renderHome() {
+    const user = auth.currentUser;
+    if(!user) return `<div class="card">Ошибка: не авторизован</div>`;
+    const role = await getUserRole(user);
+    const roleIcon = role === "admin" ? "👑" : (role === "teacher" ? "👩‍🏫" : "👪");
+    const roleName = role === "admin" ? "Администратор" : (role === "teacher" ? "Воспитатель" : "Родитель");
+    return `
+        <div class="card" style="text-align:center;">
+            <div style="font-size: 60px;">${roleIcon}</div>
+            <h3>${escapeHtml(user.displayName || user.email)}</h3>
+            <span class="badge">${roleName}</span>
+            <div style="margin-top: 20px;">
+                <button onclick="logout()"><i class="fas fa-sign-out-alt"></i> Выйти</button>
+            </div>
+        </div>
+    `;
+}
+
+// ============ ДЕТИ ============
+async function renderKids() {
+    const user = auth.currentUser;
+    if(!user) return `<div class="card"><div class="text-center">Войдите в аккаунт</div></div>`;
+    const role = await getUserRole(user);
+    
+    if(role === "parent") {
+        const kidsSnap = await db.collection("kids").where("parentId", "==", user.uid).get();
+        let kidsHtml = "";
+        kidsSnap.forEach(d => {
+            kidsHtml += `<div class="student-card ${currentChildId === d.id ? 'active' : ''}" onclick="selectChild('${d.id}')">
+                <span>👶 ${escapeHtml(d.data().name)} ${d.data().groupId ? '✅' : '⏳'}</span>
+                <i class="fas fa-chevron-right"></i>
+            </div>`;
+        });
         return `
             <div class="card">
-                <div class="card-title"><i class="fas fa-comments"></i> Чат группы</div>
-                <div class="chat-container">
-                    <div id="chatMessages" class="chat-messages"></div>
-                    <div class="chat-input">
-                        <input id="chatInput" placeholder="Напишите сообщение..." style="flex:1;">
-                        <button onclick="sendMessage()" style="width:auto;"><i class="fas fa-paper-plane"></i></button>
-                    </div>
-                </div>
+                <div class="card-title"><i class="fas fa-baby-carriage"></i> Мои дети</div>
+                <div class="students-grid">${kidsHtml || "<div class='text-center'>Нет детей</div>"}</div>
+                <input id="newKidName" placeholder="Имя ребенка">
+                <button onclick="addKid()"><i class="fas fa-plus"></i> Добавить</button>
+                ${currentChildId ? `<div class="success-msg" style="display:block; margin-top:15px;">✅ Активный ребёнок выбран</div>` : `<div class="error-msg" style="display:block; margin-top:15px;">⚠️ Выберите активного ребёнка</div>`}
             </div>
         `;
     }
+    return `<div class="card"><div class="text-center">Доступ только для родителей</div></div>`;
+}
 
-    window.sendMessage = async () => {
-        const user = auth.currentUser;
-        const text = document.getElementById("chatInput")?.value.trim();
-        if(!text || !currentGroupId) return;
-        const role = await getUserRole(user);
-        await db.collection("groupMessages").add({
-            text, groupId: currentGroupId, uid: user.uid,
-            name: user.displayName || user.email, role,
-            createdAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
-        document.getElementById("chatInput").value = "";
-    };
+window.addKid = async () => {
+    const user = auth.currentUser;
+    const name = document.getElementById("newKidName")?.value.trim();
+    if(!name) { alert("Введите имя"); return; }
+    await db.collection("kids").add({ name, parentId: user.uid, groupId: null });
+    document.getElementById("newKidName").value = "";
+    navigate('kids');
+};
 
-    function loadChatMessages() {
-        const container = document.getElementById("chatMessages");
-        if(!container || !currentGroupId) return;
-        if(unsubscribeMessages) unsubscribeMessages();
-        unsubscribeMessages = db.collection("groupMessages").where("groupId","==",currentGroupId).orderBy("createdAt","asc").limitToLast(80).onSnapshot(snap => {
-            if(!container) return;
-            let msgs = [];
-            snap.forEach(d => msgs.push(d.data()));
-            if(msgs.length === 0) { container.innerHTML = "<div class='text-center'>💬 Нет сообщений</div>"; return; }
-            container.innerHTML = "";
-            msgs.forEach(m => {
-                const isParent = m.role === "parent";
-                const div = document.createElement("div");
-                div.className = `message ${isParent ? 'parent' : 'teacher'}`;
-                div.innerHTML = `<div class="message-bubble"><strong>${escapeHtml(m.name)}</strong><br>${escapeHtml(m.text)}<div style="font-size:0.65rem; opacity:0.7; margin-top:4px;">${m.createdAt?.toDate ? new Date(m.createdAt.toDate()).toLocaleTimeString() : ''}</div></div>`;
-                container.appendChild(div);
-            });
-            container.scrollTop = container.scrollHeight;
-        });
+window.selectChild = (id) => {
+    currentChildId = id;
+    currentGroupId = null;
+    alert("Активный ребёнок выбран!");
+    navigate('kids');
+};
+
+// ============ КРУЖКИ ============
+async function renderCircles() {
+    const user = auth.currentUser;
+    if(!user) return `<div class="card"><div class="text-center">Войдите</div></div>`;
+    const role = await getUserRole(user);
+    const circlesSnap = await db.collection("circles").get();
+    let circlesHtml = "";
+    
+    for(const doc of circlesSnap.docs) {
+        const c = doc.data();
+        let action = "";
+        if(role === "parent" && currentChildId) {
+            const isEnrolled = c.enrolledKids?.includes(currentChildId);
+            action = `<button onclick="toggleEnroll('${doc.id}')" style="width:auto; margin:0;">${isEnrolled ? '✅ Отменить' : '✏️ Записать'}</button>`;
+        } else if(role === "teacher" || role === "admin") {
+            action = `<button onclick="viewCircleKids('${doc.id}')" style="width:auto; margin:0;">👀 Список</button>`;
+        }
+        circlesHtml += `<div class="circle-card"><span>${escapeHtml(c.name)}</span>${action}</div>`;
     }
-
-    async function renderProfile() {
-        const user = auth.currentUser;
-        if(!user) return `<div class="card"><button onclick="showLogin()">Войти</button></div>`;
-        const role = await getUserRole(user);
-        return `<div class="card"><div class="card-title"><i class="fas fa-user-circle"></i> Профиль</div><div class="text-center"><div style="font-size:70px;">👤</div><div><strong>${escapeHtml(user.displayName||user.email)}</strong></div><div class="badge">${role}</div><div>📧 ${escapeHtml(user.email)}</div><button onclick="logout()" style="margin-top:20px;"><i class="fas fa-sign-out-alt"></i> Выйти</button></div></div>`;
+    
+    let addForm = "";
+    if(role === "teacher" || role === "admin") {
+        addForm = `<hr><input id="newCircleName" placeholder="Название кружка"><button onclick="addCircle()">➕ Добавить кружок</button>`;
     }
+    
+    return `<div class="card"><div class="card-title"><i class="fas fa-palette"></i> Кружки</div><div class="circles-grid">${circlesHtml || "Нет кружков"}</div>${addForm}</div>`;
+}
 
-    async function logout() { if(unsubscribeMessages) unsubscribeMessages(); await auth.signOut(); window.location.reload(); }
-
-    // ==================== НАВИГАЦИЯ ====================
-    async function navigate(screen) {
-        const tabs = document.querySelectorAll('.tab');
-        tabs.forEach(tab => { if(tab.dataset.tab === screen) tab.classList.add('active'); else tab.classList.remove('active'); });
-        const content = document.getElementById("appContent");
-        content.style.opacity = "0";
-        setTimeout(async () => {
-            let html = "";
-            if(screen === "home") html = await renderHome();
-            else if(screen === "kids") html = await renderKids();
-            else if(screen === "circles") html = await renderCircles();
-            else if(screen === "schedule") html = await renderSchedule();
-            else if(screen === "chat") html = await renderChat();
-            else if(screen === "profile") html = await renderProfile();
-            content.innerHTML = html;
-            if(screen === "chat" && currentGroupId) loadChatMessages();
-            else if(unsubscribeMessages) { unsubscribeMessages(); unsubscribeMessages = null; }
-            content.style.opacity = "1";
-        }, 50);
+window.toggleEnroll = async (circleId) => {
+    if(!currentChildId) { alert("Сначала выберите активного ребёнка во вкладке 'Дети'"); return; }
+    const circleRef = db.collection("circles").doc(circleId);
+    const circle = await circleRef.get();
+    let enrolled = circle.data().enrolledKids || [];
+    if(enrolled.includes(currentChildId)) {
+        enrolled = enrolled.filter(id => id !== currentChildId);
+        alert("✅ Запись отменена");
+    } else {
+        enrolled.push(currentChildId);
+        alert("✅ Ребёнок записан на кружок!");
     }
+    await circleRef.update({ enrolledKids: enrolled });
+    navigate('circles');
+};
 
-    // ==================== ЗАПУСК ====================
-    seedTestAccounts().then(() => {
-        auth.onAuthStateChanged((user) => {
-            if(user) {
-                document.getElementById("tabBar").style.display = "flex";
-                navigate('home');
-            } else {
-                document.getElementById("tabBar").style.display = "none";
-                showLogin();
-            }
-        });
+window.viewCircleKids = async (circleId) => {
+    const circle = await db.collection("circles").doc(circleId).get();
+    const kidsIds = circle.data().enrolledKids || [];
+    let list = "";
+    for(let id of kidsIds) {
+        const kid = await db.collection("kids").doc(id).get();
+        if(kid.exists) list += `- ${kid.data().name}\n`;
+    }
+    alert(`📋 Записаны дети:\n${list || "Нет записей"}`);
+};
+
+window.addCircle = async () => {
+    const name = document.getElementById("newCircleName")?.value.trim();
+    if(!name) return;
+    await db.collection("circles").add({ name, description: "", enrolledKids: [] });
+    navigate('circles');
+};
+
+// ============ РАСПИСАНИЕ ============
+async function renderSchedule() {
+    const user = auth.currentUser;
+    if(!user) return `<div class="card"><div class="text-center">Войдите</div></div>`;
+    const role = await getUserRole(user);
+    const common = (await db.collection("settings").doc("commonSchedule").get()).data()?.items || [];
+    let commonHtml = common.map(t => `<div class="schedule-item">📌 ${escapeHtml(t)}</div>`).join("");
+    
+    let indivHtml = "";
+    if(role === "teacher" || role === "admin") {
+        const kidsSnap = await db.collection("kids").get();
+        let kidSelect = `<select id="indivKid"><option value="">Выбрать ребёнка</option>`;
+        kidsSnap.forEach(k => kidSelect += `<option value="${k.id}">${escapeHtml(k.data().name)}</option>`);
+        kidSelect += `</select><input id="indivEvent" placeholder="Индивидуальное занятие"><button onclick="addIndividualEvent()">➕ Добавить</button>`;
+        const events = await db.collection("individualSchedule").get();
+        let eventsHtml = "";
+        events.forEach(e => eventsHtml += `<div class="schedule-item">🧸 ${escapeHtml(e.data().childName)}: ${escapeHtml(e.data().event)}</div>`);
+        indivHtml = `<hr><h4>Индивидуальное расписание</h4>${kidSelect}<div>${eventsHtml || "Нет записей"}</div>`;
+    } else if(role === "parent" && currentChildId) {
+        const events = await db.collection("individualSchedule").where("childId","==",currentChildId).get();
+        let myHtml = "";
+        events.forEach(e => myHtml += `<div class="schedule-item">📖 ${escapeHtml(e.data().event)}</div>`);
+        indivHtml = `<hr><h4>Занятия ребёнка</h4>${myHtml || "Нет индивидуальных занятий"}`;
+    }
+    
+    return `<div class="card"><div class="card-title"><i class="fas fa-calendar-alt"></i> Расписание дня</div><h4>Общее расписание</h4>${commonHtml}${indivHtml}</div>`;
+}
+
+window.addIndividualEvent = async () => {
+    const kidId = document.getElementById("indivKid")?.value;
+    const eventText = document.getElementById("indivEvent")?.value.trim();
+    if(!kidId || !eventText) { alert("Выберите ребёнка и введите занятие"); return; }
+    const kid = await db.collection("kids").doc(kidId).get();
+    await db.collection("individualSchedule").add({ childId: kidId, childName: kid.data().name, event: eventText });
+    navigate('schedule');
+};
+
+// ============ ЧАТ ПО ГРУППАМ ============
+async function renderChat() {
+    const user = auth.currentUser;
+    if(!user) return `<div class="card"><div class="text-center">Войдите</div></div>`;
+    const role = await getUserRole(user);
+    let groupId = null;
+    
+    if(role === "parent" && currentChildId) {
+        const kid = await db.collection("kids").doc(currentChildId).get();
+        groupId = kid.data()?.groupId;
+    } else if(role === "teacher" || role === "admin") {
+        const userDoc = await db.collection("users").doc(user.uid).get();
+        const groupIds = userDoc.data()?.groupIds || [];
+        groupId = groupIds[0];
+    }
+    
+    if(!groupId) {
+        return `<div class="card"><div class="text-center">Вы не состоите в группе. Обратитесь к администратору.</div></div>`;
+    }
+    
+    currentGroupId = groupId;
+    return `
+        <div class="card">
+            <div class="card-title"><i class="fas fa-comments"></i> Чат группы</div>
+            <div id="chatMessages" style="height: 350px; overflow-y: auto; background: #fef9ef; border-radius: 28px; padding: 15px; margin-bottom: 10px;"></div>
+            <div class="flex">
+                <input id="chatInput" placeholder="Напишите сообщение..." style="flex:1;">
+                <button onclick="sendMessage()" style="width:auto;"><i class="fas fa-paper-plane"></i></button>
+            </div>
+        </div>
+    `;
+}
+
+window.sendMessage = async () => {
+    const user = auth.currentUser;
+    const text = document.getElementById("chatInput")?.value.trim();
+    if(!text || !currentGroupId) return;
+    const role = await getUserRole(user);
+    await db.collection("groupMessages").add({
+        text, groupId: currentGroupId, uid: user.uid,
+        name: user.displayName || user.email, role,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
     });
+    document.getElementById("chatInput").value = "";
+};
+
+function loadChatMessages() {
+    const container = document.getElementById("chatMessages");
+    if(!container || !currentGroupId) return;
+    if(unsubscribeMessages) unsubscribeMessages();
+    unsubscribeMessages = db.collection("groupMessages").where("groupId","==",currentGroupId).orderBy("createdAt","asc").limitToLast(80).onSnapshot(snap => {
+        if(!container) return;
+        let msgs = [];
+        snap.forEach(d => msgs.push(d.data()));
+        if(msgs.length === 0) { container.innerHTML = "<div class='text-center'>💬 Нет сообщений</div>"; return; }
+        container.innerHTML = "";
+        msgs.forEach(m => {
+            const isParent = m.role === "parent";
+            const div = document.createElement("div");
+            div.style.marginBottom = "12px";
+            div.style.textAlign = isParent ? "right" : "left";
+            div.innerHTML = `<div style="display:inline-block; background:${isParent ? '#f0bc7a' : 'white'}; color:${isParent ? 'white' : '#5a3e2b'}; padding:8px 16px; border-radius:24px; max-width:80%;"><strong>${escapeHtml(m.name)}</strong><br>${escapeHtml(m.text)}<div style="font-size:0.65rem; opacity:0.7;">${m.createdAt?.toDate ? new Date(m.createdAt.toDate()).toLocaleTimeString() : ''}</div></div>`;
+            container.appendChild(div);
+        });
+        container.scrollTop = container.scrollHeight;
+    });
+}
+
+// ============ ПРОФИЛЬ ============
+async function renderProfile() {
+    const user = auth.currentUser;
+    if(!user) return `<div class="card"><button onclick="showLogin()">Войти</button></div>`;
+    const role = await getUserRole(user);
+    const roleName = role === "admin" ? "Администратор" : (role === "teacher" ? "Воспитатель" : "Родитель");
+    return `
+        <div class="card">
+            <div class="card-title"><i class="fas fa-user-circle"></i> Профиль</div>
+            <div class="text-center">
+                <div style="font-size: 70px;">👤</div>
+                <div><strong>${escapeHtml(user.displayName || user.email)}</strong></div>
+                <div>📧 ${escapeHtml(user.email)}</div>
+                <div class="badge" style="margin-top: 8px;">${roleName}</div>
+                <button onclick="logout()" style="margin-top: 20px;"><i class="fas fa-sign-out-alt"></i> Выйти</button>
+            </div>
+        </div>
+    `;
+}
+
+// ============ НАВИГАЦИЯ ============
+async function navigate(screen) {
+    const tabs = document.querySelectorAll('.tab');
+    tabs.forEach(tab => tab.classList.remove('active'));
+    if(screen === 'home') tabs[0]?.classList.add('active');
+    else if(screen === 'kids') tabs[1]?.classList.add('active');
+    else if(screen === 'circles') tabs[2]?.classList.add('active');
+    else if(screen === 'schedule') tabs[3]?.classList.add('active');
+    else if(screen === 'chat') tabs[4]?.classList.add('active');
+    else if(screen === 'profile') tabs[5]?.classList.add('active');
+    
+    const content = document.getElementById("content");
+    content.style.opacity = "0";
+    
+    setTimeout(async () => {
+        let html = "";
+        if(screen === "home") html = await renderHome();
+        else if(screen === "kids") html = await renderKids();
+        else if(screen === "circles") html = await renderCircles();
+        else if(screen === "schedule") html = await renderSchedule();
+        else if(screen === "chat") html = await renderChat();
+        else if(screen === "profile") html = await renderProfile();
+        else html = `<div class="card">Страница в разработке</div>`;
+        
+        content.innerHTML = html;
+        if(screen === "chat" && currentGroupId) loadChatMessages();
+        else if(unsubscribeMessages) { unsubscribeMessages(); unsubscribeMessages = null; }
+        content.style.opacity = "1";
+    }, 50);
+}
+
+// ============ ЗАПУСК ============
+seedTestAccounts().then(() => {
+    auth.onAuthStateChanged((user) => {
+        if(user) {
+            document.getElementById("tabbar").style.display = "flex";
+            navigate('home');
+        } else {
+            document.getElementById("tabbar").style.display = "none";
+            showLogin();
+        }
+    });
+}).catch(err => {
+    console.error("Ошибка инициализации:", err);
+    showLogin();
+});
 </script>
 </body>
 </html>

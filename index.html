@@ -64,6 +64,12 @@
         }
         button:hover { background: #ecd6aa; transform: scale(0.98); }
         button.small-btn { width: auto; padding: 6px 12px; margin-top: 0; font-size: 0.8rem; }
+        button.approve { background: #a8e6cf; }
+        button.approve:hover { background: #8fd6bc; }
+        button.reject { background: #ffb3ba; }
+        button.reject:hover { background: #ff9aa2; }
+        button.delete-btn { background: #ffddcc; }
+        button.delete-btn:hover { background: #ffccbb; }
         input, select, textarea {
             width: 100%;
             padding: 12px 16px;
@@ -93,14 +99,14 @@
             display: flex;
             padding: 8px 16px;
             border-radius: 50px;
-            gap: 18px;
+            gap: 14px;
             box-shadow: 0 8px 20px rgba(0,0,0,0.15);
             z-index: 200;
             flex-wrap: wrap;
             justify-content: center;
         }
         .tab {
-            font-size: 20px;
+            font-size: 18px;
             cursor: pointer;
             opacity: 0.5;
             padding: 5px;
@@ -111,6 +117,9 @@
         .small { font-size: 0.7rem; color: #ad8b64; text-align: center; margin-top: 12px; }
         .text-center { text-align: center; }
         .badge { background: #e9ddce; border-radius: 30px; padding: 4px 12px; font-size: 0.7rem; display: inline-block; }
+        .badge-pending { background: #ffe0b3; color: #cc8800; }
+        .badge-approved { background: #a8e6cf; color: #2d6a2d; }
+        .badge-rejected { background: #ffb3ba; color: #c23d3d; }
         .flex { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
         .list-item {
             background: #fef5ea;
@@ -123,7 +132,15 @@
             cursor: pointer;
         }
         .list-item.active { border: 2px solid #f0bc7a; background: #fff3e4; }
-        .schedule-item { background: #fef2e2; padding: 10px 16px; border-radius: 40px; margin-bottom: 8px; }
+        .schedule-item { 
+            background: #fef2e2; 
+            padding: 10px 16px; 
+            border-radius: 40px; 
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
         .chat-container { height: 350px; overflow-y: auto; background: #fef9ef; border-radius: 28px; padding: 15px; margin-bottom: 10px; }
         .message-item {
             padding: 8px 14px;
@@ -136,6 +153,7 @@
         hr { margin: 15px 0; border-color: #faeedb; }
         .inline-select { width: auto; margin: 0; padding: 8px 12px; }
         .assigned-badge { background: #a8d5a8; color: #2d6a2d; padding: 2px 8px; border-radius: 20px; font-size: 0.7rem; }
+        .request-item { background: #fff8f0; border-radius: 30px; padding: 12px; margin-bottom: 10px; border-left: 4px solid #f0bc7a; }
     </style>
 </head>
 <body>
@@ -151,6 +169,7 @@
         <div class="tab" onclick="navigate('circles')"><i class="fas fa-palette"></i></div>
         <div class="tab" onclick="navigate('activities')"><i class="fas fa-star"></i></div>
         <div class="tab" onclick="navigate('schedule')"><i class="fas fa-calendar-alt"></i></div>
+        <div class="tab" onclick="navigate('requests')"><i class="fas fa-clipboard-list"></i></div>
         <div class="tab" onclick="navigate('groups')"><i class="fas fa-users"></i></div>
         <div class="tab" onclick="navigate('chat')"><i class="fas fa-comment-dots"></i></div>
         <div class="tab" onclick="navigate('profile')"><i class="fas fa-user"></i></div>
@@ -170,13 +189,14 @@ let groups = JSON.parse(localStorage.getItem('ladushki_groups')) || [
     { id: 'g2', name: 'Звёздочки' }
 ];
 
-// КРУЖКИ (для записи)
+// КРУЖКИ (список доступных кружков)
 let circles = JSON.parse(localStorage.getItem('ladushki_circles')) || [];
 
-// ИНДИВИДУАЛЬНЫЕ ЗАНЯТИЯ (тоже список, потом назначаются детям)
-let individualActivities = JSON.parse(localStorage.getItem('ladushki_individual_activities')) || [];
+// ЗАЯВКИ НА КРУЖКИ (статус: pending, approved, rejected)
+let circleRequests = JSON.parse(localStorage.getItem('ladushki_circle_requests')) || [];
 
-// НАЗНАЧЕННЫЕ ИНДИВИДУАЛЬНЫЕ ЗАНЯТИЯ (связь activityId + childId)
+// ИНДИВИДУАЛЬНЫЕ ЗАНЯТИЯ
+let individualActivities = JSON.parse(localStorage.getItem('ladushki_individual_activities')) || [];
 let assignedActivities = JSON.parse(localStorage.getItem('ladushki_assigned_activities')) || [];
 
 let scheduleCommon = JSON.parse(localStorage.getItem('ladushki_schedule')) || [
@@ -198,6 +218,7 @@ function saveData() {
     localStorage.setItem('ladushki_kids', JSON.stringify(kids));
     localStorage.setItem('ladushki_groups', JSON.stringify(groups));
     localStorage.setItem('ladushki_circles', JSON.stringify(circles));
+    localStorage.setItem('ladushki_circle_requests', JSON.stringify(circleRequests));
     localStorage.setItem('ladushki_individual_activities', JSON.stringify(individualActivities));
     localStorage.setItem('ladushki_assigned_activities', JSON.stringify(assignedActivities));
     localStorage.setItem('ladushki_schedule', JSON.stringify(scheduleCommon));
@@ -330,7 +351,7 @@ function renderKids() {
         const myKids = kids.filter(k => k.parentId === currentUser.id);
         let kidsHtml = myKids.map(k => `
             <div class="list-item ${currentChildId === k.id ? 'active' : ''}" onclick="selectChild('${k.id}')">
-                <span>👶 ${escapeHtml(k.name)} ${k.groupId ? '<span class="assigned-badge">✅ в группе ' + escapeHtml(groups.find(g=>g.id===k.groupId)?.name) + '</span>' : '⏳ без группы'}</span>
+                <span>👶 ${escapeHtml(k.name)} ${k.groupId ? '<span class="assigned-badge">✅ в группе</span>' : '⏳ без группы'}</span>
                 <i class="fas fa-chevron-right"></i>
             </div>
         `).join('');
@@ -381,77 +402,170 @@ window.assignKidToGroup = (kidId, groupId) => {
     if(kid) {
         kid.groupId = groupId || null;
         saveData();
-        alert(`✅ Ребёнок ${kid.name} назначен в группу ${groups.find(g=>g.id===groupId)?.name || 'удалена'}`);
+        alert(`✅ Ребёнок ${kid.name} назначен в группу`);
         navigate('groups');
     }
 };
 
-// ============ КРУЖКИ (ДОБАВЛЕНИЕ + ЗАПИСЬ) ============
+// ============ КРУЖКИ (С ЗАЯВКАМИ) ============
 function renderCircles() {
     if(!currentUser) return `<div class="card">Войдите</div>`;
     
     let circlesHtml = circles.map(c => {
-        let action = "";
+        let statusHtml = "";
+        let actionHtml = "";
+        
         if(currentUser.role === "parent" && currentChildId) {
-            const isEnrolled = c.enrolled?.includes(currentChildId);
-            action = `<button onclick="toggleEnroll('${c.id}')" class="small-btn">${isEnrolled ? '✅ Отменить' : '✏️ Записать'}</button>`;
-        } else if(currentUser.role === "teacher" || currentUser.role === "admin") {
-            const enrolledCount = c.enrolled?.length || 0;
-            action = `<button onclick="viewCircleKids('${c.id}')" class="small-btn">👀 ${enrolledCount} детей</button>`;
+            // Проверяем статус заявки для этого ребёнка и кружка
+            const existingRequest = circleRequests.find(r => r.circleId === c.id && r.childId === currentChildId);
+            if(existingRequest) {
+                if(existingRequest.status === 'pending') {
+                    statusHtml = `<span class="badge badge-pending">⏳ На рассмотрении</span>`;
+                    actionHtml = `<button onclick="cancelRequest('${c.id}')" class="small-btn" style="background:#ffddcc;">Отменить заявку</button>`;
+                } else if(existingRequest.status === 'approved') {
+                    statusHtml = `<span class="badge badge-approved">✅ Зачислен</span>`;
+                    actionHtml = `<button onclick="cancelRequest('${c.id}')" class="small-btn" style="background:#ffddcc;">Отказаться</button>`;
+                } else if(existingRequest.status === 'rejected') {
+                    statusHtml = `<span class="badge badge-rejected">❌ Отказано</span>`;
+                    actionHtml = `<button onclick="sendRequest('${c.id}')" class="small-btn">Повторно записать</button>`;
+                }
+            } else {
+                actionHtml = `<button onclick="sendRequest('${c.id}')" class="small-btn">✏️ Записаться</button>`;
+            }
+        } else if(currentUser.role === "admin" || currentUser.role === "teacher") {
+            const pendingCount = circleRequests.filter(r => r.circleId === c.id && r.status === 'pending').length;
+            actionHtml = `<button onclick="viewCircleRequests('${c.id}')" class="small-btn">👀 Заявки (${pendingCount})</button>`;
         }
-        return `<div class="list-item"><span>🎨 ${escapeHtml(c.name)}</span>${action}</div>`;
+        
+        return `<div class="list-item"><span>🎨 ${escapeHtml(c.name)}</span><div class="flex">${statusHtml}${actionHtml}</div></div>`;
     }).join('');
     
     let addForm = "";
-    if(currentUser.role === "teacher" || currentUser.role === "admin") {
+    if(currentUser.role === "admin" || currentUser.role === "teacher") {
         addForm = `<hr><input id="newCircleName" placeholder="Название кружка"><button onclick="addCircle()"><i class="fas fa-plus"></i> Добавить кружок</button>`;
     }
     
     return `<div class="card"><div class="card-title"><i class="fas fa-palette"></i> Кружки</div><div>${circlesHtml || "Нет кружков"}</div>${addForm}</div>`;
 }
 
-window.toggleEnroll = (circleId) => {
+window.sendRequest = (circleId) => {
     if(!currentChildId) { alert("Сначала выберите активного ребёнка!"); return; }
+    const kid = kids.find(k => k.id === currentChildId);
     const circle = circles.find(c => c.id === circleId);
-    if(!circle.enrolled) circle.enrolled = [];
-    if(circle.enrolled.includes(currentChildId)) {
-        circle.enrolled = circle.enrolled.filter(id => id !== currentChildId);
-        alert("✅ Запись отменена");
-    } else {
-        circle.enrolled.push(currentChildId);
-        alert("✅ Ребёнок записан на кружок!");
-    }
-    saveData();
-    navigate('circles');
-};
-
-window.viewCircleKids = (circleId) => {
-    const circle = circles.find(c => c.id === circleId);
-    const enrolledKids = (circle.enrolled || []).map(id => {
-        const kid = kids.find(k => k.id === id);
-        return kid ? kid.name : "Неизвестно";
+    
+    circleRequests.push({
+        id: Date.now().toString(),
+        circleId,
+        circleName: circle.name,
+        childId: currentChildId,
+        childName: kid.name,
+        parentId: currentUser.id,
+        parentName: currentUser.name,
+        status: 'pending',
+        createdAt: new Date().toLocaleString()
     });
-    alert(`📋 Записаны дети:\n${enrolledKids.join('\n') || "Нет записей"}`);
-};
-
-window.addCircle = () => {
-    const name = document.getElementById("newCircleName")?.value.trim();
-    if(!name) return;
-    circles.push({ id: Date.now().toString(), name, description: "", enrolled: [] });
     saveData();
+    alert(`✅ Заявка на кружок "${circle.name}" отправлена на рассмотрение!`);
     navigate('circles');
 };
 
-// ============ ИНДИВИДУАЛЬНЫЕ ЗАНЯТИЯ (ДОБАВЛЯЕМ КАК КРУЖКИ, ПОТОМ НАЗНАЧАЕМ) ============
+window.cancelRequest = (circleId) => {
+    if(confirm("Отменить заявку/отказаться от кружка?")) {
+        circleRequests = circleRequests.filter(r => !(r.circleId === circleId && r.childId === currentChildId));
+        saveData();
+        alert("✅ Заявка отменена");
+        navigate('circles');
+    }
+};
+
+window.viewCircleRequests = (circleId) => {
+    const requests = circleRequests.filter(r => r.circleId === circleId && r.status === 'pending');
+    if(requests.length === 0) {
+        alert("Нет активных заявок на этот кружок");
+        return;
+    }
+    let msg = `📋 Заявки на кружок:\n\n`;
+    requests.forEach(r => {
+        msg += `👶 ${r.childName} (родитель: ${r.parentName})\n`;
+    });
+    alert(msg);
+};
+
+// ============ ЗАЯВКИ (ТОЛЬКО ДЛЯ АДМИНА) ============
+function renderRequests() {
+    if(!currentUser) return `<div class="card">Войдите</div>`;
+    
+    if(currentUser.role !== "admin") {
+        return `<div class="card"><div class="text-center">🔒 Только для администратора</div></div>`;
+    }
+    
+    const pendingRequests = circleRequests.filter(r => r.status === 'pending');
+    const approvedRequests = circleRequests.filter(r => r.status === 'approved');
+    
+    let pendingHtml = pendingRequests.map(r => `
+        <div class="request-item">
+            <div><strong>👶 ${escapeHtml(r.childName)}</strong> хочет записаться на <strong>🎨 ${escapeHtml(r.circleName)}</strong></div>
+            <div class="small">📅 ${r.createdAt} | 👪 родитель: ${escapeHtml(r.parentName)}</div>
+            <div class="flex" style="margin-top: 10px;">
+                <button onclick="approveRequest('${r.id}')" class="small-btn approve">✅ Одобрить</button>
+                <button onclick="rejectRequest('${r.id}')" class="small-btn reject">❌ Отказать</button>
+            </div>
+        </div>
+    `).join('');
+    
+    let approvedHtml = approvedRequests.map(r => `
+        <div class="request-item" style="border-left-color: #a8e6cf;">
+            <div><strong>👶 ${escapeHtml(r.childName)}</strong> записан на <strong>🎨 ${escapeHtml(r.circleName)}</strong></div>
+            <div class="small">✅ Одобрено</div>
+        </div>
+    `).join('');
+    
+    return `<div class="card">
+        <div class="card-title"><i class="fas fa-clipboard-list"></i> Заявки на кружки</div>
+        <h4>⏳ Ожидают рассмотрения (${pendingRequests.length})</h4>
+        ${pendingHtml || "<div class='text-center'>Нет активных заявок</div>"}
+        <hr>
+        <h4>✅ Одобренные заявки</h4>
+        ${approvedHtml || "<div class='text-center'>Нет одобренных заявок</div>"}
+    </div>`;
+}
+
+window.approveRequest = (requestId) => {
+    const request = circleRequests.find(r => r.id === requestId);
+    if(request) {
+        request.status = 'approved';
+        // Добавляем ребёнка в enrolled списки кружка
+        const circle = circles.find(c => c.id === request.circleId);
+        if(circle) {
+            if(!circle.enrolled) circle.enrolled = [];
+            if(!circle.enrolled.includes(request.childId)) {
+                circle.enrolled.push(request.childId);
+            }
+        }
+        saveData();
+        alert(`✅ Заявка одобрена! Ребёнок записан на кружок.`);
+        navigate('requests');
+    }
+};
+
+window.rejectRequest = (requestId) => {
+    const request = circleRequests.find(r => r.id === requestId);
+    if(request) {
+        request.status = 'rejected';
+        saveData();
+        alert(`❌ Заявка отклонена.`);
+        navigate('requests');
+    }
+};
+
+// ============ ИНДИВИДУАЛЬНЫЕ ЗАНЯТИЯ ============
 function renderActivities() {
     if(!currentUser) return `<div class="card">Войдите</div>`;
     
-    // Список созданных занятий
     let activitiesHtml = individualActivities.map(act => {
         return `<div class="list-item"><span>⭐ ${escapeHtml(act.name)}</span><button onclick="deleteActivity('${act.id}')" class="small-btn" style="background:#ffddcc;">🗑️</button></div>`;
     }).join('');
     
-    // Назначенные занятия (показываем всем)
     let assignedHtml = "";
     if(currentUser.role === "parent" && currentChildId) {
         const myAssigned = assignedActivities.filter(a => a.childId === currentChildId);
@@ -464,11 +578,9 @@ function renderActivities() {
             });
         }
     } else if(currentUser.role === "teacher" || currentUser.role === "admin") {
-        // Для воспитателя: выбор ребёнка и назначение
         let selectHtml = `<select id="assignChildSelect"><option value="">Выбрать ребёнка</option>${kids.map(k => `<option value="${k.id}">${escapeHtml(k.name)}</option>`).join("")}</select>`;
         let selectActivityHtml = `<select id="assignActivitySelect"><option value="">Выбрать занятие</option>${individualActivities.map(act => `<option value="${act.id}">${escapeHtml(act.name)}</option>`).join("")}</select>`;
         
-        // Список уже назначенных
         let assignedList = "";
         for(let kid of kids) {
             const kidAssignments = assignedActivities.filter(a => a.childId === kid.id);
@@ -490,7 +602,7 @@ function renderActivities() {
     
     let addForm = "";
     if(currentUser.role === "teacher" || currentUser.role === "admin") {
-        addForm = `<hr><input id="newActivityName" placeholder="Название занятия (например: Логопед, Музыка)"><button onclick="addActivity()"><i class="fas fa-plus"></i> Добавить занятие</button>`;
+        addForm = `<hr><input id="newActivityName" placeholder="Название занятия (например: Логопед)"><button onclick="addActivity()"><i class="fas fa-plus"></i> Добавить занятие</button>`;
     }
     
     return `<div class="card"><div class="card-title"><i class="fas fa-star"></i> Индивидуальные занятия</div>
@@ -510,7 +622,7 @@ window.addActivity = () => {
 };
 
 window.deleteActivity = (activityId) => {
-    if(confirm("Удалить занятие? Оно будет снято со всех детей")) {
+    if(confirm("Удалить занятие?")) {
         individualActivities = individualActivities.filter(a => a.id !== activityId);
         assignedActivities = assignedActivities.filter(a => a.activityId !== activityId);
         saveData();
@@ -523,7 +635,6 @@ window.assignActivityToChild = () => {
     const activityId = document.getElementById("assignActivitySelect")?.value;
     if(!childId || !activityId) { alert("Выберите ребёнка и занятие"); return; }
     
-    // Проверяем, не назначено ли уже
     const alreadyAssigned = assignedActivities.find(a => a.childId === childId && a.activityId === activityId);
     if(alreadyAssigned) {
         alert("Это занятие уже назначено этому ребёнку");
@@ -536,15 +647,22 @@ window.assignActivityToChild = () => {
     navigate('activities');
 };
 
-// ============ РАСПИСАНИЕ ============
+// ============ РАСПИСАНИЕ (С ВОЗМОЖНОСТЬЮ УДАЛЕНИЯ ДЛЯ АДМИНА) ============
 function renderSchedule() {
     if(!currentUser) return `<div class="card">Войдите</div>`;
     
-    let commonHtml = scheduleCommon.map(t => `<div class="schedule-item">📌 ${escapeHtml(t)}</div>`).join("");
+    let commonHtml = scheduleCommon.map((t, index) => `
+        <div class="schedule-item">
+            <span>📌 ${escapeHtml(t)}</span>
+            ${(currentUser.role === "admin") ? `<button onclick="deleteScheduleItem(${index})" class="small-btn delete-btn">🗑️</button>` : ''}
+        </div>
+    `).join('');
     
     let addForm = "";
-    if(currentUser.role === "teacher" || currentUser.role === "admin") {
-        addForm = `<hr><input id="newScheduleItem" placeholder="Новое событие в расписании"><button onclick="addScheduleItem()">➕ Добавить</button>`;
+    if(currentUser.role === "admin") {
+        addForm = `<hr><input id="newScheduleItem" placeholder="Новое событие в расписании"><button onclick="addScheduleItem()"><i class="fas fa-plus"></i> Добавить</button>`;
+    } else if(currentUser.role === "teacher") {
+        addForm = `<hr><div class="small">Только администратор может изменять расписание</div>`;
     }
     
     return `<div class="card"><div class="card-title"><i class="fas fa-calendar-alt"></i> Расписание дня</div><h4>Общее расписание</h4>${commonHtml}${addForm}</div>`;
@@ -559,7 +677,15 @@ window.addScheduleItem = () => {
     }
 };
 
-// ============ ГРУППЫ (ТОЛЬКО ДЛЯ АДМИНА) ============
+window.deleteScheduleItem = (index) => {
+    if(confirm("Удалить этот пункт из расписания?")) {
+        scheduleCommon.splice(index, 1);
+        saveData();
+        navigate('schedule');
+    }
+};
+
+// ============ ГРУППЫ ============
 function renderGroups() {
     if(!currentUser) return `<div class="card">Войдите</div>`;
     
@@ -570,23 +696,13 @@ function renderGroups() {
     let groupsHtml = groups.map(g => `
         <div class="list-item">
             <span>📁 ${escapeHtml(g.name)}</span>
-            <button onclick="deleteGroup('${g.id}')" class="small-btn" style="background:#ffddcc;">🗑️</button>
+            <button onclick="deleteGroup('${g.id}')" class="small-btn delete-btn">🗑️</button>
         </div>
     `).join('');
     
     let teachersHtml = users.filter(u => u.role === 'teacher').map(u => `
         <div class="list-item">
             <span>👩‍🏫 ${escapeHtml(u.name)}</span>
-            <select onchange="assignUserToGroup('${u.id}', this.value)" class="inline-select" style="width:auto;">
-                <option value="">Без группы</option>
-                ${groups.map(g => `<option value="${g.id}" ${u.groupId === g.id ? 'selected' : ''}>${escapeHtml(g.name)}</option>`).join('')}
-            </select>
-        </div>
-    `).join('');
-    
-    let parentsHtml = users.filter(u => u.role === 'parent').map(u => `
-        <div class="list-item">
-            <span>👪 ${escapeHtml(u.name)}</span>
             <select onchange="assignUserToGroup('${u.id}', this.value)" class="inline-select" style="width:auto;">
                 <option value="">Без группы</option>
                 ${groups.map(g => `<option value="${g.id}" ${u.groupId === g.id ? 'selected' : ''}>${escapeHtml(g.name)}</option>`).join('')}
@@ -605,9 +721,6 @@ function renderGroups() {
             <hr>
             <h4>👩‍🏫 Воспитатели</h4>
             ${teachersHtml || "Нет воспитателей"}
-            <hr>
-            <h4>👪 Родители</h4>
-            ${parentsHtml || "Нет родителей"}
         </div>
     `;
 }
@@ -640,7 +753,7 @@ window.assignUserToGroup = (userId, groupId) => {
     }
 };
 
-// ============ ЧАТ ПО ГРУППАМ ============
+// ============ ЧАТ ============
 function renderChat() {
     if(!currentUser) return `<div class="card">Войдите</div>`;
     
@@ -743,7 +856,7 @@ function escapeHtml(str) { if(!str) return ''; return str.replace(/[&<>]/g, m =>
 // ============ НАВИГАЦИЯ ============
 function navigate(screen) {
     const tabs = document.querySelectorAll('.tab');
-    const screens = ['home', 'kids', 'circles', 'activities', 'schedule', 'groups', 'chat', 'profile'];
+    const screens = ['home', 'kids', 'circles', 'activities', 'schedule', 'requests', 'groups', 'chat', 'profile'];
     tabs.forEach((tab, i) => {
         if(screens[i] === screen) tab.classList.add('active');
         else tab.classList.remove('active');
@@ -759,6 +872,7 @@ function navigate(screen) {
         else if(screen === "circles") html = renderCircles();
         else if(screen === "activities") html = renderActivities();
         else if(screen === "schedule") html = renderSchedule();
+        else if(screen === "requests") html = renderRequests();
         else if(screen === "groups") html = renderGroups();
         else if(screen === "chat") html = renderChat();
         else if(screen === "profile") html = renderProfile();

@@ -72,19 +72,33 @@
 // ============ ЛОКАЛЬНОЕ ХРАНИЛИЩЕ ============
 let users = JSON.parse(localStorage.getItem('ladushki_users')) || [
     { id: '1', email: 'admin@ladushki.ru', password: 'Admin2025', name: 'Мария Петровна', role: 'admin', groupId: null },
-    { id: '2', email: 'teacher@ladushki.ru', password: 'Teacher2025', name: 'Анна Сергеевна', role: 'teacher', groupId: 'g1' }
+    { id: '2', email: 'teacher@mail.tu', password: 'ppp22rrtt66', name: 'Анна Сергеевна', role: 'teacher', groupId: 'g1' },
+    { id: '3', email: 'roditell77@mail.ru', password: 'ppp22rrtt66', name: 'Елена Иванова', role: 'parent', groupId: null }
 ];
 
-let kids = JSON.parse(localStorage.getItem('ladushki_kids')) || [];
+let kids = JSON.parse(localStorage.getItem('ladushki_kids')) || [
+    { id: 'k1', name: 'Миша Иванов', parentId: '3', groupId: 'g1' },
+    { id: 'k2', name: 'Алиса Иванова', parentId: '3', groupId: 'g1' }
+];
+
 let groups = JSON.parse(localStorage.getItem('ladushki_groups')) || [
     { id: 'g1', name: 'Солнышко' },
     { id: 'g2', name: 'Звёздочки' },
     { id: 'g3', name: 'Ромашки' }
 ];
 
-let circles = JSON.parse(localStorage.getItem('ladushki_circles')) || [];
+let circles = JSON.parse(localStorage.getItem('ladushki_circles')) || [
+    { id: 'c1', name: '🎨 Рисование', weekday: 'Понедельник', time: '15:00' },
+    { id: 'c2', name: '🏃 Физкультура', weekday: 'Среда', time: '16:00' },
+    { id: 'c3', name: '🎭 Театр', weekday: 'Пятница', time: '15:30' }
+];
+
 let circleRequests = JSON.parse(localStorage.getItem('ladushki_circle_requests')) || [];
-let individualActivities = JSON.parse(localStorage.getItem('ladushki_individual_activities')) || [];
+let individualActivities = JSON.parse(localStorage.getItem('ladushki_individual_activities')) || [
+    { id: 'a1', name: 'Логопед' },
+    { id: 'a2', name: 'Психолог' },
+    { id: 'a3', name: 'Музыка' }
+];
 let assignedActivities = JSON.parse(localStorage.getItem('ladushki_assigned_activities')) || [];
 
 let scheduleCommon = JSON.parse(localStorage.getItem('ladushki_schedule')) || [
@@ -125,7 +139,7 @@ function showLogin() {
             <input id="loginPass" type="password" placeholder="Пароль">
             <div id="loginError" class="error-msg"></div>
             <button onclick="doLogin()"><i class="fas fa-sign-in-alt"></i> Войти</button>
-            <div class="small">✨ admin@ladushki.ru / Admin2025<br>✨ teacher@ladushki.ru / Teacher2025</div>
+            <div class="small">✨ admin@ladushki.ru / Admin2025<br>✨ teacher@mail.tu / ppp22rrtt66<br>✨ roditell77@mail.ru / ppp22rrtt66</div>
         </div>
     `;
 }
@@ -383,13 +397,12 @@ window.deleteKid = (kidId) => {
     }
 };
 
-// ============ КРУЖКИ (С РАСПИСАНИЕМ И ЗАЯВКАМИ) ============
+// ============ КРУЖКИ ============
 function renderCircles() {
     if(!currentUser) return `<div class="card">Войдите</div>`;
     const role = currentUser.role;
     
     if(role === "admin" || role === "teacher") {
-        // Админ и воспитатель: управление кружками и заявками
         let circlesHtml = circles.map(c => `
             <div class="circle-card">
                 <div class="circle-header">
@@ -402,7 +415,6 @@ function renderCircles() {
             </div>
         `).join('');
         
-        // Заявки на рассмотрение
         const pendingRequests = circleRequests.filter(r => r.status === 'pending');
         let pendingHtml = pendingRequests.map(r => `
             <div class="request-item">
@@ -426,7 +438,7 @@ function renderCircles() {
                         <option value="">День недели</option>
                         ${WEEKDAYS.map(d => `<option value="${d}">${d}</option>`).join('')}
                     </select>
-                    <input id="newCircleTime" placeholder="Время (например: 15:00)" style="flex:1;">
+                    <input id="newCircleTime" placeholder="Время" style="flex:1;">
                     <button onclick="addCircle()" class="small-btn">➕ Добавить</button>
                 </div>
             `;
@@ -444,7 +456,7 @@ function renderCircles() {
     
     if(role === "parent") {
         if(!selectedChildId) {
-            return `<div class="card"><div class="text-center">⚠️ Сначала выберите ребёнка на вкладке "Дети"</div></div>`;
+            return `<div class="card"><div class="text-center">⚠️ Сначала выберите ребёнка</div></div>`;
         }
         
         const myRequests = circleRequests.filter(r => r.childId === selectedChildId);
@@ -464,27 +476,26 @@ function renderCircles() {
         let pendingHtml = pendingRequests.map(r => `
             <div class="circle-card" style="opacity:0.7;">
                 <div><strong>🎨 ${escapeHtml(r.circleName)}</strong></div>
-                <div class="small">📅 ${r.selectedWeekday || '?'} в ${r.selectedTime || '?'}</div>
-                <div class="badge badge-pending">⏳ На рассмотрении</div>
+                <div class="small">⏳ На рассмотрении</div>
             </div>
         `).join('');
         
         let availableCirclesHtml = circles.filter(c => !myRequests.some(r => r.circleId === c.id)).map(c => `
             <div class="circle-card">
                 <div><strong>🎨 ${escapeHtml(c.name)}</strong></div>
-                <div class="circle-time">📅 ${c.weekday || 'Не указан'} | 🕐 ${c.time || 'Не указано'}</div>
-                <button onclick="showScheduleOptions('${c.id}', '${escapeHtml(c.name)}')" class="small-btn" style="margin-top:8px;">📝 Выбрать расписание</button>
+                <div class="circle-time">📅 ${c.weekday} | 🕐 ${c.time}</div>
+                <button onclick="showScheduleOptions('${c.id}', '${escapeHtml(c.name)}')" class="small-btn">📝 Записаться</button>
             </div>
         `).join('');
         
-        return `<div class="card"><div class="card-title"><i class="fas fa-palette"></i> Кружки для ${escapeHtml(kids.find(k=>k.id===selectedChildId)?.name)}</div>
-            <h4>✅ Записан на кружки</h4>
+        return `<div class="card"><div class="card-title"><i class="fas fa-palette"></i> Кружки</div>
+            <h4>✅ Записан</h4>
             ${enrolledHtml || "<div class='text-center'>Нет записей</div>"}
             <hr>
-            <h4>⏳ Ожидают рассмотрения</h4>
+            <h4>⏳ Ожидают</h4>
             ${pendingHtml || "<div class='text-center'>Нет</div>"}
             <hr>
-            <h4>📢 Доступные кружки</h4>
+            <h4>📢 Доступные</h4>
             ${availableCirclesHtml || "<div class='text-center'>Нет доступных кружков</div>"}
         </div>`;
     }
@@ -506,7 +517,7 @@ window.addCircle = () => {
 };
 
 window.deleteCircle = (circleId) => {
-    if(confirm("Удалить кружок? Все заявки будут удалены.")) {
+    if(confirm("Удалить кружок?")) {
         circles = circles.filter(c => c.id !== circleId);
         circleRequests = circleRequests.filter(r => r.circleId !== circleId);
         saveData();
@@ -517,8 +528,8 @@ window.deleteCircle = (circleId) => {
 window.editCircleSchedule = (circleId) => {
     const circle = circles.find(c => c.id === circleId);
     if(!circle) return;
-    const newWeekday = prompt("Введите день недели (Понедельник, Вторник...)", circle.weekday);
-    const newTime = prompt("Введите время (например: 15:00)", circle.time);
+    const newWeekday = prompt("День недели:", circle.weekday);
+    const newTime = prompt("Время:", circle.time);
     if(newWeekday !== null) circle.weekday = newWeekday || "Не указан";
     if(newTime !== null) circle.time = newTime || "Не указано";
     saveData();
@@ -533,12 +544,12 @@ window.showScheduleOptions = (circleId, circleName) => {
         <div id="scheduleModal" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); backdrop-filter:blur(5px); z-index:1000; display:flex; align-items:center; justify-content:center;">
             <div style="background:white; max-width:350px; width:90%; border-radius:48px; padding:24px;">
                 <h3 style="margin-bottom:16px;">🎨 ${escapeHtml(circleName)}</h3>
-                <p>Выберите удобное время:</p>
-                <div class="schedule-option" style="display:flex; justify-content:space-between; align-items:center; margin:12px 0; padding:12px; background:#fef5ea; border-radius:30px;">
+                <p>Выберите расписание:</p>
+                <div style="margin:12px 0; padding:12px; background:#fef5ea; border-radius:30px; display:flex; justify-content:space-between;">
                     <span>📅 ${circle.weekday} в ${circle.time}</span>
-                    <button onclick="selectScheduleOption('${circleId}', '${circle.weekday}', '${circle.time}')" class="small-btn" style="margin:0;">✅ Выбрать</button>
+                    <button onclick="selectScheduleOption('${circleId}', '${circle.weekday}', '${circle.time}')" class="small-btn">✅ Выбрать</button>
                 </div>
-                <button onclick="closeModal()" class="small-btn" style="margin-top:16px;">Отмена</button>
+                <button onclick="closeModal()" class="small-btn">Отмена</button>
             </div>
         </div>
     `;
@@ -553,7 +564,7 @@ window.selectScheduleOption = (circleId, weekday, time) => {
     
     const existing = circleRequests.find(r => r.circleId === circleId && r.childId === selectedChildId);
     if(existing) {
-        alert("Вы уже отправляли заявку на этот кружок");
+        alert("Вы уже отправляли заявку");
         return;
     }
     
@@ -566,7 +577,7 @@ window.selectScheduleOption = (circleId, weekday, time) => {
         status: 'pending', createdAt: new Date().toLocaleString()
     });
     saveData();
-    alert(`✅ Заявка на кружок "${circle.name}" (${weekday} ${time}) отправлена!`);
+    alert(`✅ Заявка на "${circle.name}" отправлена!`);
     navigate('circles');
 };
 
@@ -584,7 +595,7 @@ window.approveRequest = (requestId) => {
     if(request) {
         request.status = 'approved';
         saveData();
-        alert(`✅ Заявка одобрена! Ребёнок записан на кружок.`);
+        alert(`✅ Заявка одобрена!`);
         navigate('circles');
     }
 };
@@ -616,12 +627,12 @@ function renderActivities() {
     let assignedHtml = "";
     if(role === "parent") {
         if(!selectedChildId) {
-            assignedHtml = `<div class="text-center">⚠️ Сначала выберите ребёнка на вкладке "Дети"</div>`;
+            assignedHtml = `<div class="text-center">⚠️ Сначала выберите ребёнка</div>`;
         } else {
             const myAssigned = assignedActivities.filter(a => a.childId === selectedChildId);
             const kidName = kids.find(k => k.id === selectedChildId)?.name;
             assignedHtml = `<h4>📖 Занятия для ${kidName}</h4>`;
-            if(myAssigned.length === 0) assignedHtml += "<div class='text-center'>Нет назначенных занятий</div>";
+            if(myAssigned.length === 0) assignedHtml += "<div class='text-center'>Нет занятий</div>";
             else {
                 myAssigned.forEach(a => {
                     const act = individualActivities.find(act => act.id === a.activityId);
@@ -684,17 +695,17 @@ window.assignActivityToChild = () => {
     
     const alreadyAssigned = assignedActivities.find(a => a.childId === childId && a.activityId === activityId);
     if(alreadyAssigned) {
-        alert("Это занятие уже назначено этому ребёнку");
+        alert("Это занятие уже назначено");
         return;
     }
     
     assignedActivities.push({ childId, activityId });
     saveData();
-    alert("✅ Занятие назначено ребёнку!");
+    alert("✅ Занятие назначено!");
     navigate('activities');
 };
 
-// ============ РАСПИСАНИЕ (АДМИН И ВОСПИТАТЕЛЬ МОГУТ МЕНЯТЬ) ============
+// ============ РАСПИСАНИЕ ============
 function renderSchedule() {
     if(!currentUser) return `<div class="card">Войдите</div>`;
     const role = currentUser.role;
@@ -755,7 +766,7 @@ function renderGroups() {
     
     let addForm = "";
     if(role === "admin") {
-        addForm = `<div class="flex"><input id="newGroupName" placeholder="Название новой группы" style="flex:1;"><button onclick="addGroup()" class="small-btn">➕ Создать</button></div><hr>`;
+        addForm = `<div class="flex"><input id="newGroupName" placeholder="Название" style="flex:1;"><button onclick="addGroup()" class="small-btn">➕ Создать</button></div><hr>`;
     }
     
     let teachersList = "";
@@ -763,7 +774,7 @@ function renderGroups() {
         const teachers = users.filter(u => u.role === 'teacher');
         teachersList = `
             <hr>
-            <h4>👩‍🏫 Назначение воспитателя в группу</h4>
+            <h4>👩‍🏫 Назначение воспитателя</h4>
             <div class="flex">
                 <select id="assignTeacherSelect" style="flex:1;">
                     <option value="">Выберите воспитателя</option>
@@ -778,7 +789,7 @@ function renderGroups() {
         `;
     }
     
-    return `<div class="card"><div class="card-title"><i class="fas fa-users"></i> Группы детского сада</div>${addForm}${groupsInfo}${teachersList}</div>`;
+    return `<div class="card"><div class="card-title"><i class="fas fa-users"></i> Группы</div>${addForm}${groupsInfo}${teachersList}</div>`;
 }
 
 window.addGroup = () => {
@@ -790,7 +801,7 @@ window.addGroup = () => {
 };
 
 window.deleteGroup = (groupId) => {
-    if(confirm("Удалить группу? Дети останутся без группы.")) {
+    if(confirm("Удалить группу?")) {
         groups = groups.filter(g => g.id !== groupId);
         kids.forEach(k => { if(k.groupId === groupId) k.groupId = null; });
         users.forEach(u => { if(u.groupId === groupId) u.groupId = null; });
@@ -807,7 +818,7 @@ window.assignTeacherToGroup = () => {
     if(teacher) {
         teacher.groupId = groupId;
         saveData();
-        alert(`✅ Воспитатель ${teacher.name} назначен в группу ${groups.find(g=>g.id===groupId)?.name}`);
+        alert(`✅ ${teacher.name} назначен в группу`);
         navigate('groups');
     }
 };
@@ -906,12 +917,9 @@ function navigate(screen) {
         
         if(screen === "chat") setTimeout(() => { const c = document.getElementById("chatContainer"); if(c) c.scrollTop = c.scrollHeight; }, 100);
         
-        // Обновляем активную вкладку
         document.querySelectorAll('.tab').forEach(tab => {
             tab.classList.remove('active');
-            if(tab.getAttribute('onclick')?.includes(`'${screen}'`)) {
-                tab.classList.add('active');
-            }
+            if(tab.getAttribute('onclick')?.includes(`'${screen}'`)) tab.classList.add('active');
         });
     }, 50);
 }

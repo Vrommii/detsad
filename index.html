@@ -144,15 +144,27 @@
             justify-content: space-between;
             align-items: center;
         }
-        .chat-container { height: 380px; overflow-y: auto; background: #fef9ef; border-radius: 28px; padding: 15px; margin-bottom: 12px; }
+        .chat-container { 
+            height: 380px; 
+            overflow-y: auto; 
+            background: #fef9ef; 
+            border-radius: 28px; 
+            padding: 15px; 
+            margin-bottom: 12px; 
+            display: flex; 
+            flex-direction: column; 
+        }
         .message-item {
             padding: 10px 16px;
             border-radius: 22px;
             margin-bottom: 12px;
             max-width: 80%;
+            word-wrap: break-word;
         }
-        .message-mine { background: #f0bc7a; color: white; margin-left: auto; }
-        .message-other { background: #f5e2c1; margin-right: auto; }
+        .message-mine { background: #f0bc7a; color: white; align-self: flex-end; }
+        .message-other { background: #f5e2c1; align-self: flex-start; }
+        .message-time { font-size: 0.65rem; opacity: 0.7; margin-top: 4px; }
+        .chat-selector { background: #fef5ea; border-radius: 40px; padding: 12px; margin-bottom: 16px; }
         hr { margin: 18px 0; border-color: #faeedb; }
         .inline-select { width: auto; margin: 0; padding: 8px 14px; }
         .assigned-badge { background: #a8d5a8; color: #2d6a2d; padding: 3px 10px; border-radius: 20px; font-size: 0.7rem; }
@@ -212,6 +224,7 @@ let messages = JSON.parse(localStorage.getItem('ladushki_messages')) || [];
 
 let currentUser = null;
 let selectedChildId = null;
+let adminSelectedChatGroupId = null; // для админа: выбранная группа для чата
 
 function saveData() {
     localStorage.setItem('ladushki_users', JSON.stringify(users));
@@ -259,6 +272,7 @@ window.doLogin = () => {
     
     currentUser = user;
     selectedChildId = null;
+    adminSelectedChatGroupId = null;
     localStorage.setItem('ladushki_currentUser', JSON.stringify(user));
     document.getElementById("tabbar").style.display = "flex";
     navigate('home');
@@ -267,6 +281,7 @@ window.doLogin = () => {
 window.logout = () => {
     currentUser = null;
     selectedChildId = null;
+    adminSelectedChatGroupId = null;
     localStorage.removeItem('ladushki_currentUser');
     document.getElementById("tabbar").style.display = "none";
     showLogin();
@@ -400,7 +415,7 @@ function renderHome() {
     `;
 }
 
-// ============ ДЕТИ (С ВОЗМОЖНОСТЬЮ ДОБАВЛЯТЬ ДЕТЕЙ ДЛЯ АДМИНА) ============
+// ============ ДЕТИ ============
 function renderKids() {
     if(!currentUser) return `<div class="card">Войдите</div>`;
     
@@ -807,7 +822,7 @@ window.rejectRequest = (requestId) => {
     }
 };
 
-// ============ ГРУППЫ (С ОТОБРАЖЕНИЕМ ДЕТЕЙ) ============
+// ============ ГРУППЫ ============
 function renderGroups() {
     if(!currentUser) return `<div class="card">Войдите</div>`;
     
@@ -850,60 +865,117 @@ window.deleteGroup = (groupId) => {
     }
 };
 
-// ============ ЧАТ ============
+// ============ ЧАТ (С ВЫБОРОМ ГРУППЫ ДЛЯ АДМИНА) ============
 function renderChat() {
     if(!currentUser) return `<div class="card">Войдите</div>`;
     
-    let groupId = null;
+    let currentGroupId = null;
     let groupName = "";
+    let chatSelectorHtml = "";
+    
     if(currentUser.role === "admin") {
-        groupId = "admin_chat";
-        groupName = "Администратора";
-    } else if(currentUser.role === "teacher") {
-        groupId = currentUser.groupId;
-        const group = groups.find(g => g.id === groupId);
+        // Админ может выбрать любую группу для просмотра чата
+        if(!adminSelectedChatGroupId && groups.length > 0) {
+            adminSelectedChatGroupId = groups[0].id;
+        }
+        currentGroupId = adminSelectedChatGroupId;
+        const selectedGroup = groups.find(g => g.id === currentGroupId);
+        groupName = selectedGroup?.name || "не выбрана";
+        
+        chatSelectorHtml = `
+            <div class="chat-selector">
+                <div class="flex">
+                    <select id="adminChatGroupSelect" class="inline-select" style="flex:1;">
+                        <option value="">Выберите группу</option>
+                        ${groups.map(g => `<option value="${g.id}" ${g.id === currentGroupId ? 'selected' : ''}>${escapeHtml(g.name)}</option>`).join('')}
+                    </select>
+                    <button onclick="changeAdminChatGroup()" class="small-btn">📂 Выбрать</button>
+                </div>
+            </div>
+        `;
+    } 
+    else if(currentUser.role === "teacher") {
+        currentGroupId = currentUser.groupId;
+        const group = groups.find(g => g.id === currentGroupId);
         groupName = group?.name || "группы";
-    } else if(currentUser.role === "parent" && selectedChildId) {
+        if(!currentGroupId) {
+            return `<div class="card"><div class="text-center">Вы не назначены в группу. Обратитесь к администратору.</div></div>`;
+        }
+    } 
+    else if(currentUser.role === "parent") {
+        if(!selectedChildId) {
+            return `<div class="card"><div class="text-center">⚠️ Сначала выберите ребёнка на вкладке "Дети"</div></div>`;
+        }
         const kid = kids.find(k => k.id === selectedChildId);
-        groupId = kid?.groupId;
-        const group = groups.find(g => g.id === groupId);
+        currentGroupId = kid?.groupId;
+        const group = groups.find(g => g.id === currentGroupId);
         groupName = group?.name || "группы";
+        if(!currentGroupId) {
+            return `<div class="card"><div class="text-center">Ваш ребёнок не состоит в группе. Обратитесь к администратору.</div></div>`;
+        }
     }
     
-    if(!groupId) {
-        return `<div class="card"><div class="text-center">Выберите ребёнка или обратитесь к администратору</div></div>`;
+    if(!currentGroupId) {
+        return `<div class="card"><div class="text-center">Чат недоступен. Выберите группу или ребёнка.</div></div>`;
     }
     
-    const chatMessages = messages.filter(m => m.groupId === groupId);
+    // Фильтруем сообщения по выбранной группе
+    const chatMessages = messages.filter(m => m.groupId === currentGroupId);
     const messagesHtml = chatMessages.map(m => `
         <div class="message-item ${m.senderId === currentUser.id ? 'message-mine' : 'message-other'}">
             <div><strong>${escapeHtml(m.senderName)}</strong></div>
             <div>${escapeHtml(m.text)}</div>
-            <div style="font-size:0.65rem;">${m.time}</div>
+            <div class="message-time">${m.time}</div>
         </div>
     `).join('');
     
-    return `<div class="card"><div class="card-title"><i class="fas fa-comments"></i> Чат ${groupName}</div><div id="chatContainer" class="chat-container">${messagesHtml || "💬 Нет сообщений"}</div><div class="flex"><input id="chatInput" placeholder="Сообщение..." style="flex:1;"><button onclick="sendMessage()" class="small-btn">📤</button></div></div>`;
+    return `
+        <div class="card">
+            <div class="card-title"><i class="fas fa-comments"></i> Чат ${groupName}</div>
+            ${chatSelectorHtml}
+            <div id="chatContainer" class="chat-container">${messagesHtml || "<div class='text-center'>💬 Нет сообщений</div>"}</div>
+            <div class="flex">
+                <input id="chatInput" placeholder="Напишите сообщение..." style="flex:1;">
+                <button onclick="sendMessage()" class="small-btn">📤 Отправить</button>
+            </div>
+        </div>
+    `;
 }
+
+window.changeAdminChatGroup = () => {
+    const select = document.getElementById("adminChatGroupSelect");
+    if(select && select.value) {
+        adminSelectedChatGroupId = select.value;
+        navigate('chat');
+    } else {
+        alert("Выберите группу");
+    }
+};
 
 window.sendMessage = () => {
     const text = document.getElementById("chatInput")?.value.trim();
     if(!text) return;
     
     let groupId = null;
+    
     if(currentUser.role === "admin") {
-        groupId = "admin_chat";
+        groupId = adminSelectedChatGroupId;
     } else if(currentUser.role === "teacher") {
         groupId = currentUser.groupId;
     } else if(currentUser.role === "parent" && selectedChildId) {
         const kid = kids.find(k => k.id === selectedChildId);
         groupId = kid?.groupId;
     }
-    if(!groupId) return;
+    
+    if(!groupId) {
+        alert("Чат недоступен. Выберите группу или ребёнка.");
+        return;
+    }
     
     messages.push({
         id: Date.now().toString(),
-        groupId, text,
+        groupId: groupId,
+        text: text,
         senderId: currentUser.id,
         senderName: currentUser.name,
         time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
@@ -911,7 +983,11 @@ window.sendMessage = () => {
     saveData();
     document.getElementById("chatInput").value = "";
     navigate('chat');
-    setTimeout(() => { const c = document.getElementById("chatContainer"); if(c) c.scrollTop = c.scrollHeight; }, 100);
+    
+    setTimeout(() => {
+        const container = document.getElementById("chatContainer");
+        if(container) container.scrollTop = container.scrollHeight;
+    }, 100);
 };
 
 // ============ ПРОФИЛЬ ============
@@ -951,7 +1027,10 @@ function navigate(screen) {
         content.style.opacity = "1";
         
         if(screen === "chat") {
-            setTimeout(() => { const c = document.getElementById("chatContainer"); if(c) c.scrollTop = c.scrollHeight; }, 100);
+            setTimeout(() => {
+                const container = document.getElementById("chatContainer");
+                if(container) container.scrollTop = container.scrollHeight;
+            }, 100);
         }
     }, 50);
 }

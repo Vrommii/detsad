@@ -1,36 +1,36 @@
 // ============ ЛОКАЛЬНОЕ ХРАНИЛИЩЕ ============
-let users = JSON.parse(localStorage.getItem('ladushki_users')) || [
-    { id: '1', email: 'admin@ladushki.ru', password: 'Admin2025', name: 'Мария Петровна', role: 'admin', groupId: null },
+let users = JSON.parse(localStorage.getItem('talants_users')) || [
+    { id: '1', email: 'admin@talants.ru', password: 'Admin2025', name: 'Мария Петровна', role: 'admin', groupId: null },
     { id: '2', email: 'teacher@mail.tu', password: 'ppp22rrtt66', name: 'Анна Сергеевна', role: 'teacher', groupId: 'g1' },
     { id: '3', email: 'roditell77@mail.ru', password: 'ppp22rrtt66', name: 'Елена Иванова', role: 'parent', groupId: null }
 ];
 
-let kids = JSON.parse(localStorage.getItem('ladushki_kids')) || [
+let kids = JSON.parse(localStorage.getItem('talants_kids')) || [
     { id: 'k1', name: 'Миша Иванов', parentId: '3', groupId: 'g1' },
     { id: 'k2', name: 'Алиса Иванова', parentId: '3', groupId: 'g1' }
 ];
 
-let groups = JSON.parse(localStorage.getItem('ladushki_groups')) || [
+let groups = JSON.parse(localStorage.getItem('talants_groups')) || [
     { id: 'g1', name: 'Солнышко' },
     { id: 'g2', name: 'Звёздочки' },
     { id: 'g3', name: 'Ромашки' }
 ];
 
-let circles = JSON.parse(localStorage.getItem('ladushki_circles')) || [
+let circles = JSON.parse(localStorage.getItem('talants_circles')) || [
     { id: 'c1', name: '🎨 Рисование', weekday: 'Понедельник', time: '15:00' },
     { id: 'c2', name: '🏃 Физкультура', weekday: 'Среда', time: '16:00' },
     { id: 'c3', name: '🎭 Театр', weekday: 'Пятница', time: '15:30' }
 ];
 
-let circleRequests = JSON.parse(localStorage.getItem('ladushki_circle_requests')) || [];
-let individualActivities = JSON.parse(localStorage.getItem('ladushki_individual_activities')) || [
+let circleRequests = JSON.parse(localStorage.getItem('talants_circle_requests')) || [];
+let individualActivities = JSON.parse(localStorage.getItem('talants_individual_activities')) || [
     { id: 'a1', name: 'Логопед' },
     { id: 'a2', name: 'Психолог' },
     { id: 'a3', name: 'Музыка' }
 ];
-let assignedActivities = JSON.parse(localStorage.getItem('ladushki_assigned_activities')) || [];
+let assignedActivities = JSON.parse(localStorage.getItem('talants_assigned_activities')) || [];
 
-let scheduleCommon = JSON.parse(localStorage.getItem('ladushki_schedule')) || [
+let scheduleCommon = JSON.parse(localStorage.getItem('talants_schedule')) || [
     '🍳 08:30 — Завтрак',
     '🎨 10:00 — Творчество',
     '🚶 11:30 — Прогулка',
@@ -39,7 +39,7 @@ let scheduleCommon = JSON.parse(localStorage.getItem('ladushki_schedule')) || [
     '🍎 15:30 — Полдник'
 ];
 
-let messages = JSON.parse(localStorage.getItem('ladushki_messages')) || [];
+let messages = JSON.parse(localStorage.getItem('talants_messages')) || [];
 
 let currentUser = null;
 let selectedChildId = null;
@@ -48,15 +48,15 @@ let adminSelectedChatGroupId = null;
 const WEEKDAYS = ['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница'];
 
 function saveData() {
-    localStorage.setItem('ladushki_users', JSON.stringify(users));
-    localStorage.setItem('ladushki_kids', JSON.stringify(kids));
-    localStorage.setItem('ladushki_groups', JSON.stringify(groups));
-    localStorage.setItem('ladushki_circles', JSON.stringify(circles));
-    localStorage.setItem('ladushki_circle_requests', JSON.stringify(circleRequests));
-    localStorage.setItem('ladushki_individual_activities', JSON.stringify(individualActivities));
-    localStorage.setItem('ladushki_assigned_activities', JSON.stringify(assignedActivities));
-    localStorage.setItem('ladushki_schedule', JSON.stringify(scheduleCommon));
-    localStorage.setItem('ladushki_messages', JSON.stringify(messages));
+    localStorage.setItem('talants_users', JSON.stringify(users));
+    localStorage.setItem('talants_kids', JSON.stringify(kids));
+    localStorage.setItem('talants_groups', JSON.stringify(groups));
+    localStorage.setItem('talants_circles', JSON.stringify(circles));
+    localStorage.setItem('talants_circle_requests', JSON.stringify(circleRequests));
+    localStorage.setItem('talants_individual_activities', JSON.stringify(individualActivities));
+    localStorage.setItem('talants_assigned_activities', JSON.stringify(assignedActivities));
+    localStorage.setItem('talants_schedule', JSON.stringify(scheduleCommon));
+    localStorage.setItem('talants_messages', JSON.stringify(messages));
 }
 
 // ============ ВСПОМОГАТЕЛЬНЫЕ ============
@@ -79,7 +79,7 @@ function showLogin() {
             <input id="loginPass" type="password" placeholder="Пароль">
             <div id="loginError" class="error-msg"></div>
             <button onclick="doLogin()"><i class="fas fa-sign-in-alt"></i> Войти</button>
-            <div class="small">✨ admin@ladushki.ru / Admin2025<br>✨ teacher@mail.tu / ppp22rrtt66<br>✨ roditell77@mail.ru / ppp22rrtt66</div>
+            <div class="small">✨ admin@talants.ru / Admin2025<br>✨ teacher@mail.tu / ppp22rrtt66<br>✨ roditell77@mail.ru / ppp22rrtt66</div>
         </div>
     `;
 }
@@ -105,7 +105,7 @@ window.doLogin = () => {
     currentUser = user;
     selectedChildId = null;
     adminSelectedChatGroupId = null;
-    localStorage.setItem('ladushki_currentUser', JSON.stringify(user));
+    localStorage.setItem('talants_currentUser', JSON.stringify(user));
     updateTabBar();
     navigate('home');
 };
@@ -113,7 +113,7 @@ window.doLogin = () => {
 window.logout = () => {
     currentUser = null;
     selectedChildId = null;
-    localStorage.removeItem('ladushki_currentUser');
+    localStorage.removeItem('talants_currentUser');
     document.getElementById("tabbar").innerHTML = "";
     showLogin();
 };
@@ -858,7 +858,7 @@ function navigate(screen) {
 }
 
 // ============ ЗАПУСК ============
-const savedUser = localStorage.getItem('ladushki_currentUser');
+const savedUser = localStorage.getItem('talants_currentUser');
 if (savedUser) {
     currentUser = JSON.parse(savedUser);
     updateTabBar();

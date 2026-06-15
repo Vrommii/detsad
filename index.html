@@ -4,17 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Ладушки | Детский сад</title>
-    <!-- Firebase SDKs -->
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             background: #faf0e1;
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            font-family: 'Segoe UI', system-ui, sans-serif;
             padding: 20px 16px 90px 16px;
             min-height: 100vh;
         }
@@ -115,19 +110,25 @@
         .loading { text-align: center; padding: 40px; color: #7b5a3b; }
         .badge { background: #e9ddce; border-radius: 30px; padding: 4px 12px; font-size: 0.7rem; display: inline-block; }
         .flex { display: flex; gap: 10px; flex-wrap: wrap; }
-        .students-grid, .circles-grid { display: flex; flex-direction: column; gap: 10px; max-height: 300px; overflow-y: auto; }
-        .student-card, .circle-card {
+        .kids-list, .circles-list { display: flex; flex-direction: column; gap: 10px; max-height: 300px; overflow-y: auto; }
+        .kid-item, .circle-item {
             background: #fef5ea;
             border-radius: 60px;
             padding: 10px 16px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            cursor: pointer;
-            transition: 0.2s;
         }
-        .student-card.active, .circle-card.active { background: #fff3e4; border: 2px solid #f0bc7a; }
         .schedule-item { background: #fef2e2; padding: 10px 16px; border-radius: 40px; margin-bottom: 8px; }
+        .message-item {
+            background: #f5e2c1;
+            padding: 10px 14px;
+            border-radius: 20px;
+            margin-bottom: 10px;
+            max-width: 80%;
+        }
+        .message-parent { background: #f0bc7a; color: white; margin-left: auto; }
+        .chat-container { height: 350px; overflow-y: auto; background: #fef9ef; border-radius: 28px; padding: 15px; margin-bottom: 10px; }
     </style>
 </head>
 <body>
@@ -148,73 +149,39 @@
 </div>
 
 <script>
-// ============ ПОЛНЫЙ КОНФИГ FIREBASE ============
-const firebaseConfig = {
-    apiKey: "AIzaSyAuZgI5XVWNSfHKWhAp26SWdD_Ye-3gBzs",
-    authDomain: "detsad-7ca3d.firebaseapp.com",
-    projectId: "detsad-7ca3d",
-    storageBucket: "detsad-7ca3d.firebasestorage.app",
-    appId: "1:1051274306315:web:abc123def456"  // добавлен для стабильности
-};
-
-// Инициализация Firebase
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.firestore();
-
-// Глобальные переменные
-let currentUser = null;
-let currentChildId = null;
-let currentGroupId = null;
-let unsubscribeMessages = null;
-
-// Тестовые аккаунты
-const TEST_ACCOUNTS = [
-    { email: "admin@ladushki.ru", password: "Admin2025", name: "Мария Петровна", role: "admin" },
-    { email: "teacher@ladushki.ru", password: "Ladushki2025", name: "Анна Сергеевна", role: "teacher" }
+// ============ ЛОКАЛЬНОЕ ХРАНИЛИЩЕ (всё работает без Firebase!) ============
+let users = JSON.parse(localStorage.getItem('ladushki_users')) || [
+    { id: '1', email: 'admin@ladushki.ru', password: 'Admin2025', name: 'Мария Петровна', role: 'admin' },
+    { id: '2', email: 'teacher@ladushki.ru', password: 'Ladushki2025', name: 'Анна Сергеевна', role: 'teacher' }
 ];
 
-// ============ ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ============
-function escapeHtml(str) { if(!str) return ''; return str.replace(/[&<>]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[m])); }
+let kids = JSON.parse(localStorage.getItem('ladushki_kids')) || [];
+let circles = JSON.parse(localStorage.getItem('ladushki_circles')) || [
+    { id: 'c1', name: '🎨 Рисование', description: 'Развитие творчества', enrolled: [] },
+    { id: 'c2', name: '🏃 Физкультура', description: 'Подвижные игры', enrolled: [] },
+    { id: 'c3', name: '🎭 Театральная студия', description: 'Развитие речи', enrolled: [] }
+];
+let scheduleCommon = JSON.parse(localStorage.getItem('ladushki_schedule')) || [
+    '🍳 08:30 — Завтрак',
+    '🎨 10:00 — Творчество',
+    '🚶 11:30 — Прогулка',
+    '🍲 12:30 — Обед',
+    '😴 13:30 — Тихий час',
+    '🍎 15:30 — Полдник'
+];
+let individualSchedule = JSON.parse(localStorage.getItem('ladushki_individual')) || [];
+let messages = JSON.parse(localStorage.getItem('ladushki_messages')) || [];
 
-async function getUserRole(user) {
-    if(!user) return null;
-    if(user.email === "admin@ladushki.ru") return "admin";
-    if(user.email === "teacher@ladushki.ru") return "teacher";
-    const doc = await db.collection("users").doc(user.uid).get();
-    return doc.exists ? doc.data().role : "parent";
-}
+let currentUser = null;
+let currentChildId = null;
 
-// ============ СОЗДАНИЕ ТЕСТОВЫХ АККАУНТОВ ============
-async function seedTestAccounts() {
-    for(const acc of TEST_ACCOUNTS) {
-        try {
-            await auth.createUserWithEmailAndPassword(acc.email, acc.password);
-            console.log("Создан:", acc.email);
-        } catch(e) { if(e.code !== 'auth/email-already-in-use') console.warn(e); }
-        
-        try {
-            const userCred = await auth.signInWithEmailAndPassword(acc.email, acc.password);
-            await db.collection("users").doc(userCred.user.uid).set({
-                email: acc.email, role: acc.role, name: acc.name
-            }, { merge: true });
-            await auth.signOut();
-        } catch(e) {}
-    }
-    
-    // Общее расписание
-    const scheduleRef = db.collection("settings").doc("commonSchedule");
-    if(!(await scheduleRef.get()).exists) {
-        await scheduleRef.set({ items: ["🍳 08:30 Завтрак", "🎨 10:00 Творчество", "🚶 11:30 Прогулка", "🍲 12:30 Обед", "😴 13:30 Тихий час", "🍎 15:30 Полдник"] });
-    }
-    
-    // Тестовые кружки
-    const circlesSnap = await db.collection("circles").get();
-    if(circlesSnap.empty) {
-        await db.collection("circles").add({ name: "🎨 Рисование", description: "Развитие творческих способностей", enrolledKids: [] });
-        await db.collection("circles").add({ name: "🏃 Физкультура", description: "Подвижные игры", enrolledKids: [] });
-        await db.collection("circles").add({ name: "🎭 Театральная студия", description: "Развитие речи", enrolledKids: [] });
-    }
+function saveData() {
+    localStorage.setItem('ladushki_users', JSON.stringify(users));
+    localStorage.setItem('ladushki_kids', JSON.stringify(kids));
+    localStorage.setItem('ladushki_circles', JSON.stringify(circles));
+    localStorage.setItem('ladushki_schedule', JSON.stringify(scheduleCommon));
+    localStorage.setItem('ladushki_individual', JSON.stringify(individualSchedule));
+    localStorage.setItem('ladushki_messages', JSON.stringify(messages));
 }
 
 // ============ АВТОРИЗАЦИЯ ============
@@ -232,28 +199,28 @@ function showLogin() {
     `;
 }
 
-window.doLogin = async () => {
+window.doLogin = () => {
     const email = document.getElementById("loginEmail").value.trim();
     const pass = document.getElementById("loginPass").value;
     const errDiv = document.getElementById("loginError");
     
     if(!email || !pass) {
         errDiv.style.display = "block";
-        errDiv.innerText = "Заполните все поля";
+        errDiv.innerText = "Заполните поля";
         return;
     }
     
-    errDiv.style.display = "none";
-    
-    try {
-        await auth.signInWithEmailAndPassword(email, pass);
-        document.getElementById("tabbar").style.display = "flex";
-        navigate('home');
-    } catch(e) {
+    const user = users.find(u => u.email === email && u.password === pass);
+    if(!user) {
         errDiv.style.display = "block";
-        errDiv.innerText = "❌ Неверный email или пароль";
-        console.error(e);
+        errDiv.innerText = "Неверный email или пароль";
+        return;
     }
+    
+    currentUser = user;
+    localStorage.setItem('ladushki_currentUser', JSON.stringify(user));
+    document.getElementById("tabbar").style.display = "flex";
+    navigate('home');
 };
 
 function showRegister() {
@@ -275,7 +242,7 @@ function showRegister() {
     `;
 }
 
-window.doRegister = async () => {
+window.doRegister = () => {
     const name = document.getElementById("regName").value.trim();
     const email = document.getElementById("regEmail").value.trim();
     const pass = document.getElementById("regPass").value;
@@ -296,49 +263,37 @@ window.doRegister = async () => {
         errDiv.innerText = "Пароль должен быть не менее 6 символов";
         return;
     }
-    
-    try {
-        const cred = await auth.createUserWithEmailAndPassword(email, pass);
-        await cred.user.updateProfile({ displayName: name });
-        await db.collection("users").doc(cred.user.uid).set({
-            name, email, role, createdAt: new Date()
-        });
-        sucDiv.style.display = "block";
-        sucDiv.innerText = "✅ Регистрация успешна! Перенаправление...";
-        setTimeout(() => {
-            window.location.reload();
-        }, 1500);
-    } catch(e) {
+    if(users.find(u => u.email === email)) {
         errDiv.style.display = "block";
-        if(e.code === 'auth/email-already-in-use') {
-            errDiv.innerText = "❌ Этот email уже зарегистрирован";
-        } else {
-            errDiv.innerText = "❌ " + e.message;
-        }
+        errDiv.innerText = "Email уже зарегистрирован";
+        return;
     }
+    
+    users.push({ id: Date.now().toString(), email, password: pass, name, role });
+    saveData();
+    
+    sucDiv.style.display = "block";
+    sucDiv.innerText = "✅ Регистрация успешна!";
+    setTimeout(() => showLogin(), 1500);
 };
 
-// ============ ВЫХОД ============
-window.logout = async () => {
-    if(unsubscribeMessages) unsubscribeMessages();
-    await auth.signOut();
+window.logout = () => {
+    currentUser = null;
     currentChildId = null;
-    currentGroupId = null;
+    localStorage.removeItem('ladushki_currentUser');
     document.getElementById("tabbar").style.display = "none";
     showLogin();
 };
 
 // ============ ГЛАВНАЯ ============
-async function renderHome() {
-    const user = auth.currentUser;
-    if(!user) return `<div class="card">Ошибка: не авторизован</div>`;
-    const role = await getUserRole(user);
-    const roleIcon = role === "admin" ? "👑" : (role === "teacher" ? "👩‍🏫" : "👪");
-    const roleName = role === "admin" ? "Администратор" : (role === "teacher" ? "Воспитатель" : "Родитель");
+function renderHome() {
+    if(!currentUser) return `<div class="card">Ошибка</div>`;
+    const roleIcon = currentUser.role === "admin" ? "👑" : (currentUser.role === "teacher" ? "👩‍🏫" : "👪");
+    const roleName = currentUser.role === "admin" ? "Администратор" : (currentUser.role === "teacher" ? "Воспитатель" : "Родитель");
     return `
         <div class="card" style="text-align:center;">
             <div style="font-size: 60px;">${roleIcon}</div>
-            <h3>${escapeHtml(user.displayName || user.email)}</h3>
+            <h3>${escapeHtml(currentUser.name)}</h3>
             <span class="badge">${roleName}</span>
             <div style="margin-top: 20px;">
                 <button onclick="logout()"><i class="fas fa-sign-out-alt"></i> Выйти</button>
@@ -348,173 +303,158 @@ async function renderHome() {
 }
 
 // ============ ДЕТИ ============
-async function renderKids() {
-    const user = auth.currentUser;
-    if(!user) return `<div class="card"><div class="text-center">Войдите в аккаунт</div></div>`;
-    const role = await getUserRole(user);
+function renderKids() {
+    if(!currentUser) return `<div class="card">Войдите</div>`;
     
-    if(role === "parent") {
-        const kidsSnap = await db.collection("kids").where("parentId", "==", user.uid).get();
-        let kidsHtml = "";
-        kidsSnap.forEach(d => {
-            kidsHtml += `<div class="student-card ${currentChildId === d.id ? 'active' : ''}" onclick="selectChild('${d.id}')">
-                <span>👶 ${escapeHtml(d.data().name)} ${d.data().groupId ? '✅' : '⏳'}</span>
+    if(currentUser.role === "parent") {
+        const myKids = kids.filter(k => k.parentId === currentUser.id);
+        let kidsHtml = myKids.map(k => `
+            <div class="kid-item ${currentChildId === k.id ? 'active' : ''}" style="cursor:pointer; border:${currentChildId === k.id ? '2px solid #f0bc7a' : 'none'}" onclick="selectChild('${k.id}')">
+                <span>👶 ${escapeHtml(k.name)} ${k.groupId ? '✅' : '⏳'}</span>
                 <i class="fas fa-chevron-right"></i>
-            </div>`;
-        });
+            </div>
+        `).join('');
+        
         return `
             <div class="card">
                 <div class="card-title"><i class="fas fa-baby-carriage"></i> Мои дети</div>
-                <div class="students-grid">${kidsHtml || "<div class='text-center'>Нет детей</div>"}</div>
+                <div class="kids-list">${kidsHtml || "<div class='text-center'>Нет детей</div>"}</div>
                 <input id="newKidName" placeholder="Имя ребенка">
                 <button onclick="addKid()"><i class="fas fa-plus"></i> Добавить</button>
                 ${currentChildId ? `<div class="success-msg" style="display:block; margin-top:15px;">✅ Активный ребёнок выбран</div>` : `<div class="error-msg" style="display:block; margin-top:15px;">⚠️ Выберите активного ребёнка</div>`}
             </div>
         `;
     }
-    return `<div class="card"><div class="text-center">Доступ только для родителей</div></div>`;
+    return `<div class="card"><div class="text-center">Только для родителей</div></div>`;
 }
 
-window.addKid = async () => {
-    const user = auth.currentUser;
+window.addKid = () => {
     const name = document.getElementById("newKidName")?.value.trim();
     if(!name) { alert("Введите имя"); return; }
-    await db.collection("kids").add({ name, parentId: user.uid, groupId: null });
+    kids.push({ id: Date.now().toString(), name, parentId: currentUser.id, groupId: null });
+    saveData();
     document.getElementById("newKidName").value = "";
     navigate('kids');
 };
 
 window.selectChild = (id) => {
     currentChildId = id;
-    currentGroupId = null;
     alert("Активный ребёнок выбран!");
     navigate('kids');
 };
 
 // ============ КРУЖКИ ============
-async function renderCircles() {
-    const user = auth.currentUser;
-    if(!user) return `<div class="card"><div class="text-center">Войдите</div></div>`;
-    const role = await getUserRole(user);
-    const circlesSnap = await db.collection("circles").get();
-    let circlesHtml = "";
+function renderCircles() {
+    if(!currentUser) return `<div class="card">Войдите</div>`;
     
-    for(const doc of circlesSnap.docs) {
-        const c = doc.data();
+    let circlesHtml = circles.map(c => {
         let action = "";
-        if(role === "parent" && currentChildId) {
-            const isEnrolled = c.enrolledKids?.includes(currentChildId);
-            action = `<button onclick="toggleEnroll('${doc.id}')" style="width:auto; margin:0;">${isEnrolled ? '✅ Отменить' : '✏️ Записать'}</button>`;
-        } else if(role === "teacher" || role === "admin") {
-            action = `<button onclick="viewCircleKids('${doc.id}')" style="width:auto; margin:0;">👀 Список</button>`;
+        if(currentUser.role === "parent" && currentChildId) {
+            const isEnrolled = c.enrolled.includes(currentChildId);
+            action = `<button onclick="toggleEnroll('${c.id}')" style="width:auto; margin:0;">${isEnrolled ? '✅ Отменить' : '✏️ Записать'}</button>`;
+        } else if(currentUser.role === "teacher" || currentUser.role === "admin") {
+            action = `<button onclick="viewCircleKids('${c.id}')" style="width:auto; margin:0;">👀 Список</button>`;
         }
-        circlesHtml += `<div class="circle-card"><span>${escapeHtml(c.name)}</span>${action}</div>`;
-    }
+        return `<div class="circle-item"><span>${escapeHtml(c.name)}</span>${action}</div>`;
+    }).join('');
     
     let addForm = "";
-    if(role === "teacher" || role === "admin") {
+    if(currentUser.role === "teacher" || currentUser.role === "admin") {
         addForm = `<hr><input id="newCircleName" placeholder="Название кружка"><button onclick="addCircle()">➕ Добавить кружок</button>`;
     }
     
-    return `<div class="card"><div class="card-title"><i class="fas fa-palette"></i> Кружки</div><div class="circles-grid">${circlesHtml || "Нет кружков"}</div>${addForm}</div>`;
+    return `<div class="card"><div class="card-title"><i class="fas fa-palette"></i> Кружки</div><div class="circles-list">${circlesHtml || "Нет кружков"}</div>${addForm}</div>`;
 }
 
-window.toggleEnroll = async (circleId) => {
-    if(!currentChildId) { alert("Сначала выберите активного ребёнка во вкладке 'Дети'"); return; }
-    const circleRef = db.collection("circles").doc(circleId);
-    const circle = await circleRef.get();
-    let enrolled = circle.data().enrolledKids || [];
-    if(enrolled.includes(currentChildId)) {
-        enrolled = enrolled.filter(id => id !== currentChildId);
+window.toggleEnroll = (circleId) => {
+    if(!currentChildId) { alert("Сначала выберите активного ребёнка!"); return; }
+    const circle = circles.find(c => c.id === circleId);
+    if(circle.enrolled.includes(currentChildId)) {
+        circle.enrolled = circle.enrolled.filter(id => id !== currentChildId);
         alert("✅ Запись отменена");
     } else {
-        enrolled.push(currentChildId);
+        circle.enrolled.push(currentChildId);
         alert("✅ Ребёнок записан на кружок!");
     }
-    await circleRef.update({ enrolledKids: enrolled });
+    saveData();
     navigate('circles');
 };
 
-window.viewCircleKids = async (circleId) => {
-    const circle = await db.collection("circles").doc(circleId).get();
-    const kidsIds = circle.data().enrolledKids || [];
-    let list = "";
-    for(let id of kidsIds) {
-        const kid = await db.collection("kids").doc(id).get();
-        if(kid.exists) list += `- ${kid.data().name}\n`;
-    }
-    alert(`📋 Записаны дети:\n${list || "Нет записей"}`);
+window.viewCircleKids = (circleId) => {
+    const circle = circles.find(c => c.id === circleId);
+    const enrolledKids = circle.enrolled.map(id => {
+        const kid = kids.find(k => k.id === id);
+        return kid ? kid.name : "Неизвестно";
+    });
+    alert(`📋 Записаны дети:\n${enrolledKids.join('\n') || "Нет записей"}`);
 };
 
-window.addCircle = async () => {
+window.addCircle = () => {
     const name = document.getElementById("newCircleName")?.value.trim();
     if(!name) return;
-    await db.collection("circles").add({ name, description: "", enrolledKids: [] });
+    circles.push({ id: Date.now().toString(), name, description: "", enrolled: [] });
+    saveData();
     navigate('circles');
 };
 
 // ============ РАСПИСАНИЕ ============
-async function renderSchedule() {
-    const user = auth.currentUser;
-    if(!user) return `<div class="card"><div class="text-center">Войдите</div></div>`;
-    const role = await getUserRole(user);
-    const common = (await db.collection("settings").doc("commonSchedule").get()).data()?.items || [];
-    let commonHtml = common.map(t => `<div class="schedule-item">📌 ${escapeHtml(t)}</div>`).join("");
+function renderSchedule() {
+    if(!currentUser) return `<div class="card">Войдите</div>`;
+    
+    let commonHtml = scheduleCommon.map(t => `<div class="schedule-item">📌 ${escapeHtml(t)}</div>`).join("");
     
     let indivHtml = "";
-    if(role === "teacher" || role === "admin") {
-        const kidsSnap = await db.collection("kids").get();
-        let kidSelect = `<select id="indivKid"><option value="">Выбрать ребёнка</option>`;
-        kidsSnap.forEach(k => kidSelect += `<option value="${k.id}">${escapeHtml(k.data().name)}</option>`);
-        kidSelect += `</select><input id="indivEvent" placeholder="Индивидуальное занятие"><button onclick="addIndividualEvent()">➕ Добавить</button>`;
-        const events = await db.collection("individualSchedule").get();
-        let eventsHtml = "";
-        events.forEach(e => eventsHtml += `<div class="schedule-item">🧸 ${escapeHtml(e.data().childName)}: ${escapeHtml(e.data().event)}</div>`);
-        indivHtml = `<hr><h4>Индивидуальное расписание</h4>${kidSelect}<div>${eventsHtml || "Нет записей"}</div>`;
-    } else if(role === "parent" && currentChildId) {
-        const events = await db.collection("individualSchedule").where("childId","==",currentChildId).get();
-        let myHtml = "";
-        events.forEach(e => myHtml += `<div class="schedule-item">📖 ${escapeHtml(e.data().event)}</div>`);
-        indivHtml = `<hr><h4>Занятия ребёнка</h4>${myHtml || "Нет индивидуальных занятий"}`;
+    if(currentUser.role === "teacher" || currentUser.role === "admin") {
+        let kidSelect = `<select id="indivKid"><option value="">Выбрать ребёнка</option>${kids.map(k => `<option value="${k.id}">${escapeHtml(k.name)}</option>`).join("")}</select>`;
+        let eventsHtml = individualSchedule.map(e => `<div class="schedule-item">🧸 ${escapeHtml(e.childName)}: ${escapeHtml(e.event)}</div>`).join("");
+        indivHtml = `<hr><h4>Индивидуальное расписание</h4>${kidSelect}<input id="indivEvent" placeholder="Индивидуальное занятие"><button onclick="addIndividualEvent()">➕ Добавить</button><div>${eventsHtml || "Нет записей"}</div>`;
+    } else if(currentUser.role === "parent" && currentChildId) {
+        const myEvents = individualSchedule.filter(e => e.childId === currentChildId);
+        indivHtml = `<hr><h4>Занятия ребёнка</h4>${myEvents.map(e => `<div class="schedule-item">📖 ${escapeHtml(e.event)}</div>`).join("") || "Нет индивидуальных занятий"}`;
     }
     
     return `<div class="card"><div class="card-title"><i class="fas fa-calendar-alt"></i> Расписание дня</div><h4>Общее расписание</h4>${commonHtml}${indivHtml}</div>`;
 }
 
-window.addIndividualEvent = async () => {
+window.addIndividualEvent = () => {
     const kidId = document.getElementById("indivKid")?.value;
     const eventText = document.getElementById("indivEvent")?.value.trim();
     if(!kidId || !eventText) { alert("Выберите ребёнка и введите занятие"); return; }
-    const kid = await db.collection("kids").doc(kidId).get();
-    await db.collection("individualSchedule").add({ childId: kidId, childName: kid.data().name, event: eventText });
+    const kid = kids.find(k => k.id === kidId);
+    individualSchedule.push({ childId: kidId, childName: kid.name, event: eventText });
+    saveData();
     navigate('schedule');
 };
 
-// ============ ЧАТ ПО ГРУППАМ ============
-async function renderChat() {
-    const user = auth.currentUser;
-    if(!user) return `<div class="card"><div class="text-center">Войдите</div></div>`;
-    const role = await getUserRole(user);
-    let groupId = null;
+// ============ ЧАТ ============
+function renderChat() {
+    if(!currentUser) return `<div class="card">Войдите</div>`;
     
-    if(role === "parent" && currentChildId) {
-        const kid = await db.collection("kids").doc(currentChildId).get();
-        groupId = kid.data()?.groupId;
-    } else if(role === "teacher" || role === "admin") {
-        const userDoc = await db.collection("users").doc(user.uid).get();
-        const groupIds = userDoc.data()?.groupIds || [];
-        groupId = groupIds[0];
+    let groupId = null;
+    if(currentUser.role === "parent" && currentChildId) {
+        const kid = kids.find(k => k.id === currentChildId);
+        groupId = kid?.groupId;
+    } else if(currentUser.role === "teacher" || currentUser.role === "admin") {
+        groupId = "group_1";
     }
     
     if(!groupId) {
         return `<div class="card"><div class="text-center">Вы не состоите в группе. Обратитесь к администратору.</div></div>`;
     }
     
-    currentGroupId = groupId;
+    const chatMessages = messages.filter(m => m.groupId === groupId);
+    const messagesHtml = chatMessages.map(m => `
+        <div class="message-item ${m.senderId === currentUser.id ? 'message-parent' : ''}" style="${m.senderId === currentUser.id ? 'margin-left:auto; background:#f0bc7a;' : 'background:#f5e2c1;'}">
+            <div><strong>${escapeHtml(m.senderName)}</strong></div>
+            <div>${escapeHtml(m.text)}</div>
+            <div style="font-size:0.65rem; opacity:0.7;">${m.time}</div>
+        </div>
+    `).join('');
+    
     return `
         <div class="card">
             <div class="card-title"><i class="fas fa-comments"></i> Чат группы</div>
-            <div id="chatMessages" style="height: 350px; overflow-y: auto; background: #fef9ef; border-radius: 28px; padding: 15px; margin-bottom: 10px;"></div>
+            <div id="chatContainer" class="chat-container">${messagesHtml || "<div class='text-center'>💬 Нет сообщений</div>"}</div>
             <div class="flex">
                 <input id="chatInput" placeholder="Напишите сообщение..." style="flex:1;">
                 <button onclick="sendMessage()" style="width:auto;"><i class="fas fa-paper-plane"></i></button>
@@ -523,54 +463,49 @@ async function renderChat() {
     `;
 }
 
-window.sendMessage = async () => {
-    const user = auth.currentUser;
+window.sendMessage = () => {
     const text = document.getElementById("chatInput")?.value.trim();
-    if(!text || !currentGroupId) return;
-    const role = await getUserRole(user);
-    await db.collection("groupMessages").add({
-        text, groupId: currentGroupId, uid: user.uid,
-        name: user.displayName || user.email, role,
-        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    if(!text) return;
+    
+    let groupId = null;
+    if(currentUser.role === "parent" && currentChildId) {
+        const kid = kids.find(k => k.id === currentChildId);
+        groupId = kid?.groupId;
+    } else {
+        groupId = "group_1";
+    }
+    
+    if(!groupId) return;
+    
+    messages.push({
+        id: Date.now().toString(),
+        groupId,
+        text,
+        senderId: currentUser.id,
+        senderName: currentUser.name,
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     });
+    saveData();
     document.getElementById("chatInput").value = "";
+    navigate('chat');
+    
+    setTimeout(() => {
+        const container = document.getElementById("chatContainer");
+        if(container) container.scrollTop = container.scrollHeight;
+    }, 100);
 };
 
-function loadChatMessages() {
-    const container = document.getElementById("chatMessages");
-    if(!container || !currentGroupId) return;
-    if(unsubscribeMessages) unsubscribeMessages();
-    unsubscribeMessages = db.collection("groupMessages").where("groupId","==",currentGroupId).orderBy("createdAt","asc").limitToLast(80).onSnapshot(snap => {
-        if(!container) return;
-        let msgs = [];
-        snap.forEach(d => msgs.push(d.data()));
-        if(msgs.length === 0) { container.innerHTML = "<div class='text-center'>💬 Нет сообщений</div>"; return; }
-        container.innerHTML = "";
-        msgs.forEach(m => {
-            const isParent = m.role === "parent";
-            const div = document.createElement("div");
-            div.style.marginBottom = "12px";
-            div.style.textAlign = isParent ? "right" : "left";
-            div.innerHTML = `<div style="display:inline-block; background:${isParent ? '#f0bc7a' : 'white'}; color:${isParent ? 'white' : '#5a3e2b'}; padding:8px 16px; border-radius:24px; max-width:80%;"><strong>${escapeHtml(m.name)}</strong><br>${escapeHtml(m.text)}<div style="font-size:0.65rem; opacity:0.7;">${m.createdAt?.toDate ? new Date(m.createdAt.toDate()).toLocaleTimeString() : ''}</div></div>`;
-            container.appendChild(div);
-        });
-        container.scrollTop = container.scrollHeight;
-    });
-}
-
 // ============ ПРОФИЛЬ ============
-async function renderProfile() {
-    const user = auth.currentUser;
-    if(!user) return `<div class="card"><button onclick="showLogin()">Войти</button></div>`;
-    const role = await getUserRole(user);
-    const roleName = role === "admin" ? "Администратор" : (role === "teacher" ? "Воспитатель" : "Родитель");
+function renderProfile() {
+    if(!currentUser) return `<div class="card"><button onclick="showLogin()">Войти</button></div>`;
+    const roleName = currentUser.role === "admin" ? "Администратор" : (currentUser.role === "teacher" ? "Воспитатель" : "Родитель");
     return `
         <div class="card">
             <div class="card-title"><i class="fas fa-user-circle"></i> Профиль</div>
             <div class="text-center">
                 <div style="font-size: 70px;">👤</div>
-                <div><strong>${escapeHtml(user.displayName || user.email)}</strong></div>
-                <div>📧 ${escapeHtml(user.email)}</div>
+                <div><strong>${escapeHtml(currentUser.name)}</strong></div>
+                <div>📧 ${escapeHtml(currentUser.email)}</div>
                 <div class="badge" style="margin-top: 8px;">${roleName}</div>
                 <button onclick="logout()" style="margin-top: 20px;"><i class="fas fa-sign-out-alt"></i> Выйти</button>
             </div>
@@ -578,8 +513,10 @@ async function renderProfile() {
     `;
 }
 
+function escapeHtml(str) { if(!str) return ''; return str.replace(/[&<>]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[m])); }
+
 // ============ НАВИГАЦИЯ ============
-async function navigate(screen) {
+function navigate(screen) {
     const tabs = document.querySelectorAll('.tab');
     tabs.forEach(tab => tab.classList.remove('active'));
     if(screen === 'home') tabs[0]?.classList.add('active');
@@ -592,38 +529,35 @@ async function navigate(screen) {
     const content = document.getElementById("content");
     content.style.opacity = "0";
     
-    setTimeout(async () => {
+    setTimeout(() => {
         let html = "";
-        if(screen === "home") html = await renderHome();
-        else if(screen === "kids") html = await renderKids();
-        else if(screen === "circles") html = await renderCircles();
-        else if(screen === "schedule") html = await renderSchedule();
-        else if(screen === "chat") html = await renderChat();
-        else if(screen === "profile") html = await renderProfile();
-        else html = `<div class="card">Страница в разработке</div>`;
-        
+        if(screen === "home") html = renderHome();
+        else if(screen === "kids") html = renderKids();
+        else if(screen === "circles") html = renderCircles();
+        else if(screen === "schedule") html = renderSchedule();
+        else if(screen === "chat") html = renderChat();
+        else if(screen === "profile") html = renderProfile();
         content.innerHTML = html;
-        if(screen === "chat" && currentGroupId) loadChatMessages();
-        else if(unsubscribeMessages) { unsubscribeMessages(); unsubscribeMessages = null; }
         content.style.opacity = "1";
+        
+        if(screen === "chat") {
+            setTimeout(() => {
+                const container = document.getElementById("chatContainer");
+                if(container) container.scrollTop = container.scrollHeight;
+            }, 100);
+        }
     }, 50);
 }
 
 // ============ ЗАПУСК ============
-seedTestAccounts().then(() => {
-    auth.onAuthStateChanged((user) => {
-        if(user) {
-            document.getElementById("tabbar").style.display = "flex";
-            navigate('home');
-        } else {
-            document.getElementById("tabbar").style.display = "none";
-            showLogin();
-        }
-    });
-}).catch(err => {
-    console.error("Ошибка инициализации:", err);
+const savedUser = localStorage.getItem('ladushki_currentUser');
+if(savedUser) {
+    currentUser = JSON.parse(savedUser);
+    document.getElementById("tabbar").style.display = "flex";
+    navigate('home');
+} else {
     showLogin();
-});
+}
 </script>
 </body>
 </html>

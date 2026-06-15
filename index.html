@@ -63,7 +63,7 @@
             transition: 0.2s;
         }
         button:hover { background: #ecd6aa; transform: scale(0.98); }
-        input, select {
+        input, select, textarea {
             width: 100%;
             padding: 12px 16px;
             margin-top: 8px;
@@ -92,12 +92,12 @@
             display: flex;
             padding: 8px 20px;
             border-radius: 50px;
-            gap: 25px;
+            gap: 20px;
             box-shadow: 0 8px 20px rgba(0,0,0,0.15);
             z-index: 200;
         }
         .tab {
-            font-size: 24px;
+            font-size: 22px;
             cursor: pointer;
             opacity: 0.5;
             padding: 5px;
@@ -107,28 +107,30 @@
         .tab.active { opacity: 1; background: #ffe0bf; transform: scale(1.1); }
         .small { font-size: 0.7rem; color: #ad8b64; text-align: center; margin-top: 12px; }
         .text-center { text-align: center; }
-        .loading { text-align: center; padding: 40px; color: #7b5a3b; }
         .badge { background: #e9ddce; border-radius: 30px; padding: 4px 12px; font-size: 0.7rem; display: inline-block; }
-        .flex { display: flex; gap: 10px; flex-wrap: wrap; }
-        .kids-list, .circles-list { display: flex; flex-direction: column; gap: 10px; max-height: 300px; overflow-y: auto; }
-        .kid-item, .circle-item {
+        .flex { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+        .list-item {
             background: #fef5ea;
             border-radius: 60px;
             padding: 10px 16px;
+            margin-bottom: 8px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            cursor: pointer;
         }
+        .list-item.active { border: 2px solid #f0bc7a; background: #fff3e4; }
         .schedule-item { background: #fef2e2; padding: 10px 16px; border-radius: 40px; margin-bottom: 8px; }
+        .chat-container { height: 350px; overflow-y: auto; background: #fef9ef; border-radius: 28px; padding: 15px; margin-bottom: 10px; }
         .message-item {
-            background: #f5e2c1;
-            padding: 10px 14px;
+            padding: 8px 14px;
             border-radius: 20px;
             margin-bottom: 10px;
             max-width: 80%;
         }
-        .message-parent { background: #f0bc7a; color: white; margin-left: auto; }
-        .chat-container { height: 350px; overflow-y: auto; background: #fef9ef; border-radius: 28px; padding: 15px; margin-bottom: 10px; }
+        .message-mine { background: #f0bc7a; color: white; margin-left: auto; }
+        .message-other { background: #f5e2c1; margin-right: auto; }
+        .group-select { background: #fef5ea; border-radius: 40px; padding: 12px; margin-bottom: 15px; }
     </style>
 </head>
 <body>
@@ -137,30 +139,41 @@
         <h1><i class="fas fa-bear"></i> Ладушки <i class="fas fa-leaf"></i></h1>
         <div class="small">детский сад для маленьких звёздочек</div>
     </div>
-    <div id="content"><div class="loading"><i class="fas fa-spinner fa-pulse"></i> Загрузка...</div></div>
+    <div id="content"><div class="loading" style="text-align:center; padding:40px;"><i class="fas fa-spinner fa-pulse"></i> Загрузка...</div></div>
     <div class="bottom-tabs" id="tabbar" style="display: none;">
         <div class="tab" onclick="navigate('home')"><i class="fas fa-home"></i></div>
         <div class="tab" onclick="navigate('kids')"><i class="fas fa-baby-carriage"></i></div>
         <div class="tab" onclick="navigate('circles')"><i class="fas fa-palette"></i></div>
         <div class="tab" onclick="navigate('schedule')"><i class="fas fa-calendar-alt"></i></div>
+        <div class="tab" onclick="navigate('groups')"><i class="fas fa-users"></i></div>
         <div class="tab" onclick="navigate('chat')"><i class="fas fa-comment-dots"></i></div>
         <div class="tab" onclick="navigate('profile')"><i class="fas fa-user"></i></div>
     </div>
 </div>
 
 <script>
-// ============ ЛОКАЛЬНОЕ ХРАНИЛИЩЕ (всё работает без Firebase!) ============
+// ============ ЛОКАЛЬНОЕ ХРАНИЛИЩЕ ============
 let users = JSON.parse(localStorage.getItem('ladushki_users')) || [
-    { id: '1', email: 'admin@ladushki.ru', password: 'Admin2025', name: 'Мария Петровна', role: 'admin' },
-    { id: '2', email: 'teacher@ladushki.ru', password: 'Ladushki2025', name: 'Анна Сергеевна', role: 'teacher' }
+    { id: '1', email: 'admin@ladushki.ru', password: 'Admin2025', name: 'Мария Петровна', role: 'admin', groupId: null },
+    { id: '2', email: 'teacher@ladushki.ru', password: 'Ladushki2025', name: 'Анна Сергеевна', role: 'teacher', groupId: 'g1' }
 ];
 
-let kids = JSON.parse(localStorage.getItem('ladushki_kids')) || [];
+let kids = JSON.parse(localStorage.getItem('ladushki_kids')) || [
+    { id: 'k1', name: 'Миша Иванов', parentId: null, groupId: 'g1' },
+    { id: 'k2', name: 'Алиса Петрова', parentId: null, groupId: 'g1' }
+];
+
+let groups = JSON.parse(localStorage.getItem('ladushki_groups')) || [
+    { id: 'g1', name: 'Солнышко' },
+    { id: 'g2', name: 'Звёздочки' }
+];
+
 let circles = JSON.parse(localStorage.getItem('ladushki_circles')) || [
     { id: 'c1', name: '🎨 Рисование', description: 'Развитие творчества', enrolled: [] },
     { id: 'c2', name: '🏃 Физкультура', description: 'Подвижные игры', enrolled: [] },
     { id: 'c3', name: '🎭 Театральная студия', description: 'Развитие речи', enrolled: [] }
 ];
+
 let scheduleCommon = JSON.parse(localStorage.getItem('ladushki_schedule')) || [
     '🍳 08:30 — Завтрак',
     '🎨 10:00 — Творчество',
@@ -169,6 +182,7 @@ let scheduleCommon = JSON.parse(localStorage.getItem('ladushki_schedule')) || [
     '😴 13:30 — Тихий час',
     '🍎 15:30 — Полдник'
 ];
+
 let individualSchedule = JSON.parse(localStorage.getItem('ladushki_individual')) || [];
 let messages = JSON.parse(localStorage.getItem('ladushki_messages')) || [];
 
@@ -178,6 +192,7 @@ let currentChildId = null;
 function saveData() {
     localStorage.setItem('ladushki_users', JSON.stringify(users));
     localStorage.setItem('ladushki_kids', JSON.stringify(kids));
+    localStorage.setItem('ladushki_groups', JSON.stringify(groups));
     localStorage.setItem('ladushki_circles', JSON.stringify(circles));
     localStorage.setItem('ladushki_schedule', JSON.stringify(scheduleCommon));
     localStorage.setItem('ladushki_individual', JSON.stringify(individualSchedule));
@@ -269,7 +284,7 @@ window.doRegister = () => {
         return;
     }
     
-    users.push({ id: Date.now().toString(), email, password: pass, name, role });
+    users.push({ id: Date.now().toString(), email, password: pass, name, role, groupId: null });
     saveData();
     
     sucDiv.style.display = "block";
@@ -302,14 +317,14 @@ function renderHome() {
     `;
 }
 
-// ============ ДЕТИ ============
+// ============ ДЕТИ (С ВЫБОРОМ АКТИВНОГО) ============
 function renderKids() {
     if(!currentUser) return `<div class="card">Войдите</div>`;
     
     if(currentUser.role === "parent") {
         const myKids = kids.filter(k => k.parentId === currentUser.id);
         let kidsHtml = myKids.map(k => `
-            <div class="kid-item ${currentChildId === k.id ? 'active' : ''}" style="cursor:pointer; border:${currentChildId === k.id ? '2px solid #f0bc7a' : 'none'}" onclick="selectChild('${k.id}')">
+            <div class="list-item ${currentChildId === k.id ? 'active' : ''}" onclick="selectChild('${k.id}')">
                 <span>👶 ${escapeHtml(k.name)} ${k.groupId ? '✅' : '⏳'}</span>
                 <i class="fas fa-chevron-right"></i>
             </div>
@@ -318,12 +333,21 @@ function renderKids() {
         return `
             <div class="card">
                 <div class="card-title"><i class="fas fa-baby-carriage"></i> Мои дети</div>
-                <div class="kids-list">${kidsHtml || "<div class='text-center'>Нет детей</div>"}</div>
+                <div>${kidsHtml || "<div class='text-center'>Нет детей</div>"}</div>
                 <input id="newKidName" placeholder="Имя ребенка">
                 <button onclick="addKid()"><i class="fas fa-plus"></i> Добавить</button>
-                ${currentChildId ? `<div class="success-msg" style="display:block; margin-top:15px;">✅ Активный ребёнок выбран</div>` : `<div class="error-msg" style="display:block; margin-top:15px;">⚠️ Выберите активного ребёнка</div>`}
+                ${currentChildId ? `<div class="success-msg" style="display:block; margin-top:15px;">✅ Активный ребёнок: ${escapeHtml(myKids.find(k=>k.id===currentChildId)?.name)}</div>` : `<div class="error-msg" style="display:block; margin-top:15px;">⚠️ Выберите активного ребёнка</div>`}
             </div>
         `;
+    }
+    
+    if(currentUser.role === "admin" || currentUser.role === "teacher") {
+        let allKidsHtml = kids.map(k => `
+            <div class="list-item">
+                <span>👶 ${escapeHtml(k.name)} (группа: ${groups.find(g=>g.id===k.groupId)?.name || 'нет'})</span>
+            </div>
+        `).join('');
+        return `<div class="card"><div class="card-title"><i class="fas fa-users-viewfinder"></i> Все дети</div><div>${allKidsHtml || "Нет детей"}</div></div>`;
     }
     return `<div class="card"><div class="text-center">Только для родителей</div></div>`;
 }
@@ -355,7 +379,7 @@ function renderCircles() {
         } else if(currentUser.role === "teacher" || currentUser.role === "admin") {
             action = `<button onclick="viewCircleKids('${c.id}')" style="width:auto; margin:0;">👀 Список</button>`;
         }
-        return `<div class="circle-item"><span>${escapeHtml(c.name)}</span>${action}</div>`;
+        return `<div class="list-item"><span>${escapeHtml(c.name)}</span>${action}</div>`;
     }).join('');
     
     let addForm = "";
@@ -363,7 +387,7 @@ function renderCircles() {
         addForm = `<hr><input id="newCircleName" placeholder="Название кружка"><button onclick="addCircle()">➕ Добавить кружок</button>`;
     }
     
-    return `<div class="card"><div class="card-title"><i class="fas fa-palette"></i> Кружки</div><div class="circles-list">${circlesHtml || "Нет кружков"}</div>${addForm}</div>`;
+    return `<div class="card"><div class="card-title"><i class="fas fa-palette"></i> Кружки</div><div>${circlesHtml || "Нет кружков"}</div>${addForm}</div>`;
 }
 
 window.toggleEnroll = (circleId) => {
@@ -397,7 +421,7 @@ window.addCircle = () => {
     navigate('circles');
 };
 
-// ============ РАСПИСАНИЕ ============
+// ============ РАСПИСАНИЕ (ОБЩЕЕ + ИНДИВИДУАЛЬНОЕ) ============
 function renderSchedule() {
     if(!currentUser) return `<div class="card">Войдите</div>`;
     
@@ -407,10 +431,10 @@ function renderSchedule() {
     if(currentUser.role === "teacher" || currentUser.role === "admin") {
         let kidSelect = `<select id="indivKid"><option value="">Выбрать ребёнка</option>${kids.map(k => `<option value="${k.id}">${escapeHtml(k.name)}</option>`).join("")}</select>`;
         let eventsHtml = individualSchedule.map(e => `<div class="schedule-item">🧸 ${escapeHtml(e.childName)}: ${escapeHtml(e.event)}</div>`).join("");
-        indivHtml = `<hr><h4>Индивидуальное расписание</h4>${kidSelect}<input id="indivEvent" placeholder="Индивидуальное занятие"><button onclick="addIndividualEvent()">➕ Добавить</button><div>${eventsHtml || "Нет записей"}</div>`;
+        indivHtml = `<hr><h4>📋 Индивидуальное расписание</h4>${kidSelect}<input id="indivEvent" placeholder="Индивидуальное занятие"><button onclick="addIndividualEvent()">➕ Добавить</button><div>${eventsHtml || "Нет записей"}</div>`;
     } else if(currentUser.role === "parent" && currentChildId) {
         const myEvents = individualSchedule.filter(e => e.childId === currentChildId);
-        indivHtml = `<hr><h4>Занятия ребёнка</h4>${myEvents.map(e => `<div class="schedule-item">📖 ${escapeHtml(e.event)}</div>`).join("") || "Нет индивидуальных занятий"}`;
+        indivHtml = `<hr><h4>📖 Занятия ${kids.find(k=>k.id===currentChildId)?.name}</h4>${myEvents.map(e => `<div class="schedule-item">📖 ${escapeHtml(e.event)}</div>`).join("") || "Нет индивидуальных занятий"}`;
     }
     
     return `<div class="card"><div class="card-title"><i class="fas fa-calendar-alt"></i> Расписание дня</div><h4>Общее расписание</h4>${commonHtml}${indivHtml}</div>`;
@@ -426,16 +450,116 @@ window.addIndividualEvent = () => {
     navigate('schedule');
 };
 
-// ============ ЧАТ ============
+// ============ ГРУППЫ (ТОЛЬКО ДЛЯ АДМИНА) ============
+function renderGroups() {
+    if(!currentUser) return `<div class="card">Войдите</div>`;
+    
+    if(currentUser.role !== "admin") {
+        return `<div class="card"><div class="text-center">🔒 Только для администратора</div></div>`;
+    }
+    
+    let groupsHtml = groups.map(g => `
+        <div class="list-item">
+            <span>📁 ${escapeHtml(g.name)}</span>
+            <button onclick="deleteGroup('${g.id}')" style="width:auto; margin:0; background:#ffddcc;">🗑️</button>
+        </div>
+    `).join('');
+    
+    let usersHtml = users.filter(u => u.role !== 'admin').map(u => `
+        <div class="list-item">
+            <span>${u.role === 'teacher' ? '👩‍🏫' : '👪'} ${escapeHtml(u.name)}</span>
+            <select onchange="assignToGroup('${u.id}', this.value)" style="width:auto; margin:0; padding:5px 10px;">
+                <option value="">Выбрать группу</option>
+                ${groups.map(g => `<option value="${g.id}" ${u.groupId === g.id ? 'selected' : ''}>${escapeHtml(g.name)}</option>`).join('')}
+            </select>
+        </div>
+    `).join('');
+    
+    let kidsHtml = kids.map(k => `
+        <div class="list-item">
+            <span>👶 ${escapeHtml(k.name)}</span>
+            <select onchange="assignKidToGroup('${k.id}', this.value)" style="width:auto; margin:0; padding:5px 10px;">
+                <option value="">Выбрать группу</option>
+                ${groups.map(g => `<option value="${g.id}" ${k.groupId === g.id ? 'selected' : ''}>${escapeHtml(g.name)}</option>`).join('')}
+            </select>
+        </div>
+    `).join('');
+    
+    return `
+        <div class="card">
+            <div class="card-title"><i class="fas fa-layer-group"></i> Управление группами</div>
+            <input id="newGroupName" placeholder="Название новой группы">
+            <button onclick="addGroup()"><i class="fas fa-plus"></i> Создать группу</button>
+            <hr>
+            <h4>Существующие группы</h4>
+            ${groupsHtml || "Нет групп"}
+            <hr>
+            <h4>👥 Пользователи</h4>
+            ${usersHtml || "Нет пользователей"}
+            <hr>
+            <h4>👶 Дети</h4>
+            ${kidsHtml || "Нет детей"}
+        </div>
+    `;
+}
+
+window.addGroup = () => {
+    const name = document.getElementById("newGroupName")?.value.trim();
+    if(!name) { alert("Введите название группы"); return; }
+    groups.push({ id: Date.now().toString(), name });
+    saveData();
+    navigate('groups');
+};
+
+window.deleteGroup = (groupId) => {
+    if(confirm("Удалить группу?")) {
+        groups = groups.filter(g => g.id !== groupId);
+        kids.forEach(k => { if(k.groupId === groupId) k.groupId = null; });
+        users.forEach(u => { if(u.groupId === groupId) u.groupId = null; });
+        saveData();
+        navigate('groups');
+    }
+};
+
+window.assignToGroup = (userId, groupId) => {
+    const user = users.find(u => u.id === userId);
+    if(user) {
+        user.groupId = groupId || null;
+        saveData();
+        alert(`✅ ${user.name} назначен в группу`);
+        navigate('groups');
+    }
+};
+
+window.assignKidToGroup = (kidId, groupId) => {
+    const kid = kids.find(k => k.id === kidId);
+    if(kid) {
+        kid.groupId = groupId || null;
+        saveData();
+        alert(`✅ Ребёнок ${kid.name} назначен в группу`);
+        navigate('groups');
+    }
+};
+
+// ============ ЧАТ ПО ГРУППАМ ============
 function renderChat() {
     if(!currentUser) return `<div class="card">Войдите</div>`;
     
     let groupId = null;
+    let groupName = "";
+    
     if(currentUser.role === "parent" && currentChildId) {
         const kid = kids.find(k => k.id === currentChildId);
         groupId = kid?.groupId;
-    } else if(currentUser.role === "teacher" || currentUser.role === "admin") {
-        groupId = "group_1";
+        const group = groups.find(g => g.id === groupId);
+        groupName = group?.name || "группы";
+    } else if(currentUser.role === "teacher") {
+        groupId = currentUser.groupId;
+        const group = groups.find(g => g.id === groupId);
+        groupName = group?.name || "группы";
+    } else if(currentUser.role === "admin") {
+        groupId = "admin_chat";
+        groupName = "Администратора";
     }
     
     if(!groupId) {
@@ -444,7 +568,7 @@ function renderChat() {
     
     const chatMessages = messages.filter(m => m.groupId === groupId);
     const messagesHtml = chatMessages.map(m => `
-        <div class="message-item ${m.senderId === currentUser.id ? 'message-parent' : ''}" style="${m.senderId === currentUser.id ? 'margin-left:auto; background:#f0bc7a;' : 'background:#f5e2c1;'}">
+        <div class="message-item ${m.senderId === currentUser.id ? 'message-mine' : 'message-other'}">
             <div><strong>${escapeHtml(m.senderName)}</strong></div>
             <div>${escapeHtml(m.text)}</div>
             <div style="font-size:0.65rem; opacity:0.7;">${m.time}</div>
@@ -453,7 +577,7 @@ function renderChat() {
     
     return `
         <div class="card">
-            <div class="card-title"><i class="fas fa-comments"></i> Чат группы</div>
+            <div class="card-title"><i class="fas fa-comments"></i> Чат ${groupName}</div>
             <div id="chatContainer" class="chat-container">${messagesHtml || "<div class='text-center'>💬 Нет сообщений</div>"}</div>
             <div class="flex">
                 <input id="chatInput" placeholder="Напишите сообщение..." style="flex:1;">
@@ -471,8 +595,10 @@ window.sendMessage = () => {
     if(currentUser.role === "parent" && currentChildId) {
         const kid = kids.find(k => k.id === currentChildId);
         groupId = kid?.groupId;
-    } else {
-        groupId = "group_1";
+    } else if(currentUser.role === "teacher") {
+        groupId = currentUser.groupId;
+    } else if(currentUser.role === "admin") {
+        groupId = "admin_chat";
     }
     
     if(!groupId) return;
@@ -518,13 +644,11 @@ function escapeHtml(str) { if(!str) return ''; return str.replace(/[&<>]/g, m =>
 // ============ НАВИГАЦИЯ ============
 function navigate(screen) {
     const tabs = document.querySelectorAll('.tab');
-    tabs.forEach(tab => tab.classList.remove('active'));
-    if(screen === 'home') tabs[0]?.classList.add('active');
-    else if(screen === 'kids') tabs[1]?.classList.add('active');
-    else if(screen === 'circles') tabs[2]?.classList.add('active');
-    else if(screen === 'schedule') tabs[3]?.classList.add('active');
-    else if(screen === 'chat') tabs[4]?.classList.add('active');
-    else if(screen === 'profile') tabs[5]?.classList.add('active');
+    const screens = ['home', 'kids', 'circles', 'schedule', 'groups', 'chat', 'profile'];
+    tabs.forEach((tab, i) => {
+        if(screens[i] === screen) tab.classList.add('active');
+        else tab.classList.remove('active');
+    });
     
     const content = document.getElementById("content");
     content.style.opacity = "0";
@@ -535,6 +659,7 @@ function navigate(screen) {
         else if(screen === "kids") html = renderKids();
         else if(screen === "circles") html = renderCircles();
         else if(screen === "schedule") html = renderSchedule();
+        else if(screen === "groups") html = renderGroups();
         else if(screen === "chat") html = renderChat();
         else if(screen === "profile") html = renderProfile();
         content.innerHTML = html;

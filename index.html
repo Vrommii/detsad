@@ -13,109 +13,21 @@
             padding: 20px 20px 100px 20px;
             min-height: 100vh;
         }
-        .app-container {
-            max-width: 700px;
-            margin: 0 auto;
-            background: #fffef7;
-            border-radius: 48px;
-            box-shadow: 0 20px 35px -12px rgba(0,0,0,0.1);
-            overflow: hidden;
-        }
-        .header {
-            background: linear-gradient(115deg, #f8e3c2, #f5d5a8);
-            padding: 24px 20px;
-            text-align: center;
-        }
-        .header h1 {
-            font-size: 28px;
-            color: #7a5a3a;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-        }
-        .header h1 i { font-size: 32px; }
-        .card {
-            background: white;
-            margin: 16px;
-            padding: 22px;
-            border-radius: 36px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-            border: 1px solid #faeedb;
-        }
-        .card-title {
-            font-size: 1.3rem;
-            font-weight: 700;
-            color: #b68b55;
-            margin-bottom: 18px;
-            border-left: 5px solid #f0bc7a;
-            padding-left: 14px;
-        }
-        button {
-            background: #f5e2c1;
-            border: none;
-            border-radius: 60px;
-            padding: 12px 18px;
-            font-weight: 600;
-            cursor: pointer;
-            width: 100%;
-            margin-top: 10px;
-            font-size: 0.95rem;
-            transition: 0.2s;
-        }
+        .app-container { max-width: 700px; margin: 0 auto; background: #fffef7; border-radius: 48px; box-shadow: 0 20px 35px -12px rgba(0,0,0,0.1); overflow: hidden; }
+        .header { background: linear-gradient(115deg, #f8e3c2, #f5d5a8); padding: 24px 20px; text-align: center; }
+        .header h1 { font-size: 28px; color: #7a5a3a; display: flex; align-items: center; justify-content: center; gap: 12px; }
+        .card { background: white; margin: 16px; padding: 22px; border-radius: 36px; border: 1px solid #faeedb; }
+        .card-title { font-size: 1.3rem; font-weight: 700; color: #b68b55; margin-bottom: 18px; border-left: 5px solid #f0bc7a; padding-left: 14px; }
+        button { background: #f5e2c1; border: none; border-radius: 60px; padding: 12px 18px; font-weight: 600; cursor: pointer; width: 100%; margin-top: 10px; transition: 0.2s; }
         button:hover { background: #ecd6aa; transform: scale(0.98); }
         button.small-btn { width: auto; padding: 8px 16px; margin-top: 0; font-size: 0.85rem; }
         button.approve { background: #a8e6cf; }
-        button.approve:hover { background: #8fd6bc; }
         button.reject { background: #ffb3ba; }
-        button.reject:hover { background: #ff9aa2; }
         button.delete-btn { background: #ffddcc; }
-        button.delete-btn:hover { background: #ffccbb; }
-        input, select, textarea {
-            width: 100%;
-            padding: 12px 16px;
-            margin-top: 8px;
-            border-radius: 48px;
-            border: 1.5px solid #f7e4ca;
-            background: white;
-            outline: none;
-            font-size: 0.95rem;
-        }
+        input, select { width: 100%; padding: 12px 16px; margin-top: 8px; border-radius: 48px; border: 1.5px solid #f7e4ca; background: white; outline: none; }
         input:focus { border-color: #f0bc7a; }
-        .error-msg, .success-msg {
-            padding: 10px;
-            border-radius: 30px;
-            margin-top: 10px;
-            text-align: center;
-            display: none;
-            font-size: 0.85rem;
-        }
-        .error-msg { background: #ffe1e1; color: #c23d3d; }
-        .success-msg { background: #daf7da; color: #267c26; }
-        .bottom-tabs {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #fffcf0;
-            display: flex;
-            padding: 12px 24px;
-            border-radius: 60px;
-            gap: 20px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-            z-index: 200;
-            flex-wrap: wrap;
-            justify-content: center;
-            border: 1px solid #faeedb;
-        }
-        .tab {
-            font-size: 24px;
-            cursor: pointer;
-            opacity: 0.5;
-            padding: 8px;
-            border-radius: 50px;
-            transition: 0.2s;
-        }
+        .bottom-tabs { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #fffcf0; display: flex; padding: 12px 24px; border-radius: 60px; gap: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); z-index: 200; flex-wrap: wrap; justify-content: center; border: 1px solid #faeedb; }
+        .tab { font-size: 24px; cursor: pointer; opacity: 0.5; padding: 8px; border-radius: 50px; transition: 0.2s; }
         .tab.active { opacity: 1; background: #ffe0bf; transform: scale(1.1); }
         .small { font-size: 0.75rem; color: #ad8b64; text-align: center; margin-top: 12px; }
         .text-center { text-align: center; }
@@ -124,47 +36,18 @@
         .badge-approved { background: #a8e6cf; color: #2d6a2d; }
         .badge-rejected { background: #ffb3ba; color: #c23d3d; }
         .flex { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
-        .list-item {
-            background: #fef5ea;
-            border-radius: 60px;
-            padding: 12px 18px;
-            margin-bottom: 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            cursor: pointer;
-        }
+        .list-item { background: #fef5ea; border-radius: 60px; padding: 12px 18px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
         .list-item.active { border: 2px solid #f0bc7a; background: #fff3e4; }
-        .schedule-item { 
-            background: #fef2e2; 
-            padding: 12px 18px; 
-            border-radius: 40px; 
-            margin-bottom: 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .chat-container { 
-            height: 380px; 
-            overflow-y: auto; 
-            background: #fef9ef; 
-            border-radius: 28px; 
-            padding: 15px; 
-            margin-bottom: 12px; 
-            display: flex; 
-            flex-direction: column; 
-        }
-        .message-item {
-            padding: 10px 16px;
-            border-radius: 22px;
-            margin-bottom: 12px;
-            max-width: 80%;
-            word-wrap: break-word;
-        }
+        .schedule-item { background: #fef2e2; padding: 12px 18px; border-radius: 40px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+        .circle-card { background: #fef5ea; border-radius: 28px; padding: 14px; margin-bottom: 12px; }
+        .circle-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; }
+        .circle-time { font-size: 0.8rem; color: #b68b55; margin-top: 5px; }
+        .schedule-option { background: #fff8f0; border-radius: 20px; padding: 8px 12px; margin: 5px 0; display: flex; justify-content: space-between; align-items: center; }
+        .chat-container { height: 380px; overflow-y: auto; background: #fef9ef; border-radius: 28px; padding: 15px; margin-bottom: 12px; display: flex; flex-direction: column; }
+        .message-item { padding: 10px 16px; border-radius: 22px; margin-bottom: 12px; max-width: 80%; word-wrap: break-word; }
         .message-mine { background: #f0bc7a; color: white; align-self: flex-end; }
         .message-other { background: #f5e2c1; align-self: flex-start; }
         .message-time { font-size: 0.65rem; opacity: 0.7; margin-top: 4px; }
-        .chat-selector { background: #fef5ea; border-radius: 40px; padding: 12px; margin-bottom: 16px; }
         hr { margin: 18px 0; border-color: #faeedb; }
         .inline-select { width: auto; margin: 0; padding: 8px 14px; }
         .assigned-badge { background: #a8d5a8; color: #2d6a2d; padding: 3px 10px; border-radius: 20px; font-size: 0.7rem; }
@@ -185,9 +68,8 @@
         <div class="tab" onclick="navigate('circles')"><i class="fas fa-palette"></i></div>
         <div class="tab" onclick="navigate('activities')"><i class="fas fa-star"></i></div>
         <div class="tab" onclick="navigate('schedule')"><i class="fas fa-calendar-alt"></i></div>
-        <div class="tab" onclick="navigate('requests')"><i class="fas fa-clipboard-list"></i></div>
         <div class="tab" onclick="navigate('groups')"><i class="fas fa-users"></i></div>
-        <div class="tab" onclick="navigate('registerParent')"><i class="fas fa-user-plus"></i></div>
+        <div class="tab" onclick="navigate('registerUser')"><i class="fas fa-user-plus"></i></div>
         <div class="tab" onclick="navigate('chat')"><i class="fas fa-comment-dots"></i></div>
         <div class="tab" onclick="navigate('profile')"><i class="fas fa-user"></i></div>
     </div>
@@ -206,8 +88,12 @@ let groups = JSON.parse(localStorage.getItem('ladushki_groups')) || [
     { id: 'g3', name: 'Ромашки' }
 ];
 
+// КРУЖКИ С РАСПИСАНИЕМ
 let circles = JSON.parse(localStorage.getItem('ladushki_circles')) || [];
+
+// ЗАЯВКИ НА КРУЖКИ (с выбранным расписанием)
 let circleRequests = JSON.parse(localStorage.getItem('ladushki_circle_requests')) || [];
+
 let individualActivities = JSON.parse(localStorage.getItem('ladushki_individual_activities')) || [];
 let assignedActivities = JSON.parse(localStorage.getItem('ladushki_assigned_activities')) || [];
 
@@ -224,7 +110,9 @@ let messages = JSON.parse(localStorage.getItem('ladushki_messages')) || [];
 
 let currentUser = null;
 let selectedChildId = null;
-let adminSelectedChatGroupId = null; // для админа: выбранная группа для чата
+let adminSelectedChatGroupId = null;
+
+const WEEKDAYS = ['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница'];
 
 function saveData() {
     localStorage.setItem('ladushki_users', JSON.stringify(users));
@@ -238,7 +126,7 @@ function saveData() {
     localStorage.setItem('ladushki_messages', JSON.stringify(messages));
 }
 
-// ============ АВТОРИЗАЦИЯ (ТОЛЬКО ВХОД) ============
+// ============ АВТОРИЗАЦИЯ ============
 function showLogin() {
     document.getElementById("content").innerHTML = `
         <div class="card">
@@ -281,14 +169,13 @@ window.doLogin = () => {
 window.logout = () => {
     currentUser = null;
     selectedChildId = null;
-    adminSelectedChatGroupId = null;
     localStorage.removeItem('ladushki_currentUser');
     document.getElementById("tabbar").style.display = "none";
     showLogin();
 };
 
-// ============ РЕГИСТРАЦИЯ РОДИТЕЛЕЙ (ТОЛЬКО АДМИН) ============
-function renderRegisterParent() {
+// ============ РЕГИСТРАЦИЯ ПОЛЬЗОВАТЕЛЕЙ (РОДИТЕЛИ + ВОСПИТАТЕЛИ) ============
+function renderRegisterUser() {
     if(!currentUser) return `<div class="card">Войдите</div>`;
     if(currentUser.role !== "admin") {
         return `<div class="card"><div class="text-center">🔒 Только для администратора</div></div>`;
@@ -296,106 +183,59 @@ function renderRegisterParent() {
     
     return `
         <div class="card">
-            <div class="card-title"><i class="fas fa-user-plus"></i> Регистрация родителей</div>
-            <div class="small">Создайте аккаунт для родителя и сразу привяжите детей</div>
-            <input id="regParentName" placeholder="Имя родителя">
-            <input id="regParentEmail" placeholder="Email родителя">
-            <input id="regParentPass" type="password" placeholder="Пароль (мин 6)">
-            <hr>
-            <h4>👶 Дети этого родителя</h4>
-            <div id="parentKidsList"></div>
-            <div class="flex">
-                <input id="newChildName" placeholder="Имя ребёнка" style="flex:1;">
-                <select id="newChildGroup" class="inline-select" style="width:auto;">
-                    <option value="">Без группы</option>
-                    ${groups.map(g => `<option value="${g.id}">${escapeHtml(g.name)}</option>`).join('')}
-                </select>
-                <button onclick="addChildToRegistration()" class="small-btn">➕ Добавить</button>
-            </div>
-            <button onclick="registerParent()"><i class="fas fa-save"></i> Зарегистрировать родителя</button>
-            <div id="regResult" class="success-msg" style="margin-top:15px;"></div>
+            <div class="card-title"><i class="fas fa-user-plus"></i> Регистрация пользователей</div>
+            <div class="small">Зарегистрируйте нового родителя или воспитателя</div>
+            <input id="regUserName" placeholder="Имя пользователя">
+            <input id="regUserEmail" placeholder="Email">
+            <input id="regUserPass" type="password" placeholder="Пароль (мин 6)">
+            <select id="regUserRole">
+                <option value="parent">Родитель</option>
+                <option value="teacher">Воспитатель</option>
+            </select>
+            <div id="regUserError" class="error-msg"></div>
+            <div id="regUserSuccess" class="success-msg"></div>
+            <button onclick="registerUser()"><i class="fas fa-save"></i> Зарегистрировать</button>
         </div>
     `;
 }
 
-let tempChildren = [];
-
-window.addChildToRegistration = () => {
-    const name = document.getElementById("newChildName")?.value.trim();
-    const groupId = document.getElementById("newChildGroup")?.value;
-    if(!name) { alert("Введите имя ребёнка"); return; }
-    tempChildren.push({ name, groupId: groupId || null });
-    document.getElementById("newChildName").value = "";
-    updateParentKidsList();
-};
-
-function updateParentKidsList() {
-    const container = document.getElementById("parentKidsList");
-    if(!container) return;
-    container.innerHTML = tempChildren.map((child, idx) => `
-        <div class="list-item">
-            <span>👶 ${escapeHtml(child.name)} ${child.groupId ? `<span class="assigned-badge">${groups.find(g=>g.id===child.groupId)?.name}</span>` : ''}</span>
-            <button onclick="removeTempChild(${idx})" class="small-btn delete-btn">🗑️</button>
-        </div>
-    `).join('');
-}
-
-window.removeTempChild = (idx) => {
-    tempChildren.splice(idx, 1);
-    updateParentKidsList();
-};
-
-window.registerParent = () => {
-    const name = document.getElementById("regParentName")?.value.trim();
-    const email = document.getElementById("regParentEmail")?.value.trim();
-    const pass = document.getElementById("regParentPass")?.value;
-    const resultDiv = document.getElementById("regResult");
+window.registerUser = () => {
+    const name = document.getElementById("regUserName")?.value.trim();
+    const email = document.getElementById("regUserEmail")?.value.trim();
+    const pass = document.getElementById("regUserPass")?.value;
+    const role = document.getElementById("regUserRole")?.value;
+    const errDiv = document.getElementById("regUserError");
+    const sucDiv = document.getElementById("regUserSuccess");
     
-    resultDiv.style.display = "none";
+    errDiv.style.display = "none";
+    sucDiv.style.display = "none";
     
     if(!name || !email || !pass) {
-        resultDiv.style.display = "block";
-        resultDiv.className = "error-msg";
-        resultDiv.innerText = "Заполните все поля";
+        errDiv.style.display = "block";
+        errDiv.innerText = "Заполните все поля";
         return;
     }
     if(pass.length < 6) {
-        resultDiv.style.display = "block";
-        resultDiv.className = "error-msg";
-        resultDiv.innerText = "Пароль должен быть не менее 6 символов";
+        errDiv.style.display = "block";
+        errDiv.innerText = "Пароль должен быть не менее 6 символов";
         return;
     }
     if(users.find(u => u.email === email)) {
-        resultDiv.style.display = "block";
-        resultDiv.className = "error-msg";
-        resultDiv.innerText = "Email уже зарегистрирован";
+        errDiv.style.display = "block";
+        errDiv.innerText = "Email уже зарегистрирован";
         return;
     }
     
-    const parentId = Date.now().toString();
-    users.push({ id: parentId, email, password: pass, name, role: 'parent', groupId: null });
-    
-    for(let child of tempChildren) {
-        kids.push({
-            id: Date.now().toString() + Math.random(),
-            name: child.name,
-            parentId: parentId,
-            groupId: child.groupId
-        });
-    }
-    
+    users.push({ id: Date.now().toString(), email, password: pass, name, role, groupId: null });
     saveData();
-    const addedCount = tempChildren.length;
-    tempChildren = [];
-    document.getElementById("regParentName").value = "";
-    document.getElementById("regParentEmail").value = "";
-    document.getElementById("regParentPass").value = "";
-    updateParentKidsList();
     
-    resultDiv.style.display = "block";
-    resultDiv.className = "success-msg";
-    resultDiv.innerText = `✅ Родитель ${name} зарегистрирован! Добавлено детей: ${addedCount}`;
-    setTimeout(() => resultDiv.style.display = "none", 3000);
+    document.getElementById("regUserName").value = "";
+    document.getElementById("regUserEmail").value = "";
+    document.getElementById("regUserPass").value = "";
+    
+    sucDiv.style.display = "block";
+    sucDiv.innerText = `✅ ${role === 'parent' ? 'Родитель' : 'Воспитатель'} ${name} зарегистрирован!`;
+    setTimeout(() => sucDiv.style.display = "none", 3000);
 };
 
 // ============ ГЛАВНАЯ ============
@@ -524,114 +364,231 @@ window.deleteKid = (kidId) => {
     }
 };
 
-// ============ КРУЖКИ ============
+// ============ КРУЖКИ (С РАСПИСАНИЕМ И ЗАЯВКАМИ) ============
 function renderCircles() {
     if(!currentUser) return `<div class="card">Войдите</div>`;
     
-    let circlesHtml = circles.map(c => {
-        let statusHtml = "";
-        let actionHtml = "";
+    if(currentUser.role === "admin") {
+        // Админ: управление кружками и заявками
+        let circlesHtml = circles.map(c => `
+            <div class="circle-card">
+                <div class="circle-header">
+                    <strong>🎨 ${escapeHtml(c.name)}</strong>
+                    <button onclick="deleteCircle('${c.id}')" class="small-btn delete-btn">🗑️</button>
+                </div>
+                <div class="circle-time">📅 ${c.weekday || 'Не указан'} | 🕐 ${c.time || 'Не указано'}</div>
+                <div class="small">👶 Записано детей: ${circleRequests.filter(r => r.circleId === c.id && r.status === 'approved').length}</div>
+                <button onclick="editCircleSchedule('${c.id}')" class="small-btn" style="margin-top:5px;">✏️ Редактировать расписание</button>
+            </div>
+        `).join('');
         
-        if(currentUser.role === "parent") {
-            if(!selectedChildId) {
-                actionHtml = `<span class="badge badge-pending">⚠️ Сначала выберите ребёнка</span>`;
-            } else {
-                const existingRequest = circleRequests.find(r => r.circleId === c.id && r.childId === selectedChildId);
-                if(existingRequest) {
-                    if(existingRequest.status === 'pending') {
-                        statusHtml = `<span class="badge badge-pending">⏳ На рассмотрении</span>`;
-                        actionHtml = `<button onclick="cancelRequest('${c.id}')" class="small-btn delete-btn">Отменить</button>`;
-                    } else if(existingRequest.status === 'approved') {
-                        statusHtml = `<span class="badge badge-approved">✅ Зачислен</span>`;
-                        actionHtml = `<button onclick="cancelRequest('${c.id}')" class="small-btn delete-btn">Отказаться</button>`;
-                    } else if(existingRequest.status === 'rejected') {
-                        statusHtml = `<span class="badge badge-rejected">❌ Отказано</span>`;
-                        actionHtml = `<button onclick="sendRequest('${c.id}')" class="small-btn">Повторно</button>`;
-                    }
-                } else {
-                    actionHtml = `<button onclick="sendRequest('${c.id}')" class="small-btn">✏️ Записаться</button>`;
-                }
-            }
-        } else if(currentUser.role === "admin") {
-            const pendingCount = circleRequests.filter(r => r.circleId === c.id && r.status === 'pending').length;
-            actionHtml = `<button onclick="viewCircleRequests('${c.id}')" class="small-btn">👀 Заявки (${pendingCount})</button>`;
+        // Заявки на рассмотрение
+        const pendingRequests = circleRequests.filter(r => r.status === 'pending');
+        let pendingHtml = pendingRequests.map(r => `
+            <div class="request-item">
+                <div><strong>👶 ${escapeHtml(r.childName)}</strong> хочет записаться на <strong>🎨 ${escapeHtml(r.circleName)}</strong></div>
+                <div class="small">📅 ${r.selectedWeekday || '?'} в ${r.selectedTime || '?'} | 👪 родитель: ${escapeHtml(r.parentName)}</div>
+                <div class="flex" style="margin-top: 10px;">
+                    <button onclick="approveRequest('${r.id}')" class="small-btn approve">✅ Одобрить</button>
+                    <button onclick="rejectRequest('${r.id}')" class="small-btn reject">❌ Отказать</button>
+                </div>
+            </div>
+        `).join('');
+        
+        let addForm = `
+            <hr>
+            <h4>➕ Добавить кружок</h4>
+            <div class="flex">
+                <input id="newCircleName" placeholder="Название кружка" style="flex:2;">
+                <select id="newCircleWeekday" class="inline-select">
+                    <option value="">День недели</option>
+                    ${WEEKDAYS.map(d => `<option value="${d}">${d}</option>`).join('')}
+                </select>
+                <input id="newCircleTime" placeholder="Время (например: 15:00)" style="flex:1;">
+                <button onclick="addCircle()" class="small-btn">➕ Добавить</button>
+            </div>
+        `;
+        
+        return `<div class="card"><div class="card-title"><i class="fas fa-palette"></i> Управление кружками</div>
+            <h4>📋 Существующие кружки</h4>
+            ${circlesHtml || "Нет кружков"}
+            ${addForm}
+            <hr>
+            <h4>⏳ Заявки на кружки (${pendingRequests.length})</h4>
+            ${pendingHtml || "<div class='text-center'>Нет заявок</div>"}
+        </div>`;
+    }
+    
+    if(currentUser.role === "parent") {
+        if(!selectedChildId) {
+            return `<div class="card"><div class="text-center">⚠️ Сначала выберите ребёнка на вкладке "Дети"</div></div>`;
         }
         
-        return `<div class="list-item"><span>🎨 ${escapeHtml(c.name)}</span><div class="flex">${statusHtml}${actionHtml}</div></div>`;
-    }).join('');
-    
-    let addForm = "";
-    if(currentUser.role === "admin") {
-        addForm = `<hr><input id="newCircleName" placeholder="Название кружка"><button onclick="addCircle()"><i class="fas fa-plus"></i> Добавить кружок</button>`;
+        const myRequests = circleRequests.filter(r => r.childId === selectedChildId);
+        const approvedCircles = myRequests.filter(r => r.status === 'approved');
+        const pendingRequests = myRequests.filter(r => r.status === 'pending');
+        
+        let enrolledHtml = approvedCircles.map(r => `
+            <div class="circle-card">
+                <div class="circle-header">
+                    <strong>🎨 ${escapeHtml(r.circleName)}</strong>
+                    <button onclick="cancelRequest('${r.circleId}')" class="small-btn delete-btn">🗑️ Отказаться</button>
+                </div>
+                <div class="circle-time">📅 ${r.selectedWeekday || '?'} | 🕐 ${r.selectedTime || '?'}</div>
+            </div>
+        `).join('');
+        
+        let pendingHtml = pendingRequests.map(r => `
+            <div class="circle-card" style="opacity:0.7;">
+                <div><strong>🎨 ${escapeHtml(r.circleName)}</strong></div>
+                <div class="small">📅 ${r.selectedWeekday || '?'} в ${r.selectedTime || '?'}</div>
+                <div class="badge badge-pending">⏳ На рассмотрении</div>
+            </div>
+        `).join('');
+        
+        let availableCirclesHtml = circles.filter(c => !myRequests.some(r => r.circleId === c.id || (r.status === 'approved' && r.circleId === c.id))).map(c => `
+            <div class="circle-card">
+                <div><strong>🎨 ${escapeHtml(c.name)}</strong></div>
+                <div class="circle-time">📅 ${c.weekday || 'Не указан'} | 🕐 ${c.time || 'Не указано'}</div>
+                <button onclick="showScheduleOptions('${c.id}', '${escapeHtml(c.name)}')" class="small-btn" style="margin-top:8px;">📝 Выбрать расписание</button>
+            </div>
+        `).join('');
+        
+        return `<div class="card"><div class="card-title"><i class="fas fa-palette"></i> Кружки для ${escapeHtml(kids.find(k=>k.id===selectedChildId)?.name)}</div>
+            <h4>✅ Записан на кружки</h4>
+            ${enrolledHtml || "<div class='text-center'>Нет записей</div>"}
+            <hr>
+            <h4>⏳ Ожидают рассмотрения</h4>
+            ${pendingHtml || "<div class='text-center'>Нет</div>"}
+            <hr>
+            <h4>📢 Доступные кружки</h4>
+            ${availableCirclesHtml || "<div class='text-center'>Нет доступных кружков</div>"}
+        </div>`;
     }
     
-    let childHint = "";
-    if(currentUser.role === "parent") {
-        const selectedKid = kids.find(k => k.id === selectedChildId);
-        childHint = `<div class="small" style="background:#fef5ea; padding:10px; border-radius:30px; margin-bottom:15px;">👶 Выбран ребёнок: ${selectedKid?.name || 'не выбран'}</div>`;
-    }
-    
-    return `<div class="card"><div class="card-title"><i class="fas fa-palette"></i> Кружки</div>${childHint}<div>${circlesHtml || "Нет кружков"}</div>${addForm}</div>`;
+    return `<div class="card"><div class="text-center">Доступно только для родителей и администратора</div></div>`;
 }
 
-window.sendRequest = (circleId) => {
-    if(!selectedChildId) { alert("Сначала выберите ребёнка на вкладке 'Дети'!"); return; }
-    const kid = kids.find(k => k.id === selectedChildId);
-    const circle = circles.find(c => c.id === circleId);
-    
-    circleRequests.push({
-        id: Date.now().toString(),
-        circleId,
-        circleName: circle.name,
-        childId: selectedChildId,
-        childName: kid.name,
-        parentId: currentUser.id,
-        parentName: currentUser.name,
-        status: 'pending',
-        createdAt: new Date().toLocaleString()
-    });
+window.addCircle = () => {
+    const name = document.getElementById("newCircleName")?.value.trim();
+    const weekday = document.getElementById("newCircleWeekday")?.value;
+    const time = document.getElementById("newCircleTime")?.value.trim();
+    if(!name) { alert("Введите название кружка"); return; }
+    circles.push({ id: Date.now().toString(), name, weekday: weekday || "Не указан", time: time || "Не указано" });
     saveData();
-    alert(`✅ Заявка на кружок "${circle.name}" для ${kid.name} отправлена!`);
+    document.getElementById("newCircleName").value = "";
+    document.getElementById("newCircleWeekday").value = "";
+    document.getElementById("newCircleTime").value = "";
     navigate('circles');
 };
 
-window.cancelRequest = (circleId) => {
-    if(confirm("Отменить заявку?")) {
-        circleRequests = circleRequests.filter(r => !(r.circleId === circleId && r.childId === selectedChildId));
+window.deleteCircle = (circleId) => {
+    if(confirm("Удалить кружок? Все заявки будут удалены.")) {
+        circles = circles.filter(c => c.id !== circleId);
+        circleRequests = circleRequests.filter(r => r.circleId !== circleId);
         saveData();
-        alert("✅ Заявка отменена");
         navigate('circles');
     }
 };
 
-window.viewCircleRequests = (circleId) => {
-    const requests = circleRequests.filter(r => r.circleId === circleId && r.status === 'pending');
-    if(requests.length === 0) {
-        alert("Нет активных заявок");
-        return;
-    }
-    let msg = `📋 Заявки на кружок:\n\n`;
-    requests.forEach(r => {
-        msg += `👶 ${r.childName} (родитель: ${r.parentName})\n`;
-    });
-    alert(msg);
-};
-
-window.addCircle = () => {
-    const name = document.getElementById("newCircleName")?.value.trim();
-    if(!name) return;
-    circles.push({ id: Date.now().toString(), name, enrolled: [] });
+window.editCircleSchedule = (circleId) => {
+    const circle = circles.find(c => c.id === circleId);
+    if(!circle) return;
+    const newWeekday = prompt("Введите день недели (Понедельник, Вторник...)", circle.weekday);
+    const newTime = prompt("Введите время (например: 15:00)", circle.time);
+    if(newWeekday !== null) circle.weekday = newWeekday || "Не указан";
+    if(newTime !== null) circle.time = newTime || "Не указано";
     saveData();
     navigate('circles');
 };
+
+window.showScheduleOptions = (circleId, circleName) => {
+    const circle = circles.find(c => c.id === circleId);
+    if(!circle) return;
+    
+    const modalHtml = `
+        <div id="scheduleModal" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); backdrop-filter:blur(5px); z-index:1000; display:flex; align-items:center; justify-content:center;">
+            <div style="background:white; max-width:350px; width:90%; border-radius:48px; padding:24px;">
+                <h3 style="margin-bottom:16px;">🎨 ${escapeHtml(circleName)}</h3>
+                <p>Выберите удобное время:</p>
+                <div class="schedule-option" style="display:flex; justify-content:space-between; align-items:center; margin:12px 0; padding:12px; background:#fef5ea; border-radius:30px;">
+                    <span>📅 ${circle.weekday} в ${circle.time}</span>
+                    <button onclick="selectScheduleOption('${circleId}', '${circle.weekday}', '${circle.time}')" class="small-btn" style="margin:0;">✅ Выбрать</button>
+                </div>
+                <button onclick="closeModal()" class="small-btn" style="margin-top:16px;">Отмена</button>
+            </div>
+        </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+};
+
+window.selectScheduleOption = (circleId, weekday, time) => {
+    closeModal();
+    if(!selectedChildId) { alert("Сначала выберите ребёнка!"); return; }
+    const kid = kids.find(k => k.id === selectedChildId);
+    const circle = circles.find(c => c.id === circleId);
+    
+    // Проверяем, нет ли уже заявки
+    const existing = circleRequests.find(r => r.circleId === circleId && r.childId === selectedChildId);
+    if(existing) {
+        alert("Вы уже отправляли заявку на этот кружок");
+        return;
+    }
+    
+    circleRequests.push({
+        id: Date.now().toString(),
+        circleId, circleName: circle.name,
+        childId: selectedChildId, childName: kid.name,
+        parentId: currentUser.id, parentName: currentUser.name,
+        selectedWeekday: weekday, selectedTime: time,
+        status: 'pending', createdAt: new Date().toLocaleString()
+    });
+    saveData();
+    alert(`✅ Заявка на кружок "${circle.name}" (${weekday} ${time}) отправлена!`);
+    navigate('circles');
+};
+
+window.cancelRequest = (circleId) => {
+    if(confirm("Отказаться от кружка?")) {
+        circleRequests = circleRequests.filter(r => !(r.circleId === circleId && r.childId === selectedChildId));
+        saveData();
+        alert("✅ Отказ оформлен");
+        navigate('circles');
+    }
+};
+
+window.approveRequest = (requestId) => {
+    const request = circleRequests.find(r => r.id === requestId);
+    if(request) {
+        request.status = 'approved';
+        saveData();
+        alert(`✅ Заявка одобрена! Ребёнок записан на кружок.`);
+        navigate('circles');
+    }
+};
+
+window.rejectRequest = (requestId) => {
+    const request = circleRequests.find(r => r.id === requestId);
+    if(request) {
+        request.status = 'rejected';
+        saveData();
+        alert(`❌ Заявка отклонена.`);
+        navigate('circles');
+    }
+};
+
+function closeModal() {
+    const modal = document.getElementById('scheduleModal');
+    if(modal) modal.remove();
+}
 
 // ============ ИНДИВИДУАЛЬНЫЕ ЗАНЯТИЯ ============
 function renderActivities() {
     if(!currentUser) return `<div class="card">Войдите</div>`;
     
-    let activitiesHtml = individualActivities.map(act => {
-        return `<div class="list-item"><span>⭐ ${escapeHtml(act.name)}</span>${currentUser.role === "admin" ? `<button onclick="deleteActivity('${act.id}')" class="small-btn delete-btn">🗑️</button>` : ''}</div>`;
-    }).join('');
+    let activitiesHtml = individualActivities.map(act => `
+        <div class="list-item"><span>⭐ ${escapeHtml(act.name)}</span>${currentUser.role === "admin" ? `<button onclick="deleteActivity('${act.id}')" class="small-btn delete-btn">🗑️</button>` : ''}</div>
+    `).join('');
     
     let assignedHtml = "";
     if(currentUser.role === "parent") {
@@ -677,13 +634,7 @@ function renderActivities() {
         addForm = `<hr><input id="newActivityName" placeholder="Название занятия"><button onclick="addActivity()"><i class="fas fa-plus"></i> Добавить занятие</button>`;
     }
     
-    let childHint = "";
-    if(currentUser.role === "parent") {
-        const selectedKid = kids.find(k => k.id === selectedChildId);
-        childHint = `<div class="small" style="background:#fef5ea; padding:10px; border-radius:30px; margin-bottom:15px;">👶 Выбран ребёнок: ${selectedKid?.name || 'не выбран'}</div>`;
-    }
-    
-    return `<div class="card"><div class="card-title"><i class="fas fa-star"></i> Индивидуальные занятия</div>${childHint}<div>${activitiesHtml || "Нет занятий"}</div>${addForm}${assignedHtml}</div>`;
+    return `<div class="card"><div class="card-title"><i class="fas fa-star"></i> Индивидуальные занятия</div><div>${activitiesHtml || "Нет занятий"}</div>${addForm}${assignedHtml}</div>`;
 }
 
 window.addActivity = () => {
@@ -756,85 +707,21 @@ window.deleteScheduleItem = (index) => {
     }
 };
 
-// ============ ЗАЯВКИ ============
-function renderRequests() {
-    if(!currentUser) return `<div class="card">Войдите</div>`;
-    
-    if(currentUser.role !== "admin") {
-        return `<div class="card"><div class="text-center">🔒 Только для администратора</div></div>`;
-    }
-    
-    const pendingRequests = circleRequests.filter(r => r.status === 'pending');
-    const approvedRequests = circleRequests.filter(r => r.status === 'approved');
-    
-    let pendingHtml = pendingRequests.map(r => `
-        <div class="request-item">
-            <div><strong>👶 ${escapeHtml(r.childName)}</strong> хочет записаться на <strong>🎨 ${escapeHtml(r.circleName)}</strong></div>
-            <div class="small">📅 ${r.createdAt} | 👪 родитель: ${escapeHtml(r.parentName)}</div>
-            <div class="flex" style="margin-top: 10px;">
-                <button onclick="approveRequest('${r.id}')" class="small-btn approve">✅ Одобрить</button>
-                <button onclick="rejectRequest('${r.id}')" class="small-btn reject">❌ Отказать</button>
-            </div>
-        </div>
-    `).join('');
-    
-    let approvedHtml = approvedRequests.map(r => `
-        <div class="request-item" style="border-left-color: #a8e6cf;">
-            <div><strong>👶 ${escapeHtml(r.childName)}</strong> записан на <strong>🎨 ${escapeHtml(r.circleName)}</strong></div>
-            <div class="small">✅ Одобрено</div>
-        </div>
-    `).join('');
-    
-    return `<div class="card">
-        <div class="card-title"><i class="fas fa-clipboard-list"></i> Заявки на кружки</div>
-        <h4>⏳ Ожидают (${pendingRequests.length})</h4>
-        ${pendingHtml || "<div class='text-center'>Нет заявок</div>"}
-        <hr>
-        <h4>✅ Одобренные</h4>
-        ${approvedHtml || "<div class='text-center'>Нет одобренных</div>"}
-    </div>`;
-}
-
-window.approveRequest = (requestId) => {
-    const request = circleRequests.find(r => r.id === requestId);
-    if(request) {
-        request.status = 'approved';
-        const circle = circles.find(c => c.id === request.circleId);
-        if(circle) {
-            if(!circle.enrolled) circle.enrolled = [];
-            if(!circle.enrolled.includes(request.childId)) {
-                circle.enrolled.push(request.childId);
-            }
-        }
-        saveData();
-        alert(`✅ Заявка одобрена!`);
-        navigate('requests');
-    }
-};
-
-window.rejectRequest = (requestId) => {
-    const request = circleRequests.find(r => r.id === requestId);
-    if(request) {
-        request.status = 'rejected';
-        saveData();
-        alert(`❌ Заявка отклонена.`);
-        navigate('requests');
-    }
-};
-
 // ============ ГРУППЫ ============
 function renderGroups() {
     if(!currentUser) return `<div class="card">Войдите</div>`;
     
     let groupsInfo = groups.map(g => {
         const kidsInGroup = kids.filter(k => k.groupId === g.id);
+        const teacher = users.find(u => u.role === 'teacher' && u.groupId === g.id);
         return `
             <div class="group-stat-card">
                 <div class="flex" style="justify-content:space-between;">
                     <strong>📁 ${escapeHtml(g.name)}</strong>
                     ${currentUser.role === "admin" ? `<button onclick="deleteGroup('${g.id}')" class="small-btn delete-btn">🗑️</button>` : ''}
                 </div>
-                <div class="small" style="margin-top:8px;">👶 Детей в группе: ${kidsInGroup.length}</div>
+                ${teacher ? `<div class="small">👩‍🏫 Воспитатель: ${escapeHtml(teacher.name)}</div>` : ''}
+                <div class="small">👶 Детей: ${kidsInGroup.length}</div>
                 <div class="small">${kidsInGroup.map(k => k.name).join(', ') || 'нет детей'}</div>
             </div>
         `;
@@ -845,7 +732,28 @@ function renderGroups() {
         addForm = `<div class="flex"><input id="newGroupName" placeholder="Название новой группы" style="flex:1;"><button onclick="addGroup()" class="small-btn">➕ Создать</button></div><hr>`;
     }
     
-    return `<div class="card"><div class="card-title"><i class="fas fa-users"></i> Группы детского сада</div>${addForm}${groupsInfo}</div>`;
+    // Список воспитателей для назначения в группу
+    let teachersList = "";
+    if(currentUser.role === "admin") {
+        const teachers = users.filter(u => u.role === 'teacher');
+        teachersList = `
+            <hr>
+            <h4>👩‍🏫 Назначение воспитателя в группу</h4>
+            <div class="flex">
+                <select id="assignTeacherSelect" style="flex:1;">
+                    <option value="">Выберите воспитателя</option>
+                    ${teachers.map(t => `<option value="${t.id}">${escapeHtml(t.name)}</option>`).join('')}
+                </select>
+                <select id="assignTeacherGroupSelect" style="flex:1;">
+                    <option value="">Выберите группу</option>
+                    ${groups.map(g => `<option value="${g.id}">${escapeHtml(g.name)}</option>`).join('')}
+                </select>
+                <button onclick="assignTeacherToGroup()" class="small-btn">📌 Назначить</button>
+            </div>
+        `;
+    }
+    
+    return `<div class="card"><div class="card-title"><i class="fas fa-users"></i> Группы детского сада</div>${addForm}${groupsInfo}${teachersList}</div>`;
 }
 
 window.addGroup = () => {
@@ -860,12 +768,26 @@ window.deleteGroup = (groupId) => {
     if(confirm("Удалить группу? Дети останутся без группы.")) {
         groups = groups.filter(g => g.id !== groupId);
         kids.forEach(k => { if(k.groupId === groupId) k.groupId = null; });
+        users.forEach(u => { if(u.groupId === groupId) u.groupId = null; });
         saveData();
         navigate('groups');
     }
 };
 
-// ============ ЧАТ (С ВЫБОРОМ ГРУППЫ ДЛЯ АДМИНА) ============
+window.assignTeacherToGroup = () => {
+    const teacherId = document.getElementById("assignTeacherSelect")?.value;
+    const groupId = document.getElementById("assignTeacherGroupSelect")?.value;
+    if(!teacherId || !groupId) { alert("Выберите воспитателя и группу"); return; }
+    const teacher = users.find(u => u.id === teacherId);
+    if(teacher) {
+        teacher.groupId = groupId;
+        saveData();
+        alert(`✅ Воспитатель ${teacher.name} назначен в группу ${groups.find(g=>g.id===groupId)?.name}`);
+        navigate('groups');
+    }
+};
+
+// ============ ЧАТ ============
 function renderChat() {
     if(!currentUser) return `<div class="card">Войдите</div>`;
     
@@ -874,52 +796,27 @@ function renderChat() {
     let chatSelectorHtml = "";
     
     if(currentUser.role === "admin") {
-        // Админ может выбрать любую группу для просмотра чата
-        if(!adminSelectedChatGroupId && groups.length > 0) {
-            adminSelectedChatGroupId = groups[0].id;
-        }
+        if(!adminSelectedChatGroupId && groups.length > 0) adminSelectedChatGroupId = groups[0].id;
         currentGroupId = adminSelectedChatGroupId;
         const selectedGroup = groups.find(g => g.id === currentGroupId);
         groupName = selectedGroup?.name || "не выбрана";
-        
-        chatSelectorHtml = `
-            <div class="chat-selector">
-                <div class="flex">
-                    <select id="adminChatGroupSelect" class="inline-select" style="flex:1;">
-                        <option value="">Выберите группу</option>
-                        ${groups.map(g => `<option value="${g.id}" ${g.id === currentGroupId ? 'selected' : ''}>${escapeHtml(g.name)}</option>`).join('')}
-                    </select>
-                    <button onclick="changeAdminChatGroup()" class="small-btn">📂 Выбрать</button>
-                </div>
-            </div>
-        `;
+        chatSelectorHtml = `<div class="flex"><select id="adminChatGroupSelect" class="inline-select" style="flex:1;">${groups.map(g => `<option value="${g.id}" ${g.id === currentGroupId ? 'selected' : ''}>${escapeHtml(g.name)}</option>`).join('')}</select><button onclick="changeAdminChatGroup()" class="small-btn">Выбрать</button></div>`;
     } 
     else if(currentUser.role === "teacher") {
         currentGroupId = currentUser.groupId;
         const group = groups.find(g => g.id === currentGroupId);
         groupName = group?.name || "группы";
-        if(!currentGroupId) {
-            return `<div class="card"><div class="text-center">Вы не назначены в группу. Обратитесь к администратору.</div></div>`;
-        }
+        if(!currentGroupId) return `<div class="card"><div class="text-center">Вы не назначены в группу</div></div>`;
     } 
     else if(currentUser.role === "parent") {
-        if(!selectedChildId) {
-            return `<div class="card"><div class="text-center">⚠️ Сначала выберите ребёнка на вкладке "Дети"</div></div>`;
-        }
+        if(!selectedChildId) return `<div class="card"><div class="text-center">⚠️ Сначала выберите ребёнка</div></div>`;
         const kid = kids.find(k => k.id === selectedChildId);
         currentGroupId = kid?.groupId;
         const group = groups.find(g => g.id === currentGroupId);
         groupName = group?.name || "группы";
-        if(!currentGroupId) {
-            return `<div class="card"><div class="text-center">Ваш ребёнок не состоит в группе. Обратитесь к администратору.</div></div>`;
-        }
+        if(!currentGroupId) return `<div class="card"><div class="text-center">Ребёнок не в группе</div></div>`;
     }
     
-    if(!currentGroupId) {
-        return `<div class="card"><div class="text-center">Чат недоступен. Выберите группу или ребёнка.</div></div>`;
-    }
-    
-    // Фильтруем сообщения по выбранной группе
     const chatMessages = messages.filter(m => m.groupId === currentGroupId);
     const messagesHtml = chatMessages.map(m => `
         <div class="message-item ${m.senderId === currentUser.id ? 'message-mine' : 'message-other'}">
@@ -929,65 +826,27 @@ function renderChat() {
         </div>
     `).join('');
     
-    return `
-        <div class="card">
-            <div class="card-title"><i class="fas fa-comments"></i> Чат ${groupName}</div>
-            ${chatSelectorHtml}
-            <div id="chatContainer" class="chat-container">${messagesHtml || "<div class='text-center'>💬 Нет сообщений</div>"}</div>
-            <div class="flex">
-                <input id="chatInput" placeholder="Напишите сообщение..." style="flex:1;">
-                <button onclick="sendMessage()" class="small-btn">📤 Отправить</button>
-            </div>
-        </div>
-    `;
+    return `<div class="card"><div class="card-title"><i class="fas fa-comments"></i> Чат ${groupName}</div>${chatSelectorHtml}<div id="chatContainer" class="chat-container">${messagesHtml || "💬 Нет сообщений"}</div><div class="flex"><input id="chatInput" placeholder="Сообщение..." style="flex:1;"><button onclick="sendMessage()" class="small-btn">📤</button></div></div>`;
 }
 
 window.changeAdminChatGroup = () => {
     const select = document.getElementById("adminChatGroupSelect");
-    if(select && select.value) {
-        adminSelectedChatGroupId = select.value;
-        navigate('chat');
-    } else {
-        alert("Выберите группу");
-    }
+    if(select && select.value) { adminSelectedChatGroupId = select.value; navigate('chat'); }
 };
 
 window.sendMessage = () => {
     const text = document.getElementById("chatInput")?.value.trim();
     if(!text) return;
-    
     let groupId = null;
-    
-    if(currentUser.role === "admin") {
-        groupId = adminSelectedChatGroupId;
-    } else if(currentUser.role === "teacher") {
-        groupId = currentUser.groupId;
-    } else if(currentUser.role === "parent" && selectedChildId) {
-        const kid = kids.find(k => k.id === selectedChildId);
-        groupId = kid?.groupId;
-    }
-    
-    if(!groupId) {
-        alert("Чат недоступен. Выберите группу или ребёнка.");
-        return;
-    }
-    
-    messages.push({
-        id: Date.now().toString(),
-        groupId: groupId,
-        text: text,
-        senderId: currentUser.id,
-        senderName: currentUser.name,
-        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-    });
+    if(currentUser.role === "admin") groupId = adminSelectedChatGroupId;
+    else if(currentUser.role === "teacher") groupId = currentUser.groupId;
+    else if(currentUser.role === "parent" && selectedChildId) groupId = kids.find(k => k.id === selectedChildId)?.groupId;
+    if(!groupId) return;
+    messages.push({ id: Date.now().toString(), groupId, text, senderId: currentUser.id, senderName: currentUser.name, time: new Date().toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' }) });
     saveData();
     document.getElementById("chatInput").value = "";
     navigate('chat');
-    
-    setTimeout(() => {
-        const container = document.getElementById("chatContainer");
-        if(container) container.scrollTop = container.scrollHeight;
-    }, 100);
+    setTimeout(() => { const c = document.getElementById("chatContainer"); if(c) c.scrollTop = c.scrollHeight; }, 100);
 };
 
 // ============ ПРОФИЛЬ ============
@@ -1002,15 +861,10 @@ function escapeHtml(str) { if(!str) return ''; return str.replace(/[&<>]/g, m =>
 // ============ НАВИГАЦИЯ ============
 function navigate(screen) {
     const tabs = document.querySelectorAll('.tab');
-    const screens = ['home', 'kids', 'circles', 'activities', 'schedule', 'requests', 'groups', 'registerParent', 'chat', 'profile'];
-    tabs.forEach((tab, i) => {
-        if(screens[i] === screen) tab.classList.add('active');
-        else tab.classList.remove('active');
-    });
-    
+    const screens = ['home', 'kids', 'circles', 'activities', 'schedule', 'groups', 'registerUser', 'chat', 'profile'];
+    tabs.forEach((tab, i) => { if(screens[i] === screen) tab.classList.add('active'); else tab.classList.remove('active'); });
     const content = document.getElementById("content");
     content.style.opacity = "0";
-    
     setTimeout(() => {
         let html = "";
         if(screen === "home") html = renderHome();
@@ -1018,32 +872,19 @@ function navigate(screen) {
         else if(screen === "circles") html = renderCircles();
         else if(screen === "activities") html = renderActivities();
         else if(screen === "schedule") html = renderSchedule();
-        else if(screen === "requests") html = renderRequests();
         else if(screen === "groups") html = renderGroups();
-        else if(screen === "registerParent") html = renderRegisterParent();
+        else if(screen === "registerUser") html = renderRegisterUser();
         else if(screen === "chat") html = renderChat();
         else if(screen === "profile") html = renderProfile();
         content.innerHTML = html;
         content.style.opacity = "1";
-        
-        if(screen === "chat") {
-            setTimeout(() => {
-                const container = document.getElementById("chatContainer");
-                if(container) container.scrollTop = container.scrollHeight;
-            }, 100);
-        }
+        if(screen === "chat") setTimeout(() => { const c = document.getElementById("chatContainer"); if(c) c.scrollTop = c.scrollHeight; }, 100);
     }, 50);
 }
 
-// ============ ЗАПУСК ============
 const savedUser = localStorage.getItem('ladushki_currentUser');
-if(savedUser) {
-    currentUser = JSON.parse(savedUser);
-    document.getElementById("tabbar").style.display = "flex";
-    navigate('home');
-} else {
-    showLogin();
-}
+if(savedUser) { currentUser = JSON.parse(savedUser); document.getElementById("tabbar").style.display = "flex"; navigate('home'); } 
+else { showLogin(); }
 </script>
 </body>
 </html>

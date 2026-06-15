@@ -2,346 +2,343 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ладушки PRO</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Ладушки PRO — Детский сад</title>
 
 <!-- Firebase SDKs -->
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 
+<!-- Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
 <style>
-* { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
-body { background: linear-gradient(135deg, #cbe6fe, #dcfce8); padding: 20px; min-height: 100vh; }
-.app { max-width: 500px; margin: 0 auto; background: white; border-radius: 30px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
-.header { background: #FF8C42; padding: 20px; text-align: center; font-size: 24px; font-weight: bold; color: white; }
-.card { padding: 20px; margin: 15px; background: #fffef7; border-radius: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
-h3 { color: #7b5a3b; margin-bottom: 15px; }
-input, select { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ffe0b5; border-radius: 30px; background: #fffaf2; }
-button { background: #fed287; border: none; border-radius: 30px; padding: 12px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 10px; }
-button:hover { background: #ffc46b; }
-.error { background: #ffe1e1; color: #c23d3d; padding: 10px; border-radius: 30px; margin: 10px 0; display: none; text-align: center; }
-.success { background: #daf7da; color: #267c26; padding: 10px; border-radius: 30px; margin: 10px 0; display: none; text-align: center; }
-.tabbar { display: flex; justify-content: space-around; padding: 10px 20px; background: #fff9f0; border-top: 1px solid #ffe0b5; }
-.tab { font-size: 20px; cursor: pointer; opacity: 0.5; padding: 5px 10px; border-radius: 20px; }
-.tab.active { opacity: 1; background: #ffe0bf; }
-.small { font-size: 11px; color: #999; text-align: center; margin-top: 15px; }
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui; }
+body { background: linear-gradient(135deg, #cbe6fe, #dcfce8); padding: 16px 12px 90px 12px; min-height: 100vh; }
+.app { max-width: 550px; margin: 0 auto; background: #fffef7; border-radius: 48px; box-shadow: 0 20px 35px -12px rgba(0,0,0,0.2); overflow: hidden; }
+.header { background: linear-gradient(115deg, #FFB347, #FF8C42); padding: 18px; text-align: center; font-size: 24px; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 10px; color: #2d2b26; }
+.card { background: rgba(255,255,245,0.95); margin: 14px; padding: 18px; border-radius: 32px; box-shadow: 0 6px 14px rgba(0,0,0,0.05); border: 1px solid #ffefdb; }
+h3 { font-size: 1.3rem; color: #7b5a3b; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; border-left: 4px solid #ffb86b; padding-left: 12px; }
+h4 { font-size: 1rem; color: #9b7a5a; margin: 12px 0 6px 0; }
+button { background: #fed287; border: none; border-radius: 60px; padding: 10px 14px; font-weight: 700; margin-top: 10px; cursor: pointer; width: 100%; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s; color: #4f2d1a; }
+button:hover { background: #ffc46b; transform: scale(0.97); }
+button.danger { background: #ffaaaa; color: #a00; }
+input, select, textarea { width: 100%; padding: 10px 14px; margin-top: 8px; border-radius: 48px; border: 1.5px solid #ffe0b5; background: #fffaf2; outline: none; }
+input:focus { border-color: #ffb351; }
+.chat-box { height: 320px; overflow-y: auto; background: #fff6ea; border-radius: 28px; padding: 10px; margin: 10px 0; border: 1px solid #ffdfb3; }
+.message { background: white; border-radius: 20px; padding: 10px; margin-bottom: 10px; display: flex; gap: 10px; }
+.avatar { width: 40px; height: 40px; border-radius: 50%; background: #fcd6a8; display: flex; align-items: center; justify-content: center; }
+.badge { background: #e9ddce; border-radius: 30px; padding: 3px 10px; font-size: 0.65rem; font-weight: bold; display: inline-block; }
+.badge.admin { background: #d4af7a; }
+.badge.teacher { background: #fdca83; }
+.schedule-item, .kid-item, .circle-item { background: #fef2e2; padding: 8px 14px; border-radius: 40px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px; font-size: 0.9rem; }
+.tabbar { position: fixed; bottom: 15px; left: 50%; transform: translateX(-50%); background: #fff9f0; display: flex; padding: 6px 16px; border-radius: 50px; gap: 18px; box-shadow: 0 8px 20px rgba(0,0,0,0.2); z-index: 200; }
+.tab { font-size: 24px; cursor: pointer; opacity: 0.5; transition: 0.2s; padding: 5px; border-radius: 40px; }
+.tab.active { opacity: 1; transform: scale(1.15); background: #ffe0bf; }
+.locked-message { text-align: center; padding: 25px; background: #fff2e4; border-radius: 35px; color: #8b6946; }
+.error-msg, .success-msg { padding: 8px; border-radius: 50px; margin-top: 10px; text-align: center; display: none; font-size: 0.8rem; }
+.error-msg { background: #ffe1e1; color: #c23d3d; }
+.success-msg { background: #daf7da; color: #267c26; }
+hr { margin: 12px 0; border-color: #ffe0b5; }
+.small { font-size: 0.65rem; color: #ad8b64; text-align: center; margin-top: 10px; }
 .loading { text-align: center; padding: 40px; color: #7b5a3b; }
+.flex-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.text-center { text-align: center; }
+.group-selector { background: #f7efdb; border-radius: 40px; padding: 8px 12px; margin-bottom: 12px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 </style>
 </head>
 <body>
 <div class="app">
-  <div class="header">🏫 Ладушки PRO</div>
-  <div id="content"><div class="loading">⏳ Загрузка...</div></div>
-  <div class="tabbar" id="tabbar" style="display:none;">
-    <div class="tab active" onclick="navigate('home')">🏠</div>
-    <div class="tab" onclick="navigate('profile')">👤</div>
+  <div class="header"><i class="fas fa-sun"></i><span>Ладушки PRO</span><i class="fas fa-children"></i></div>
+  <div id="screen"><div class="loading"><i class="fas fa-spinner fa-pulse"></i> Загрузка...</div></div>
+  <div class="tabbar">
+    <div class="tab" onclick="navigate('home', this)"><i class="fas fa-home"></i></div>
+    <div class="tab" onclick="navigate('kids', this)"><i class="fas fa-baby-carriage"></i></div>
+    <div class="tab" onclick="navigate('groups', this)"><i class="fas fa-users"></i></div>
+    <div class="tab" onclick="navigate('circles', this)"><i class="fas fa-palette"></i></div>
+    <div class="tab" onclick="navigate('schedule', this)"><i class="fas fa-calendar-alt"></i></div>
+    <div class="tab" onclick="navigate('chat', this)"><i class="fas fa-comment-dots"></i></div>
+    <div class="tab" onclick="navigate('profile', this)"><i class="fas fa-user"></i></div>
   </div>
 </div>
 
 <script>
 // ========= FIREBASE =========
-const firebaseConfig = {
-  apiKey: "AIzaSyAuZgI5XVWNSfHKWhAp26SWdD_Ye-3gBzs",
-  authDomain: "detsad-7ca3d.firebaseapp.com",
-  projectId: "detsad-7ca3d",
-  storageBucket: "detsad-7ca3d.firebasestorage.app"
+const firebaseConfig = { 
+  apiKey: "AIzaSyAuZgI5XVWNSfHKWhAp26SWdD_Ye-3gBzs", 
+  authDomain: "detsad-7ca3d.firebaseapp.com", 
+  projectId: "detsad-7ca3d", 
+  storageBucket: "detsad-7ca3d.firebasestorage.app" 
 };
-
-// Инициализация
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
+// Глобальные переменные
+let unsubscribeMessages = null;
+let currentGroupId = null;
+let currentChildId = null;
+
 // ========= СОЗДАНИЕ ТЕСТОВЫХ АККАУНТОВ =========
 async function createTestAccounts() {
-  console.log("Проверка тестовых аккаунтов...");
-  
-  // Админ
-  try {
-    await auth.createUserWithEmailAndPassword("admin@ladushki.ru", "Admin2025");
-    console.log("Админ создан");
-  } catch(e) {
-    if (e.code === 'auth/email-already-in-use') console.log("Админ уже есть");
-    else console.log("Ошибка админа:", e.code);
-  }
-  
-  // Воспитатель
-  try {
-    await auth.createUserWithEmailAndPassword("teacher@ladushki.ru", "Ladushki2025");
-    console.log("Воспитатель создан");
-  } catch(e) {
-    if (e.code === 'auth/email-already-in-use') console.log("Воспитатель уже есть");
-    else console.log("Ошибка воспитателя:", e.code);
-  }
-  
-  // Добавляем данные пользователей в Firestore
-  const users = [
-    { email: "admin@ladushki.ru", role: "admin", name: "Главный Админ" },
-    { email: "teacher@ladushki.ru", role: "teacher", name: "Воспитатель Анна" }
+  const testAccounts = [
+    { email: "admin@ladushki.ru", password: "Admin2025", name: "Главный Админ", role: "admin" },
+    { email: "teacher@ladushki.ru", password: "Ladushki2025", name: "Воспитатель Анна", role: "teacher" }
   ];
   
-  for (const user of users) {
+  for (const acc of testAccounts) {
     try {
-      const userRecord = await auth.signInWithEmailAndPassword(user.email, user.password || (user.email === "admin@ladushki.ru" ? "Admin2025" : "Ladushki2025"));
-      await db.collection("users").doc(userRecord.user.uid).set({
-        email: user.email,
-        role: user.role,
-        name: user.name
+      await auth.createUserWithEmailAndPassword(acc.email, acc.password);
+      console.log(`Создан: ${acc.email}`);
+    } catch(e) {
+      if (e.code !== 'auth/email-already-in-use') console.log(e.code);
+    }
+    
+    // Сохраняем данные в Firestore
+    try {
+      const user = await auth.signInWithEmailAndPassword(acc.email, acc.password);
+      await db.collection("users").doc(user.user.uid).set({
+        email: acc.email,
+        role: acc.role,
+        name: acc.name
       }, { merge: true });
       await auth.signOut();
-      console.log(`Данные для ${user.email} сохранены`);
-    } catch(e) {
-      console.log(`Ошибка сохранения ${user.email}:`, e.code);
-    }
+    } catch(e) {}
+  }
+  
+  // Создаём расписание
+  const scheduleRef = db.collection("settings").doc("commonSchedule");
+  if (!(await scheduleRef.get()).exists) {
+    await scheduleRef.set({ items: ["🍳 08:30 Завтрак", "🎨 10:00 Творчество", "🚶 11:30 Прогулка", "🍲 12:30 Обед", "😴 13:30 Тихий час", "🍎 15:30 Полдник"] });
   }
 }
 
-// ========= ФУНКЦИЯ ВХОДА =========
+// ========= ВСПОМОГАТЕЛЬНЫЕ =========
+function escapeHtml(s) { if(!s) return ''; return s.replace(/[&<>]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[m])); }
+async function getUserRole(user) {
+  if(!user) return null;
+  if(user.email === "admin@ladushki.ru") return "admin";
+  if(user.email === "teacher@ladushki.ru") return "teacher";
+  const doc = await db.collection("users").doc(user.uid).get();
+  return doc.exists ? doc.data().role : "parent";
+}
+
+// ========= ВХОД/РЕГИСТРАЦИЯ =========
+function showLogin() {
+  document.getElementById("screen").innerHTML = `
+    <div class="card">
+      <h3><i class="fas fa-duck"></i> Вход</h3>
+      <input id="loginEmail" placeholder="Email"><input id="loginPass" type="password" placeholder="Пароль">
+      <div id="loginError" class="error-msg"></div>
+      <button onclick="doLogin()">Войти</button>
+      <div class="small">🔑 admin@ladushki.ru / Admin2025<br>🔑 teacher@ladushki.ru / Ladushki2025</div>
+      <div class="small"><span style="color:#e68a2e;cursor:pointer;" onclick="showRegister()">Зарегистрироваться</span></div>
+    </div>`;
+}
 async function doLogin() {
-  const email = document.getElementById("loginEmail").value.trim();
-  const pass = document.getElementById("loginPass").value;
-  const errorDiv = document.getElementById("loginError");
-  
-  errorDiv.style.display = "none";
-  
-  if (!email || !pass) {
-    errorDiv.style.display = "block";
-    errorDiv.innerText = "❌ Заполните все поля";
-    return;
-  }
-  
+  const email = document.getElementById("loginEmail")?.value.trim();
+  const pass = document.getElementById("loginPass")?.value;
+  const err = document.getElementById("loginError");
+  if(!email || !pass) { err.style.display="block"; err.innerText="Заполните поля"; return; }
   try {
-    const result = await auth.signInWithEmailAndPassword(email, pass);
-    console.log("Успешный вход:", result.user.email);
-    showMainApp();
-    navigate('home');
+    await auth.signInWithEmailAndPassword(email, pass);
+    currentGroupId = null; currentChildId = null;
+    navigate('home', document.querySelector(".tab"));
   } catch(e) {
-    errorDiv.style.display = "block";
-    console.log("Ошибка входа:", e.code);
-    
-    if (e.code === 'auth/invalid-credential' || e.code === 'auth/user-not-found' || e.code === 'auth/wrong-password') {
-      errorDiv.innerText = "❌ Неверный email или пароль";
-    } else if (e.code === 'auth/network-request-failed') {
-      errorDiv.innerText = "❌ Ошибка сети. Проверьте интернет и запустите через Live Server";
-    } else {
-      errorDiv.innerText = "❌ Ошибка: " + e.message;
-    }
+    err.style.display="block";
+    err.innerText = e.code === 'auth/invalid-credential' ? "Неверный email или пароль" : "Ошибка: "+e.message;
   }
 }
-
-// ========= ФУНКЦИЯ РЕГИСТРАЦИИ =========
+function showRegister() {
+  document.getElementById("screen").innerHTML = `
+    <div class="card">
+      <h3><i class="fas fa-child"></i> Регистрация</h3>
+      <input id="regName" placeholder="Имя"><input id="regEmail" placeholder="Email"><input id="regPass" type="password" placeholder="Пароль (мин 6)">
+      <select id="regRole"><option value="parent">Родитель</option><option value="teacher">Воспитатель</option></select>
+      <div id="regError" class="error-msg"></div><div id="regSuccess" class="success-msg"></div>
+      <button onclick="doRegister()">Зарегистрироваться</button>
+      <div class="small"><span style="color:#e68a2e;cursor:pointer;" onclick="showLogin()">Войти</span></div>
+    </div>`;
+}
 async function doRegister() {
-  const name = document.getElementById("regName").value.trim();
-  const email = document.getElementById("regEmail").value.trim();
-  const pass = document.getElementById("regPass").value;
-  const role = document.getElementById("regRole").value;
-  const errorDiv = document.getElementById("regError");
-  const successDiv = document.getElementById("regSuccess");
-  
-  errorDiv.style.display = "none";
-  successDiv.style.display = "none";
-  
-  if (!name || !email || !pass) {
-    errorDiv.style.display = "block";
-    errorDiv.innerText = "❌ Заполните все поля";
-    return;
-  }
-  
-  if (pass.length < 6) {
-    errorDiv.style.display = "block";
-    errorDiv.innerText = "❌ Пароль должен быть не менее 6 символов";
-    return;
-  }
-  
+  const name = document.getElementById("regName")?.value.trim();
+  const email = document.getElementById("regEmail")?.value.trim();
+  const pass = document.getElementById("regPass")?.value;
+  const role = document.getElementById("regRole")?.value;
+  const err = document.getElementById("regError"), suc = document.getElementById("regSuccess");
+  err.style.display="none"; suc.style.display="none";
+  if(!name||!email||!pass) { err.style.display="block"; err.innerText="Заполните все поля"; return; }
+  if(pass.length<6) { err.style.display="block"; err.innerText="Пароль ≥6 символов"; return; }
   try {
-    const result = await auth.createUserWithEmailAndPassword(email, pass);
-    await result.user.updateProfile({ displayName: name });
-    await db.collection("users").doc(result.user.uid).set({
-      name: name,
-      email: email,
-      role: role,
-      createdAt: new Date()
-    });
-    
-    successDiv.style.display = "block";
-    successDiv.innerText = "✅ Регистрация успешна!";
-    
-    setTimeout(() => {
-      showMainApp();
-      navigate('home');
-    }, 1500);
-  } catch(e) {
-    errorDiv.style.display = "block";
-    if (e.code === 'auth/email-already-in-use') {
-      errorDiv.innerText = "❌ Этот email уже зарегистрирован";
-    } else {
-      errorDiv.innerText = "❌ " + e.message;
-    }
-  }
+    const cred = await auth.createUserWithEmailAndPassword(email, pass);
+    await cred.user.updateProfile({ displayName: name });
+    await db.collection("users").doc(cred.user.uid).set({ name, email, role, createdAt: new Date() });
+    suc.style.display="block"; suc.innerText="Регистрация успешна!";
+    setTimeout(()=>navigate('home',document.querySelector(".tab")),1500);
+  } catch(e) { err.style.display="block"; err.innerText=e.message; }
 }
 
-// ========= ВЫХОД =========
-async function logout() {
-  await auth.signOut();
-  showLoginScreen();
-}
-
-// ========= ЭКРАНЫ =========
-function showLoginScreen() {
-  document.getElementById("tabbar").style.display = "none";
-  document.getElementById("content").innerHTML = `
-    <div class="card">
-      <h3>🍎 Вход в аккаунт</h3>
-      <input type="email" id="loginEmail" placeholder="Email">
-      <input type="password" id="loginPass" placeholder="Пароль">
-      <div id="loginError" class="error"></div>
-      <button onclick="doLogin()">🔓 Войти</button>
-      <div class="small">
-        🔑 Тестовые аккаунты:<br>
-        👑 admin@ladushki.ru / Admin2025<br>
-        👩‍🏫 teacher@ladushki.ru / Ladushki2025
-      </div>
-      <div class="small">
-        Нет аккаунта? <span style="color:#e68a2e;cursor:pointer;" onclick="showRegisterScreen()">Зарегистрироваться</span>
-      </div>
-    </div>
-  `;
-}
-
-function showRegisterScreen() {
-  document.getElementById("tabbar").style.display = "none";
-  document.getElementById("content").innerHTML = `
-    <div class="card">
-      <h3>🐣 Регистрация</h3>
-      <input type="text" id="regName" placeholder="Ваше имя">
-      <input type="email" id="regEmail" placeholder="Email">
-      <input type="password" id="regPass" placeholder="Пароль (мин 6)">
-      <select id="regRole">
-        <option value="parent">👪 Родитель</option>
-        <option value="teacher">👩‍🏫 Воспитатель</option>
-      </select>
-      <div id="regError" class="error"></div>
-      <div id="regSuccess" class="success"></div>
-      <button onclick="doRegister()">📝 Зарегистрироваться</button>
-      <div class="small">
-        Уже есть аккаунт? <span style="color:#e68a2e;cursor:pointer;" onclick="showLoginScreen()">Войти</span>
-      </div>
-    </div>
-  `;
-}
-
-function showMainApp() {
-  document.getElementById("tabbar").style.display = "flex";
-}
-
-// ========= ГЛАВНАЯ СТРАНИЦА =========
-async function renderHome() {
+// ========= ДЕТИ =========
+async function renderKids() {
   const user = auth.currentUser;
-  if (!user) return `<div class="card"><div class="loading">Ошибка: нет пользователя</div></div>`;
+  if(!user) return `<div class="card"><div class="locked-message">Войдите</div></div>`;
+  const role = await getUserRole(user);
   
-  let role = "parent";
-  let roleName = "Родитель";
-  let roleIcon = "👪";
-  
-  try {
-    const doc = await db.collection("users").doc(user.uid).get();
-    if (doc.exists) {
-      role = doc.data().role;
-      if (role === "admin") { roleName = "Администратор"; roleIcon = "👑"; }
-      else if (role === "teacher") { roleName = "Воспитатель"; roleIcon = "👩‍🏫"; }
-      else { roleName = "Родитель"; roleIcon = "👪"; }
+  if(role === "parent") {
+    const kidsSnap = await db.collection("kids").where("parentId","==",user.uid).get();
+    let kidsList = "";
+    kidsSnap.forEach(d => kidsList += `<div class="kid-item"><span>👶 ${escapeHtml(d.data().name)} ${d.data().groupId ? '✅ в группе' : '⏳ без группы'}</span><button onclick="selectChild('${d.id}')" style="width:auto;padding:4px 12px;">Выбрать</button></div>`);
+    const activeHtml = currentChildId ? `<div class="success-msg" style="display:block">✅ Активный ребёнок выбран</div>` : `<div class="error-msg" style="display:block">⚠️ Выберите активного ребёнка</div>`;
+    return `<div class="card"><h3><i class="fas fa-baby-carriage"></i> Мои дети</h3>${kidsList||"<div>Нет детей</div>"}<input id="newKidName" placeholder="Имя"><button onclick="addKid()">➕ Добавить</button><hr>${activeHtml}<button onclick="navigate('chat',null)">💬 Чат для ребёнка</button></div>`;
+  } else if(role === "admin") {
+    const kids = await db.collection("kids").get();
+    let list = "";
+    for(const k of kids.docs) {
+      const kidData = k.data();
+      let parentName = "Неизвестно";
+      if(kidData.parentId) {
+        const parentDoc = await db.collection("users").doc(kidData.parentId).get();
+        if(parentDoc.exists) parentName = parentDoc.data().name || parentDoc.data().email;
+      }
+      list += `<div class="kid-item"><span>👶 <strong>${escapeHtml(kidData.name)}</strong><br><small>Родитель: ${escapeHtml(parentName)}</small></span><button onclick="deleteKid('${k.id}')" class="danger" style="width:auto;padding:4px 12px;">🗑️</button></div>`;
     }
-  } catch(e) { console.log(e); }
-  
-  return `
-    <div class="card" style="text-align:center;">
-      <div style="font-size: 60px;">${roleIcon}</div>
-      <h3>${escapeHtml(user.displayName || user.email)}</h3>
-      <p style="color:#7b5a3b; margin:10px 0;">${roleName}</p>
-      <p style="font-size:12px; color:#999;">${escapeHtml(user.email)}</p>
-      <button onclick="logout()" style="background:#ffaaaa;">🚪 Выйти</button>
-      <button onclick="showLoginScreen()" style="background:#ff6b6b;">🔄 Сменить аккаунт</button>
-    </div>
-  `;
+    return `<div class="card"><h3><i class="fas fa-users-viewfinder"></i> Все дети (админ)</h3>${list||"<div>Нет детей</div>"}</div>`;
+  } else if(role === "teacher") {
+    const kids = await db.collection("kids").get();
+    let list = "";
+    kids.forEach(k => list += `<div class="kid-item">👶 ${escapeHtml(k.data().name)}</div>`);
+    return `<div class="card"><h3><i class="fas fa-users-viewfinder"></i> Все дети</h3>${list}</div>`;
+  }
+  return `<div class="card"><div class="locked-message">Доступ только родителям</div></div>`;
 }
+window.deleteKid = async (id) => { if(confirm("Удалить?")) { await db.collection("kids").doc(id).delete(); renderKids(); } };
+window.addKid = async () => { const name = document.getElementById("newKidName")?.value.trim(); if(name){ await db.collection("kids").add({ name, parentId: auth.currentUser.uid, groupId: null }); document.getElementById("newKidName").value=""; renderKids(); } };
+window.selectChild = (id) => { currentChildId = id; currentGroupId = null; alert("Активный ребёнок выбран"); renderKids(); };
+
+// ========= ГРУППЫ (ТОЛЬКО АДМИН) =========
+async function renderGroups() {
+  const user = auth.currentUser;
+  if(!user) return `<div class="card"><div class="locked-message">Войдите</div></div>`;
+  const role = await getUserRole(user);
+  if(role !== "admin") return `<div class="card"><div class="locked-message">🔒 Только администратор</div></div>`;
+  
+  const groups = await db.collection("groups").get();
+  let groupHtml = "";
+  groups.forEach(g => groupHtml += `<div class="schedule-item"><span>📁 ${escapeHtml(g.data().name)}</span><button onclick="deleteGroup('${g.id}')" style="width:auto;">🗑️</button></div>`);
+  
+  return `<div class="card"><h3><i class="fas fa-layer-group"></i> Управление группами</h3>
+    <input id="newGroup" placeholder="Название группы"><button onclick="createGroup()">➕ Создать группу</button>
+    <div id="groupsList">${groupHtml}</div>
+    <hr>
+    <h4>👩‍🏫 Назначить воспитателя</h4>
+    <select id="assignTeacherId"><option value="">Выбрать воспитателя</option></select>
+    <select id="assignTeacherGroupId"><option value="">Выбрать группу</option></select>
+    <button onclick="assignTeacherToGroup()">Назначить</button>
+    <hr>
+    <h4>👶 Назначить ребёнка</h4>
+    <select id="assignKidId"><option value="">Выбрать ребёнка</option></select>
+    <select id="assignKidGroupId"><option value="">Выбрать группу</option></select>
+    <button onclick="assignKidToGroup()">Назначить</button>
+  </div>`;
+}
+
+window.createGroup = async () => { 
+  const name = document.getElementById("newGroup")?.value.trim(); 
+  if(name){ await db.collection("groups").add({name}); document.getElementById("newGroup").value=""; renderGroups(); } 
+};
+window.deleteGroup = async (id) => { if(confirm("Удалить?")){ await db.collection("groups").doc(id).delete(); renderGroups(); } };
+window.assignTeacherToGroup = async () => { alert("Выберите воспитателя и группу"); };
+window.assignKidToGroup = async () => { alert("Выберите ребёнка и группу"); };
+
+// ========= КРУЖКИ =========
+async function renderCircles() {
+  const user = auth.currentUser;
+  if(!user) return `<div class="card"><div class="locked-message">Войдите</div></div>`;
+  const role = await getUserRole(user);
+  const circles = await db.collection("circles").get();
+  let list = "";
+  for(const doc of circles.docs) {
+    const c = doc.data();
+    let action = "";
+    if(role === "parent") {
+      const kids = await db.collection("kids").where("parentId","==",user.uid).get();
+      let opts = `<select id="kidSel_${doc.id}"><option value="">Выбрать ребёнка</option>`;
+      kids.forEach(k => opts += `<option value="${k.id}">${escapeHtml(k.data().name)}</option>`);
+      opts += `</select><button onclick="enrollCircle('${doc.id}')">Записать</button>`;
+      action = opts;
+    } else {
+      action = `<button onclick="viewCircle('${doc.id}')">Список детей</button>`;
+    }
+    list += `<div class="circle-item"><div><strong>🎨 ${escapeHtml(c.name)}</strong></div><div>${action}</div></div>`;
+  }
+  let addForm = (role==="teacher"||role==="admin") ? `<hr><input id="newCircleName" placeholder="Название"><button onclick="addCircle()">➕ Добавить</button>` : "";
+  return `<div class="card"><h3><i class="fas fa-paintbrush"></i> Кружки</h3>${list||"<div>Нет кружков</div>"}${addForm}</div>`;
+}
+window.enrollCircle = async (id) => { alert("Выберите ребёнка"); };
+window.addCircle = async () => { const name = document.getElementById("newCircleName")?.value.trim(); if(name){ await db.collection("circles").add({ name, enrolledKids: [] }); renderCircles(); } };
+window.viewCircle = async (id) => { alert("Список детей"); };
+
+// ========= РАСПИСАНИЕ =========
+async function renderSchedule() {
+  const user = auth.currentUser;
+  if(!user) return `<div class="card"><div class="locked-message">Войдите</div></div>`;
+  const role = await getUserRole(user);
+  const common = (await db.collection("settings").doc("commonSchedule").get()).data()?.items || [];
+  let commonHtml = common.map((t,i)=>`<div class="schedule-item"><span>📌 ${escapeHtml(t)}</span>${(role!=="parent")?`<button onclick="editCommon(${i})" style="width:auto;">✏️</button>`:""}</div>`).join("");
+  return `<div class="card"><h3><i class="fas fa-calendar"></i> Расписание</h3><h4>Общее</h4>${commonHtml}</div>`;
+}
+window.editCommon = async (idx) => { alert("Редактирование"); };
+
+// ========= ЧАТ =========
+async function renderChat() {
+  const user = auth.currentUser;
+  if(!user) return `<div class="card"><div class="locked-message">Войдите</div></div>`;
+  return `<div class="card"><h3><i class="fas fa-comments"></i> Чат</h3><div class="chat-box" id="chatBox">Сообщения...</div><div class="flex-row"><input id="msgInput" placeholder="Сообщение..."><button onclick="sendMsg()">📤</button></div></div>`;
+}
+async function sendMsg() { alert("Функция чата"); }
 
 // ========= ПРОФИЛЬ =========
 async function renderProfile() {
   const user = auth.currentUser;
-  if (!user) return `<div class="card"><div class="loading">Ошибка</div></div>`;
-  
-  let role = "parent";
-  let roleName = "Родитель";
-  
-  try {
-    const doc = await db.collection("users").doc(user.uid).get();
-    if (doc.exists) {
-      role = doc.data().role;
-      roleName = role === "admin" ? "Администратор" : (role === "teacher" ? "Воспитатель" : "Родитель");
-    }
-  } catch(e) {}
-  
-  return `
-    <div class="card">
-      <h3>👤 Мой профиль</h3>
-      <div style="text-align:center;">
-        <div style="font-size: 70px;">👤</div>
-        <div><strong>${escapeHtml(user.displayName || user.email)}</strong></div>
-        <div style="margin:5px 0;">📧 ${escapeHtml(user.email)}</div>
-        <div style="margin-top:5px;"><span style="background:#e9ddce; padding:3px 12px; border-radius:30px;">${roleName}</span></div>
-      </div>
-      <button onclick="logout()">🚪 Выйти</button>
-    </div>
-  `;
+  if(!user) return `<div class="card"><button onclick="showLogin()">Войти</button></div>`;
+  const role = await getUserRole(user);
+  return `<div class="card"><h3><i class="fas fa-user"></i> Профиль</h3><div class="text-center"><div><strong>${escapeHtml(user.displayName||user.email)}</strong><br><span class="badge ${role}">${role}</span></div></div><button onclick="logout()">Выйти</button></div>`;
 }
 
+// ========= ГЛАВНАЯ =========
+async function renderHome() {
+  const user = auth.currentUser;
+  if(!user) return `<div class="card"><div class="locked-message"><button onclick="showLogin()">Войти</button><button onclick="showRegister()">Регистрация</button></div></div>`;
+  const role = await getUserRole(user);
+  return `<div class="card"><h3>🏠 Главная</h3><div class="text-center"><div><strong>${escapeHtml(user.displayName||user.email)}</strong><br><span class="badge ${role}">${role}</span></div></div><button onclick="navigate('kids',null)">👶 Дети</button><button onclick="navigate('chat',null)">💬 Чат</button><button onclick="showLogin()">🔄 Сменить</button></div>`;
+}
+
+async function logout() { await auth.signOut(); navigate('home', document.querySelector(".tab")); }
+
 // ========= НАВИГАЦИЯ =========
-async function navigate(screen) {
-  const tabs = document.querySelectorAll('.tab');
-  tabs.forEach((tab, i) => {
-    const screens = ['home', 'profile'];
-    if (screens[i] === screen) tab.classList.add('active');
-    else tab.classList.remove('active');
-  });
-  
-  const content = document.getElementById("content");
-  content.style.opacity = "0";
-  
+async function navigate(screen, tabEl) {
+  if(tabEl) { document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active")); tabEl.classList.add("active"); }
+  const root = document.getElementById("screen");
+  root.style.opacity = "0";
   setTimeout(async () => {
     let html = "";
-    if (screen === "home") html = await renderHome();
-    else if (screen === "profile") html = await renderProfile();
-    else html = `<div class="card">Страница в разработке</div>`;
-    
-    content.innerHTML = html;
-    content.style.opacity = "1";
+    if(screen === "home") html = await renderHome();
+    else if(screen === "kids") html = await renderKids();
+    else if(screen === "groups") html = await renderGroups();
+    else if(screen === "circles") html = await renderCircles();
+    else if(screen === "schedule") html = await renderSchedule();
+    else if(screen === "chat") html = await renderChat();
+    else if(screen === "profile") html = await renderProfile();
+    root.innerHTML = html;
+    root.style.opacity = "1";
   }, 50);
 }
 
-// ========= ВСПОМОГАТЕЛЬНЫЕ =========
-function escapeHtml(str) {
-  if (!str) return '';
-  return str.replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[m]));
-}
-
 // ========= ЗАПУСК =========
-async function init() {
-  console.log("Инициализация...");
-  await createTestAccounts();
-  
-  auth.onAuthStateChanged((user) => {
-    console.log("Auth changed:", user ? user.email : "null");
-    if (user) {
-      showMainApp();
-      navigate('home');
-    } else {
-      showLoginScreen();
-    }
-  });
-}
-
-init();
+createTestAccounts().then(() => {
+  auth.onAuthStateChanged(() => navigate('home', document.querySelector(".tab")));
+});
 </script>
 </body>
 </html>

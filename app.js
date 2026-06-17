@@ -576,7 +576,7 @@ window.showScheduleOptions = (circleId, circleName, specialistId) => {
             <span>📅 ${circle.weekday} в ${circle.time}</span>
             <button onclick="selectScheduleOption('${circleId}', '${circle.weekday}', '${circle.time}', '${specialistId}')" class="small-btn">✅ Выбрать</button>
         </div>
-        <button onclick="closeModal()" class="small-btn" style="background:#b35a5a; color:white;">Отмена</button>
+        <button onclick="closeModal()" class="small-btn" style="background:#c47a7a; color:white;">Отмена</button>
     `);
 };
 
@@ -737,7 +737,7 @@ function renderSchedule() {
                 <strong>🕐 ${escapeHtml(item.time)} — ${escapeHtml(item.title)}</strong>
                 ${item.description ? `<br><span style="font-size:0.8rem; color:#8a7a6a;">${escapeHtml(item.description)}</span>` : ''}
             </div>
-            ${canEdit ? `<button onclick="editScheduleItem(${index})" class="small-btn" style="background:#2d2d2d; color:white;">✏️</button>` : ''}
+            ${canEdit ? `<button onclick="editScheduleItem(${index})" class="small-btn" style="background:#d4a55a; color:white;">✏️</button>` : ''}
             ${canEdit ? `<button onclick="deleteScheduleItem(${index})" class="small-btn delete-btn">🗑️</button>` : ''}
         </div>
     `).join('');
@@ -890,7 +890,7 @@ function renderPrivateMessages() {
         chatHtml = `
             <div style="margin-bottom:15px;">
                 <strong>💬 Чат с ${escapeHtml(chatPartner?.name || '')}</strong>
-                <button onclick="selectedPrivateChatUserId=null; navigate('private')" class="small-btn" style="background:#b35a5a; color:white; width:auto;">✕ Закрыть</button>
+                <button onclick="selectedPrivateChatUserId=null; navigate('private')" class="small-btn" style="background:#c47a7a; color:white; width:auto;">✕ Закрыть</button>
             </div>
             <div id="privateChatContainer" class="chat-container">
                 ${msgs.map(m => `

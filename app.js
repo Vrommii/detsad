@@ -6,9 +6,9 @@ let users = JSON.parse(localStorage.getItem('talants_users')) || [
 ];
 
 let specialists = JSON.parse(localStorage.getItem('talants_specialists')) || [
-    { id: 's1', name: 'Ольга Владимировна', type: 'Логопед', phone: '+7(999)123-45-67' },
-    { id: 's2', name: 'Ирина Петровна', type: 'Психолог', phone: '+7(999)234-56-78' },
-    { id: 's3', name: 'Сергей Александрович', type: 'Музыкальный руководитель', phone: '+7(999)345-67-89' }
+    { id: 's1', name: 'Ольга Владимировна', type: 'Логопед' },
+    { id: 's2', name: 'Ирина Петровна', type: 'Психолог' },
+    { id: 's3', name: 'Сергей Александрович', type: 'Музыкальный руководитель' }
 ];
 
 let kids = JSON.parse(localStorage.getItem('talants_kids')) || [
@@ -372,7 +372,7 @@ function renderSpecialists() {
     
     let specialistsHtml = specialists.map(s => `
         <div class="list-item">
-            <span><strong>${escapeHtml(s.name)}</strong> — ${escapeHtml(s.type)}<br><small>${escapeHtml(s.phone || '')}</small></span>
+            <span><strong>${escapeHtml(s.name)}</strong> — ${escapeHtml(s.type)}</span>
             <button onclick="deleteSpecialist('${s.id}')" class="small-btn delete-btn">🗑️</button>
         </div>
     `).join('');
@@ -386,7 +386,6 @@ function renderSpecialists() {
             <h4>Добавить специалиста</h4>
             <input id="newSpecName" placeholder="ФИО специалиста">
             <input id="newSpecType" placeholder="Специальность (Логопед, Психолог...)">
-            <input id="newSpecPhone" placeholder="Телефон">
             <button onclick="addSpecialist()"><i class="fas fa-plus"></i> Добавить специалиста</button>
         </div>
     `;
@@ -395,9 +394,8 @@ function renderSpecialists() {
 window.addSpecialist = () => {
     const name = document.getElementById("newSpecName")?.value.trim();
     const type = document.getElementById("newSpecType")?.value.trim();
-    const phone = document.getElementById("newSpecPhone")?.value.trim();
     if (!name || !type) { alert("Заполните ФИО и специальность"); return; }
-    specialists.push({ id: Date.now().toString(), name, type, phone });
+    specialists.push({ id: Date.now().toString(), name, type });
     saveData();
     navigate('specialists');
 };
@@ -739,7 +737,7 @@ function renderSchedule() {
                 <strong>🕐 ${escapeHtml(item.time)} — ${escapeHtml(item.title)}</strong>
                 ${item.description ? `<br><span style="font-size:0.8rem; color:#8a7a6a;">${escapeHtml(item.description)}</span>` : ''}
             </div>
-            ${canEdit ? `<button onclick="editScheduleItem(${index})" class="small-btn" style="background:#1a3a5c; color:white;">✏️</button>` : ''}
+            ${canEdit ? `<button onclick="editScheduleItem(${index})" class="small-btn" style="background:#2d2d2d; color:white;">✏️</button>` : ''}
             ${canEdit ? `<button onclick="deleteScheduleItem(${index})" class="small-btn delete-btn">🗑️</button>` : ''}
         </div>
     `).join('');

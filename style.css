@@ -9,7 +9,7 @@ body {
     font-family: 'Segoe UI', 'Roboto', system-ui, sans-serif;
     padding: 20px 20px 100px 20px;
     min-height: 100vh;
-    color: #3d2e22;
+    color: #2d2d2d;
 }
 
 .app-container {
@@ -24,7 +24,7 @@ body {
 
 /* ===== ШАПКА ===== */
 .header {
-    background: #1a3a5c;
+    background: #2d2d2d;
     padding: 18px 24px;
     border-bottom: 4px solid #d4a55a;
 }
@@ -57,10 +57,10 @@ body {
 
 .header-badge {
     font-size: 12px;
-    color: #b0c4de;
+    color: #b0b0b0;
     letter-spacing: 0.5px;
     font-weight: 400;
-    background: rgba(255,255,255,0.08);
+    background: rgba(255,255,255,0.06);
     padding: 4px 14px;
     border-radius: 4px;
 }
@@ -68,8 +68,8 @@ body {
 .header-bottom {
     margin-top: 10px;
     font-size: 12px;
-    color: #8aa9c9;
-    border-top: 1px solid rgba(255,255,255,0.08);
+    color: #8a8a8a;
+    border-top: 1px solid rgba(255,255,255,0.06);
     padding-top: 10px;
     letter-spacing: 0.3px;
 }
@@ -87,7 +87,7 @@ body {
 .card-title {
     font-size: 1.1rem;
     font-weight: 700;
-    color: #1a3a5c;
+    color: #2d2d2d;
     margin-bottom: 16px;
     border-bottom: 2px solid #d4a55a;
     padding-bottom: 10px;
@@ -103,7 +103,7 @@ body {
 
 /* ===== КНОПКИ ===== */
 button {
-    background: #1a3a5c;
+    background: #2d2d2d;
     border: none;
     border-radius: 6px;
     padding: 10px 18px;
@@ -118,7 +118,7 @@ button {
 }
 
 button:hover {
-    background: #264d73;
+    background: #3a3a3a;
 }
 
 button.small-btn {
@@ -160,12 +160,12 @@ button.delete-btn:hover {
 
 button.outline-btn {
     background: transparent;
-    color: #1a3a5c;
-    border: 2px solid #1a3a5c;
+    color: #2d2d2d;
+    border: 2px solid #2d2d2d;
 }
 
 button.outline-btn:hover {
-    background: #1a3a5c;
+    background: #2d2d2d;
     color: #ffffff;
 }
 
@@ -183,7 +183,7 @@ input, select, textarea {
 }
 
 input:focus, select:focus, textarea:focus {
-    border-color: #1a3a5c;
+    border-color: #2d2d2d;
     background: #ffffff;
 }
 
@@ -212,7 +212,7 @@ input:focus, select:focus, textarea:focus {
     border-radius: 4px;
     transition: 0.2s;
     display: inline-block;
-    color: #1a3a5c;
+    color: #2d2d2d;
     border-bottom: 3px solid transparent;
 }
 
@@ -244,7 +244,7 @@ input:focus, select:focus, textarea:focus {
     padding: 3px 10px;
     font-size: 0.7rem;
     display: inline-block;
-    color: #1a3a5c;
+    color: #2d2d2d;
 }
 
 .badge-pending {
@@ -336,7 +336,7 @@ input:focus, select:focus, textarea:focus {
     margin-bottom: 8px;
     max-width: 85%;
     word-wrap: break-word;
-    border-left: 3px solid #1a3a5c;
+    border-left: 3px solid #2d2d2d;
 }
 
 .message-mine {

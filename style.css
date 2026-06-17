@@ -5,11 +5,11 @@
 }
 
 body {
-    background: #f0f4f8;
+    background: #f5efe8;
     font-family: 'Segoe UI', 'Roboto', system-ui, sans-serif;
     padding: 20px 20px 100px 20px;
     min-height: 100vh;
-    color: #1a2332;
+    color: #3d2e22;
 }
 
 .app-container {
@@ -17,16 +17,16 @@ body {
     margin: 0 auto;
     background: #ffffff;
     border-radius: 0px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
     overflow: hidden;
-    border: 1px solid #d0d7e0;
+    border: 1px solid #e8ddd0;
 }
 
-/* ===== СТРОГИЙ ШАПКА ===== */
+/* ===== ШАПКА ===== */
 .header {
     background: #1a3a5c;
     padding: 18px 24px;
-    border-bottom: 4px solid #e8b831;
+    border-bottom: 4px solid #d4a55a;
 }
 
 .header-top {
@@ -46,7 +46,7 @@ body {
 
 .header-left i {
     font-size: 28px;
-    color: #e8b831;
+    color: #d4a55a;
 }
 
 .header-title {
@@ -79,9 +79,9 @@ body {
     background: #ffffff;
     margin: 16px;
     padding: 20px 24px;
-    border-radius: 0px;
-    border: 1px solid #e2e8f0;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    border-radius: 8px;
+    border: 1px solid #ede5d9;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
 }
 
 .card-title {
@@ -89,7 +89,7 @@ body {
     font-weight: 700;
     color: #1a3a5c;
     margin-bottom: 16px;
-    border-bottom: 2px solid #e8b831;
+    border-bottom: 2px solid #d4a55a;
     padding-bottom: 10px;
     display: flex;
     align-items: center;
@@ -97,7 +97,7 @@ body {
 }
 
 .card-title i {
-    color: #e8b831;
+    color: #d4a55a;
     font-size: 1.2rem;
 }
 
@@ -105,7 +105,7 @@ body {
 button {
     background: #1a3a5c;
     border: none;
-    border-radius: 4px;
+    border-radius: 6px;
     padding: 10px 18px;
     font-weight: 600;
     cursor: pointer;
@@ -126,36 +126,36 @@ button.small-btn {
     padding: 6px 14px;
     margin-top: 0;
     font-size: 0.8rem;
-    background: #e8b831;
-    color: #1a2332;
+    background: #d4a55a;
+    color: #ffffff;
 }
 
 button.small-btn:hover {
-    background: #d4a82a;
+    background: #c4954a;
 }
 
 button.approve {
-    background: #2d7a4f;
+    background: #5a8f6a;
 }
 
 button.approve:hover {
-    background: #236a41;
+    background: #4a7a5a;
 }
 
 button.reject {
-    background: #b33c3c;
+    background: #b35a5a;
 }
 
 button.reject:hover {
-    background: #9e3333;
+    background: #9e4a4a;
 }
 
 button.delete-btn {
-    background: #b33c3c;
+    background: #b35a5a;
 }
 
 button.delete-btn:hover {
-    background: #9e3333;
+    background: #9e4a4a;
 }
 
 button.outline-btn {
@@ -174,9 +174,9 @@ input, select, textarea {
     width: 100%;
     padding: 10px 14px;
     margin-top: 8px;
-    border-radius: 4px;
-    border: 1.5px solid #d0d7e0;
-    background: #fafbfc;
+    border-radius: 6px;
+    border: 1.5px solid #e0d5c8;
+    background: #fcfaf7;
     outline: none;
     font-size: 0.9rem;
     transition: 0.2s;
@@ -197,10 +197,10 @@ input:focus, select:focus, textarea:focus {
     display: flex;
     padding: 8px 16px;
     gap: 0px;
-    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.06);
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
     z-index: 200;
     justify-content: center;
-    border-top: 2px solid #e2e8f0;
+    border-top: 2px solid #ede5d9;
     flex-wrap: wrap;
 }
 
@@ -218,8 +218,8 @@ input:focus, select:focus, textarea:focus {
 
 .tab.active {
     opacity: 1;
-    background: #f0f4f8;
-    border-bottom: 3px solid #e8b831;
+    background: #f5efe8;
+    border-bottom: 3px solid #d4a55a;
 }
 
 .tab.hidden {
@@ -229,7 +229,7 @@ input:focus, select:focus, textarea:focus {
 /* ===== ОБЩИЕ ЭЛЕМЕНТЫ ===== */
 .small {
     font-size: 0.7rem;
-    color: #6b7a8f;
+    color: #8a7a6a;
     text-align: center;
     margin-top: 12px;
 }
@@ -239,7 +239,7 @@ input:focus, select:focus, textarea:focus {
 }
 
 .badge {
-    background: #e8f0fe;
+    background: #f5efe8;
     border-radius: 4px;
     padding: 3px 10px;
     font-size: 0.7rem;
@@ -248,18 +248,18 @@ input:focus, select:focus, textarea:focus {
 }
 
 .badge-pending {
-    background: #fff3cd;
-    color: #856404;
+    background: #fdf0d5;
+    color: #8a6a3a;
 }
 
 .badge-approved {
-    background: #d4edda;
-    color: #155724;
+    background: #dce8d8;
+    color: #3a6a4a;
 }
 
 .badge-rejected {
-    background: #f8d7da;
-    color: #721c24;
+    background: #f5d8d8;
+    color: #8a3a3a;
 }
 
 .flex {
@@ -270,39 +270,39 @@ input:focus, select:focus, textarea:focus {
 }
 
 .list-item {
-    background: #f8fafc;
-    border-radius: 4px;
+    background: #fcfaf7;
+    border-radius: 6px;
     padding: 10px 16px;
     margin-bottom: 8px;
     display: flex;
     justify-content: space-between;
     align-items: center;
     cursor: pointer;
-    border: 1px solid #e2e8f0;
+    border: 1px solid #ede5d9;
 }
 
 .list-item.active {
-    border: 2px solid #e8b831;
-    background: #fefcf5;
+    border: 2px solid #d4a55a;
+    background: #fcf8f0;
 }
 
 .schedule-item {
-    background: #f8fafc;
+    background: #fcfaf7;
     padding: 10px 16px;
-    border-radius: 4px;
+    border-radius: 6px;
     margin-bottom: 8px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border: 1px solid #e2e8f0;
+    border: 1px solid #ede5d9;
 }
 
 .circle-card {
-    background: #f8fafc;
-    border-radius: 4px;
+    background: #fcfaf7;
+    border-radius: 6px;
     padding: 14px;
     margin-bottom: 10px;
-    border: 1px solid #e2e8f0;
+    border: 1px solid #ede5d9;
 }
 
 .circle-header {
@@ -315,24 +315,24 @@ input:focus, select:focus, textarea:focus {
 
 .circle-time {
     font-size: 0.8rem;
-    color: #4a5a6f;
+    color: #6a5a4a;
 }
 
 .chat-container {
     height: 380px;
     overflow-y: auto;
-    background: #f8fafc;
-    border-radius: 4px;
+    background: #fcfaf7;
+    border-radius: 6px;
     padding: 15px;
     margin-bottom: 12px;
     display: flex;
     flex-direction: column;
-    border: 1px solid #e2e8f0;
+    border: 1px solid #ede5d9;
 }
 
 .message-item {
     padding: 8px 14px;
-    border-radius: 4px;
+    border-radius: 6px;
     margin-bottom: 8px;
     max-width: 85%;
     word-wrap: break-word;
@@ -340,13 +340,13 @@ input:focus, select:focus, textarea:focus {
 }
 
 .message-mine {
-    background: #e8f0fe;
+    background: #f5efe8;
     align-self: flex-end;
-    border-left-color: #e8b831;
+    border-left-color: #d4a55a;
 }
 
 .message-other {
-    background: #f0f2f5;
+    background: #f0ece6;
     align-self: flex-start;
 }
 
@@ -357,13 +357,13 @@ input:focus, select:focus, textarea:focus {
 }
 
 .message-personal {
-    border-left-color: #e8b831 !important;
-    background: #fefcf5 !important;
+    border-left-color: #d4a55a !important;
+    background: #fcf8f0 !important;
 }
 
 hr {
     margin: 16px 0;
-    border-color: #e2e8f0;
+    border-color: #ede5d9;
 }
 
 .inline-select {
@@ -373,34 +373,34 @@ hr {
 }
 
 .assigned-badge {
-    background: #d4edda;
-    color: #155724;
+    background: #dce8d8;
+    color: #3a6a4a;
     padding: 2px 8px;
     border-radius: 4px;
     font-size: 0.7rem;
 }
 
 .request-item {
-    background: #f8fafc;
-    border-radius: 4px;
+    background: #fcfaf7;
+    border-radius: 6px;
     padding: 12px;
     margin-bottom: 10px;
-    border-left: 4px solid #e8b831;
-    border: 1px solid #e2e8f0;
+    border-left: 4px solid #d4a55a;
+    border: 1px solid #ede5d9;
 }
 
 .group-stat-card {
-    background: #f8fafc;
-    border-radius: 4px;
+    background: #fcfaf7;
+    border-radius: 6px;
     padding: 12px;
     margin-bottom: 10px;
-    border: 1px solid #e2e8f0;
+    border: 1px solid #ede5d9;
 }
 
 .error-msg,
 .success-msg {
     padding: 10px;
-    border-radius: 4px;
+    border-radius: 6px;
     margin-top: 10px;
     text-align: center;
     display: none;
@@ -408,13 +408,13 @@ hr {
 }
 
 .error-msg {
-    background: #f8d7da;
-    color: #721c24;
+    background: #f5d8d8;
+    color: #8a3a3a;
 }
 
 .success-msg {
-    background: #d4edda;
-    color: #155724;
+    background: #dce8d8;
+    color: #3a6a4a;
 }
 
 .loading {
@@ -428,8 +428,8 @@ hr {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(4px);
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(3px);
     z-index: 1000;
     display: flex;
     align-items: center;
@@ -437,12 +437,12 @@ hr {
 }
 
 .modal-content {
-    background: white;
+    background: #ffffff;
     max-width: 450px;
     width: 90%;
-    border-radius: 0px;
+    border-radius: 8px;
     padding: 28px;
-    border-top: 4px solid #e8b831;
+    border-top: 4px solid #d4a55a;
 }
 
 @media (max-width: 600px) {

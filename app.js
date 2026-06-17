@@ -1,9 +1,31 @@
 // ============ ЛОКАЛЬНОЕ ХРАНИЛИЩЕ ============
-let users = JSON.parse(localStorage.getItem('talants_users')) || [
+// ПРИНУДИТЕЛЬНОЕ СОЗДАНИЕ ВСЕХ ТРЁХ АККАУНТОВ
+let defaultUsers = [
     { id: '1', email: 'admin@talants.ru', password: 'Admin2025', name: 'Мария Петровна', role: 'admin', groupId: null },
     { id: '2', email: 'teacher@mail.tu', password: 'ppp22rrtt66', name: 'Анна Сергеевна', role: 'teacher', groupId: 'g1' },
     { id: '3', email: 'roditell77@mail.ru', password: 'ppp22rrtt66', name: 'Елена Иванова', role: 'parent', groupId: null }
 ];
+
+// Проверяем и перезаписываем, если аккаунтов нет или они неполные
+let savedUsers = JSON.parse(localStorage.getItem('talants_users'));
+if (!savedUsers || savedUsers.length < 3) {
+    // Если нет сохранённых пользователей или их меньше 3 — создаём заново
+    localStorage.setItem('talants_users', JSON.stringify(defaultUsers));
+    console.log('✅ Тестовые аккаунты созданы заново');
+} else {
+    // Проверяем, что все три аккаунта есть
+    let hasAdmin = savedUsers.some(u => u.email === 'admin@talants.ru');
+    let hasTeacher = savedUsers.some(u => u.email === 'teacher@mail.tu');
+    let hasParent = savedUsers.some(u => u.email === 'roditell77@mail.ru');
+    
+    if (!hasAdmin || !hasTeacher || !hasParent) {
+        // Если какого-то аккаунта нет — пересоздаём все
+        localStorage.setItem('talants_users', JSON.stringify(defaultUsers));
+        console.log('✅ Недостающие аккаунты восстановлены');
+    }
+}
+
+let users = JSON.parse(localStorage.getItem('talants_users'));
 
 let specialists = JSON.parse(localStorage.getItem('talants_specialists')) || [
     { id: 's1', name: 'Ольга Владимировна', type: 'Логопед' },
@@ -100,9 +122,9 @@ function showLogin() {
             <div id="loginError" class="error-msg"></div>
             <button onclick="doLogin()"><i class="fas fa-sign-in-alt"></i> Войти</button>
             <div class="small">Тестовые аккаунты:<br>
-            Администратор: admin@talants.ru / Admin2025<br>
-            Воспитатель: teacher@mail.tu / ppp22rrtt66<br>
-            Родитель: roditell77@mail.ru / ppp22rrtt66</div>
+            👑 Администратор: admin@talants.ru / Admin2025<br>
+            👩‍🏫 Воспитатель: teacher@mail.tu / ppp22rrtt66<br>
+            👪 Родитель: roditell77@mail.ru / ppp22rrtt66</div>
         </div>
     `;
 }
@@ -118,10 +140,13 @@ window.doLogin = () => {
         return;
     }
     
+    // Обновляем пользователей из localStorage перед проверкой
+    users = JSON.parse(localStorage.getItem('talants_users'));
+    
     const user = users.find(u => u.email === email && u.password === pass);
     if (!user) {
         errDiv.style.display = "block";
-        errDiv.innerText = "Неверный email или пароль";
+        errDiv.innerText = "❌ Неверный email или пароль. Используйте данные из списка ниже.";
         return;
     }
     
@@ -1046,11 +1071,28 @@ function navigate(screen) {
 }
 
 // ============ ЗАПУСК ============
+// Проверяем, есть ли сохранённый пользователь
 const savedUser = localStorage.getItem('talants_currentUser');
+
+// Принудительно пересоздаём пользователей при запуске
+let currentUsers = JSON.parse(localStorage.getItem('talants_users'));
+if (!currentUsers || currentUsers.length < 3) {
+    localStorage.setItem('talants_users', JSON.stringify(defaultUsers));
+    console.log('✅ Тестовые аккаунты созданы');
+}
+
 if (savedUser) {
     currentUser = JSON.parse(savedUser);
-    updateTabBar();
-    navigate('home');
+    // Проверяем, что пользователь всё ещё существует
+    let userExists = users.some(u => u.id === currentUser.id);
+    if (!userExists) {
+        // Если пользователь был удалён — выходим
+        localStorage.removeItem('talants_currentUser');
+        showLogin();
+    } else {
+        updateTabBar();
+        navigate('home');
+    }
 } else {
     showLogin();
 }

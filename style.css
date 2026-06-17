@@ -7,7 +7,7 @@
 body {
     background: #f5efe8;
     font-family: 'Segoe UI', 'Roboto', system-ui, sans-serif;
-    padding: 20px 16px 120px 16px;
+    padding: 20px 16px 130px 16px;
     min-height: 100vh;
     color: #4a3728;
 }
@@ -22,7 +22,7 @@ body {
     border: 1px solid #ede5d9;
 }
 
-/* ===== ШАПКА ===== */
+/* ===== ШАПКА (БЕЖЕВАЯ) ===== */
 .header {
     background: #e8d5c4;
     padding: 18px 24px;
@@ -188,7 +188,7 @@ input:focus, select:focus, textarea:focus {
     background: #ffffff;
 }
 
-/* ===== НИЖНЯЯ ПАНЕЛЬ (УВЕЛИЧЕННАЯ) ===== */
+/* ===== НИЖНЯЯ ПАНЕЛЬ (БОЛЬШАЯ) ===== */
 .bottom-tabs {
     position: fixed;
     bottom: 0;
@@ -196,7 +196,7 @@ input:focus, select:focus, textarea:focus {
     width: 100%;
     background: #fcf8f0;
     display: flex;
-    padding: 12px 20px;
+    padding: 14px 20px;
     gap: 4px;
     box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.06);
     z-index: 200;
@@ -206,16 +206,16 @@ input:focus, select:focus, textarea:focus {
 }
 
 .tab {
-    font-size: 22px;
+    font-size: 24px;
     cursor: pointer;
     opacity: 0.5;
-    padding: 10px 18px;
+    padding: 12px 20px;
     border-radius: 8px;
     transition: 0.2s;
     display: inline-block;
     color: #4a3728;
     border-bottom: 3px solid transparent;
-    min-width: 50px;
+    min-width: 55px;
     text-align: center;
 }
 
@@ -461,9 +461,9 @@ hr {
         font-size: 10px;
     }
     .tab {
-        font-size: 18px;
-        padding: 8px 12px;
-        min-width: 40px;
+        font-size: 20px;
+        padding: 10px 14px;
+        min-width: 44px;
     }
     .bottom-tabs {
         padding: 10px 12px;

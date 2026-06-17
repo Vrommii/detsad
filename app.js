@@ -405,7 +405,6 @@ window.addSpecialist = () => {
 window.deleteSpecialist = (id) => {
     if (confirm("Удалить специалиста?")) {
         specialists = specialists.filter(s => s.id !== id);
-        // Также удаляем связанные кружки
         circles = circles.filter(c => c.specialistId !== id);
         saveData();
         navigate('specialists');
@@ -575,11 +574,11 @@ window.showScheduleOptions = (circleId, circleName, specialistId) => {
     showModal(`
         <h3 style="margin-bottom:16px;">${escapeHtml(circleName)}</h3>
         <p>Выберите расписание:</p>
-        <div style="margin:12px 0; padding:12px; background:#f8fafc; border:1px solid #e2e8f0; display:flex; justify-content:space-between; align-items:center;">
+        <div style="margin:12px 0; padding:12px; background:#fcfaf7; border:1px solid #ede5d9; display:flex; justify-content:space-between; align-items:center;">
             <span>📅 ${circle.weekday} в ${circle.time}</span>
             <button onclick="selectScheduleOption('${circleId}', '${circle.weekday}', '${circle.time}', '${specialistId}')" class="small-btn">✅ Выбрать</button>
         </div>
-        <button onclick="closeModal()" class="small-btn" style="background:#b33c3c; color:white;">Отмена</button>
+        <button onclick="closeModal()" class="small-btn" style="background:#b35a5a; color:white;">Отмена</button>
     `);
 };
 
@@ -738,7 +737,7 @@ function renderSchedule() {
         <div class="schedule-item">
             <div>
                 <strong>🕐 ${escapeHtml(item.time)} — ${escapeHtml(item.title)}</strong>
-                ${item.description ? `<br><span style="font-size:0.8rem; color:#6b7a8f;">${escapeHtml(item.description)}</span>` : ''}
+                ${item.description ? `<br><span style="font-size:0.8rem; color:#8a7a6a;">${escapeHtml(item.description)}</span>` : ''}
             </div>
             ${canEdit ? `<button onclick="editScheduleItem(${index})" class="small-btn" style="background:#1a3a5c; color:white;">✏️</button>` : ''}
             ${canEdit ? `<button onclick="deleteScheduleItem(${index})" class="small-btn delete-btn">🗑️</button>` : ''}
@@ -880,7 +879,6 @@ window.assignTeacherToGroup = () => {
 function renderPrivateMessages() {
     if (!currentUser) return `<div class="card">Войдите</div>`;
     
-    // Список пользователей для чата (все кроме текущего)
     const otherUsers = users.filter(u => u.id !== currentUser.id);
     
     let chatHtml = "";
@@ -894,7 +892,7 @@ function renderPrivateMessages() {
         chatHtml = `
             <div style="margin-bottom:15px;">
                 <strong>💬 Чат с ${escapeHtml(chatPartner?.name || '')}</strong>
-                <button onclick="selectedPrivateChatUserId=null; navigate('private')" class="small-btn" style="background:#b33c3c; color:white; width:auto;">✕ Закрыть</button>
+                <button onclick="selectedPrivateChatUserId=null; navigate('private')" class="small-btn" style="background:#b35a5a; color:white; width:auto;">✕ Закрыть</button>
             </div>
             <div id="privateChatContainer" class="chat-container">
                 ${msgs.map(m => `
